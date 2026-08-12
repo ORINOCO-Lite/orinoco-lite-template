@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2 - 2026-08-12
+
+- Update the engine and runtime to v0.1.4 for complete downstream snapshots.
+- Use setup-pixi's v-prefixed version syntax and the reviewed workflow commit.
+- Align Copier-first defaults and its frozen lock with the checked render.
+
 ## 0.1.1 - 2026-08-12
 
 - Update the engine and runtime to v0.1.3.

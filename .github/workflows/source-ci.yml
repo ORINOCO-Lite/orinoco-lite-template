@@ -30,6 +30,6 @@ jobs:
         with:
           cache: true
           frozen: true
-          pixi-version: 0.73.0
+          pixi-version: v0.73.0
       - name: Check source, render, ownership, and update proofs
         run: pixi run check

@@ -18,6 +18,41 @@ ROOT = Path(__file__).resolve().parents[1]
 DESTINATION = ROOT / "github-template"
 ANSWERS = ROOT / ".github-template-answers.yml"
 SOURCE_LOCK = ROOT / "copier-template" / "pixi.lock"
+COPIER_CONFIGURATION = ROOT / "copier.yml"
+RELEASE_COORDINATES = (
+    "engine_version",
+    "engine_url",
+    "engine_sha256",
+    "runtime_version",
+    "runtime_url",
+    "runtime_sha256",
+    "runtime_manifest_sha256",
+    "template_source",
+    "template_version",
+    "workflow_repository",
+    "workflow_sha",
+    "workflow_ref",
+)
+
+
+def verify_coordinate_defaults() -> None:
+    """Require Copier-first creation and the checked render to share pins."""
+
+    answers = yaml.safe_load(ANSWERS.read_text(encoding="utf-8"))
+    configuration = yaml.safe_load(
+        COPIER_CONFIGURATION.read_text(encoding="utf-8")
+    )
+    mismatches = []
+    for coordinate in RELEASE_COORDINATES:
+        prompt = configuration.get(coordinate)
+        default = prompt.get("default") if isinstance(prompt, dict) else None
+        if default != answers.get(coordinate):
+            mismatches.append(coordinate)
+    if mismatches:
+        raise RuntimeError(
+            "Copier release-coordinate defaults differ from "
+            ".github-template-answers.yml: " + ", ".join(mismatches)
+        )
 
 
 def copier_executable() -> str:
@@ -35,6 +70,7 @@ def pixi_executable() -> str:
 
 
 def render(destination: Path) -> bool:
+    verify_coordinate_defaults()
     command = [
         copier_executable(),
         "copy",

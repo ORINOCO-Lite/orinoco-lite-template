@@ -81,8 +81,8 @@ class TemplateSourceTests(unittest.TestCase):
             (ROOT / "github-template" / ".copier-answers.yml").read_text()
         )
         self.assertEqual("gh:con/orinoco-lite-template", answers["_src_path"])
-        self.assertEqual("v0.1.1", answers["_commit"])
-        self.assertEqual("v0.1.1", answers["template_version"])
+        self.assertEqual("v0.1.2", answers["_commit"])
+        self.assertEqual("v0.1.2", answers["template_version"])
 
     def test_rendered_configuration_loads_with_the_actual_engine(self) -> None:
         script = """
@@ -130,6 +130,33 @@ assert workspace.path('canonical').resolve() == (root / 'metadata' / 'records').
         self.assertNotEqual({"0"}, set(lock["workflow"]["sha"]))
         self.assertTrue((ROOT / "github-template" / "pixi.lock").is_file())
 
+    def test_copier_first_defaults_match_the_checked_render_coordinates(self) -> None:
+        answers = yaml.safe_load(
+            (ROOT / ".github-template-answers.yml").read_text(encoding="utf-8")
+        )
+        configuration = yaml.safe_load(
+            (ROOT / "copier.yml").read_text(encoding="utf-8")
+        )
+        coordinates = (
+            "engine_version",
+            "engine_url",
+            "engine_sha256",
+            "runtime_version",
+            "runtime_url",
+            "runtime_sha256",
+            "runtime_manifest_sha256",
+            "template_source",
+            "template_version",
+            "workflow_repository",
+            "workflow_sha",
+            "workflow_ref",
+        )
+        for coordinate in coordinates:
+            with self.subTest(coordinate=coordinate):
+                self.assertEqual(
+                    answers[coordinate], configuration[coordinate]["default"]
+                )
+
     def test_copier_first_creation_ships_the_reviewed_frozen_lock(self) -> None:
         source_lock = ROOT / "copier-template" / "pixi.lock"
         rendered_lock = ROOT / "github-template" / "pixi.lock"
@@ -151,7 +178,7 @@ assert workspace.path('canonical').resolve() == (root / 'metadata' / 'records').
         )
         self.assertIn("runner: macos-14", workflow)
         self.assertIn("runner: ubuntu-24.04", workflow)
-        self.assertIn("pixi-version: 0.73.0", workflow)
+        self.assertIn("pixi-version: v0.73.0", workflow)
         self.assertIn("run: pixi run check", workflow)
         references = re.findall(r"^\s*uses:\s*([^\s#]+)", workflow, re.MULTILINE)
         self.assertEqual(
