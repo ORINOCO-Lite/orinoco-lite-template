@@ -1,0 +1,18 @@
+contract_version: 1
+
+site:
+  name: "Orinoco Lite Site"
+  description: "A site built with Orinoco Lite."
+  base_url: "https://example.invalid/orinoco-site/"
+
+paths:
+  canonical: metadata/records
+  reference: metadata/reference
+  provenance: metadata/provenance
+  editorial: editorial
+  assets: assets
+  site: site
+  integrations: integrations
+  generated: generated
+  extensions: extensions
+  build: build

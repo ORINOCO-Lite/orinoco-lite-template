@@ -1,0 +1,493 @@
+from __future__ import annotations
+
+import json
+import hashlib
+import os
+import shutil
+import subprocess
+import tempfile
+import tomllib
+import unittest
+import zipfile
+from pathlib import Path
+
+import yaml
+
+
+ROOT = Path(__file__).resolve().parents[1]
+INITIAL_ENGINE_URL = (
+    "https://example.invalid/orinoco_lite-0.1.0-py3-none-any.whl"
+)
+TARGET_ENGINE_URL = (
+    "https://example.invalid/orinoco_lite-0.1.1-py3-none-any.whl"
+)
+TARGET_RUNTIME_URL = "https://example.invalid/runtime-0.1.1.tar.gz"
+TARGET_RUNTIME_SHA256 = "4" * 64
+TARGET_RUNTIME_MANIFEST_SHA256 = "5" * 64
+TARGET_WORKFLOW_SHA = "6" * 40
+TARGET_WORKFLOW_REF = (
+    "example/orinoco/.github/workflows/orinoco-consumer-ci.yml@"
+    f"{TARGET_WORKFLOW_SHA}"
+)
+GIT_ENV = {
+    "GIT_AUTHOR_NAME": "Orinoco Template Test",
+    "GIT_AUTHOR_EMAIL": "template-test@example.invalid",
+    "GIT_COMMITTER_NAME": "Orinoco Template Test",
+    "GIT_COMMITTER_EMAIL": "template-test@example.invalid",
+}
+
+
+def run(
+    command: list[str],
+    cwd: Path,
+    *,
+    check: bool = True,
+) -> subprocess.CompletedProcess[str]:
+    env = dict(os.environ, **GIT_ENV, SOURCE_DATE_EPOCH="0")
+    result = subprocess.run(
+        command,
+        cwd=cwd,
+        env=env,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    if check and result.returncode:
+        raise AssertionError(
+            f"command failed ({result.returncode}): {' '.join(command)}\n"
+            f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}"
+        )
+    return result
+
+
+def commit_all(repository: Path, message: str) -> str:
+    run(["git", "add", "--all"], repository)
+    run(["git", "commit", "-m", message], repository)
+    return run(["git", "rev-parse", "HEAD"], repository).stdout.strip()
+
+
+def fake_pixi_executable(directory: Path) -> Path:
+    executable = directory / "pixi"
+    executable.write_text(
+        """#!/usr/bin/env python3
+import hashlib
+import re
+from pathlib import Path
+
+import yaml
+
+if __import__('sys').argv[1:] != ['lock']:
+    raise SystemExit('fake pixi accepts only `pixi lock`')
+root = Path.cwd()
+manifest = (root / 'pixi.toml').read_text(encoding='utf-8')
+match = re.search(r'^orinoco-lite = \\{ url = "([^"]+)" \\}$', manifest, re.MULTILINE)
+if match is None:
+    raise SystemExit('orinoco-lite URL is missing from pixi.toml')
+requirement = match.group(1)
+url, separator, declared_digest = requirement.partition('#sha256=')
+if not separator or not re.fullmatch(r'[0-9a-f]{64}', declared_digest):
+    raise SystemExit('orinoco-lite URL lacks an exact #sha256 fragment')
+version = re.search(r'orinoco_lite-([0-9]+\\.[0-9]+\\.[0-9]+)-', url)
+if version is None:
+    raise SystemExit('cannot infer exact orinoco-lite version')
+fixture = Path(__import__('os').environ['ORINOCO_TEST_ENGINE_WHEEL'])
+observed_digest = hashlib.sha256(fixture.read_bytes()).hexdigest()
+if declared_digest != observed_digest:
+    raise SystemExit('orinoco-lite wheel digest differs from URL fragment')
+(root / 'pixi.lock').write_text(
+    yaml.safe_dump(
+        {
+            'version': 7,
+            'packages': [
+                {
+                    'pypi': 'direct+' + requirement,
+                    'name': 'orinoco-lite',
+                    'version': version.group(1),
+                }
+            ],
+        },
+        sort_keys=False,
+    ),
+    encoding='utf-8',
+)
+if __import__('os').environ.get('ORINOCO_TEST_TAMPER_PROJECTION'):
+    (root / 'generated/projection/records.jsonl').write_text(
+        '{"pid":"tampered"}\\n',
+        encoding='utf-8',
+    )
+""",
+        encoding="utf-8",
+    )
+    executable.chmod(0o755)
+    return executable
+
+
+class UpdateCycleTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temporary = tempfile.TemporaryDirectory(prefix="orinoco-update-test-")
+        self.workspace = Path(self.temporary.name)
+        self.template = self.workspace / "template"
+        self.template.mkdir()
+        shutil.copy2(ROOT / "copier.yml", self.template / "copier.yml")
+        shutil.copytree(ROOT / "copier-template", self.template / "copier-template")
+        run(["git", "init", "-b", "main"], self.template)
+        self.template_v010_commit = commit_all(
+            self.template, "feat: release template 0.1.0"
+        )
+        run(["git", "tag", "v0.1.0"], self.template)
+
+        readme = self.template / "copier-template" / "README.md.jinja"
+        readme.write_text(
+            readme.read_text(encoding="utf-8").replace(
+                "# [[ project_name ]]", "# [[ project_name ]] — updated"
+            ),
+            encoding="utf-8",
+        )
+        ownership_doc = self.template / "copier-template" / "docs" / "ownership.md"
+        ownership_doc.write_text(
+            ownership_doc.read_text(encoding="utf-8")
+            + "\nTemplate release 0.1.1 clarifies conflict behavior.\n",
+            encoding="utf-8",
+        )
+        self.template_v011_commit = commit_all(
+            self.template, "docs: clarify update conflicts"
+        )
+        run(["git", "tag", "-a", "v0.1.1", "-m", "v0.1.1"], self.template)
+        self.template_v011_tag_object = run(
+            ["git", "rev-parse", "v0.1.1"], self.template
+        ).stdout.strip()
+
+        self.engine_wheel = self.workspace / "orinoco_lite-0.1.1-py3-none-any.whl"
+        with zipfile.ZipFile(self.engine_wheel, "w") as archive:
+            archive.writestr(
+                "orinoco_lite-0.1.1.dist-info/METADATA",
+                "Metadata-Version: 2.1\nName: orinoco-lite\nVersion: 0.1.1\n",
+            )
+        self.engine_sha256 = hashlib.sha256(self.engine_wheel.read_bytes()).hexdigest()
+        self.fake_bin = self.workspace / "fake-bin"
+        self.fake_bin.mkdir()
+        fake_pixi_executable(self.fake_bin)
+
+    def tearDown(self) -> None:
+        self.temporary.cleanup()
+
+    def make_consumer(self, name: str) -> Path:
+        consumer = self.workspace / name
+        initial_sha = "3" * 40
+        command = [
+            "copier",
+            "copy",
+            "--quiet",
+            "--defaults",
+            "--overwrite",
+            "--vcs-ref",
+            "v0.1.0",
+            "--data",
+            "template_version=v0.1.0",
+            "--data",
+            "engine_version=0.1.0",
+            "--data",
+            f"engine_url={INITIAL_ENGINE_URL}",
+            "--data",
+            f"engine_sha256={'0' * 63}1",
+            "--data",
+            "runtime_version=0.1.0",
+            "--data",
+            "runtime_url=https://example.invalid/runtime-0.1.0.tar.gz",
+            "--data",
+            f"runtime_sha256={'1' * 64}",
+            "--data",
+            f"runtime_manifest_sha256={'2' * 64}",
+            "--data",
+            f"workflow_sha={initial_sha}",
+            "--data",
+            "workflow_ref=example/orinoco/.github/workflows/"
+            f"orinoco-consumer-ci.yml@{initial_sha}",
+            self.template.as_posix(),
+            consumer.as_posix(),
+        ]
+        run(command, self.workspace)
+        run(["git", "init", "-b", "main"], consumer)
+        records = consumer / "metadata" / "records"
+        extensions = consumer / "extensions"
+        (records / "complete.yml").write_text(
+            "pid: example:complete\ntitle: Site-owned content\n", encoding="utf-8"
+        )
+        (extensions / "custom.css").write_text(
+            ":root { --site-accent: #123456; }\n", encoding="utf-8"
+        )
+        projection = consumer / "generated" / "projection"
+        projection.mkdir(parents=True)
+        (projection / "records.jsonl").write_text(
+            '{"pid":"example:complete"}\n', encoding="utf-8"
+        )
+        (projection / "SHA256SUMS").write_text(
+            "projection-byte-contract\n", encoding="utf-8"
+        )
+        commit_all(consumer, "feat: add complete site and customization")
+        return consumer
+
+    def update_command(self, *, skip_pixi_lock: bool = True) -> list[str]:
+        command = [
+            "python",
+            "tools/update_orinoco.py",
+            "--to-template",
+            "v0.1.1",
+            "--to-engine",
+            "0.1.1",
+            "--engine-url",
+            TARGET_ENGINE_URL,
+            "--engine-sha256",
+            self.engine_sha256,
+            "--to-runtime",
+            "0.1.1",
+            "--runtime-url",
+            TARGET_RUNTIME_URL,
+            "--runtime-sha256",
+            TARGET_RUNTIME_SHA256,
+            "--runtime-manifest-sha256",
+            TARGET_RUNTIME_MANIFEST_SHA256,
+            "--workflow-sha",
+            TARGET_WORKFLOW_SHA,
+            "--workflow-ref",
+            TARGET_WORKFLOW_REF,
+        ]
+        if skip_pixi_lock:
+            command.append("--skip-pixi-lock")
+        return command
+
+    def test_update_records_coordinates_preserves_site_and_reverts_cleanly(self) -> None:
+        consumer = self.make_consumer("success")
+        baseline = run(["git", "rev-parse", "HEAD"], consumer).stdout.strip()
+        record = (consumer / "metadata" / "records" / "complete.yml").read_bytes()
+        extension = (consumer / "extensions" / "custom.css").read_bytes()
+        projection = {
+            path.relative_to(consumer).as_posix(): path.read_bytes()
+            for path in (consumer / "generated" / "projection").rglob("*")
+            if path.is_file()
+        }
+
+        result = run(self.update_command(), consumer, check=False)
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        ledger = json.loads(
+            (consumer / "generated" / "manifests" / "framework-update.json").read_text()
+        )
+        self.assertEqual("ready-for-review", ledger["status"])
+        self.assertEqual("v0.1.0", ledger["previous"]["template"]["version"])
+        self.assertEqual(
+            self.template_v010_commit,
+            ledger["previous"]["template"]["commit"],
+        )
+        self.assertEqual(
+            "v0.1.0", ledger["previous"]["template"]["copier_ref"]
+        )
+        self.assertEqual("v0.1.1", ledger["target"]["template"]["version"])
+        self.assertEqual(
+            self.template_v011_commit,
+            ledger["target"]["template"]["commit"],
+        )
+        self.assertNotEqual(
+            self.template_v011_tag_object,
+            ledger["target"]["template"]["commit"],
+            "the ledger must record the peeled commit, not an annotated tag object",
+        )
+        self.assertEqual("v0.1.1", ledger["target"]["template"]["copier_ref"])
+        self.assertEqual("0.1.0", ledger["previous"]["engine"]["version"])
+        self.assertEqual("0.1.1", ledger["target"]["engine"]["version"])
+        self.assertEqual("0.1.0", ledger["previous"]["runtime"]["version"])
+        self.assertEqual("0.1.1", ledger["target"]["runtime"]["version"])
+        self.assertEqual([], ledger["site_owned"]["changed"])
+        self.assertEqual(record, (consumer / "metadata" / "records" / "complete.yml").read_bytes())
+        self.assertEqual(extension, (consumer / "extensions" / "custom.css").read_bytes())
+        self.assertEqual(
+            projection,
+            {
+                path.relative_to(consumer).as_posix(): path.read_bytes()
+                for path in (consumer / "generated" / "projection").rglob("*")
+                if path.is_file()
+            },
+        )
+        self.assertNotIn(
+            "generated/manifests/framework-update.json",
+            ledger["site_owned"]["before"],
+        )
+        self.assertNotIn(
+            "generated/manifests/framework-update.json",
+            ledger["site_owned"]["after"],
+        )
+        self.assertIn("— updated", (consumer / "README.md").read_text())
+
+        commit_all(consumer, "chore(deps): update Orinoco framework")
+        run(["git", "revert", "--no-edit", "HEAD"], consumer)
+        comparison = run(["git", "diff", "--quiet", baseline, "--", "."], consumer, check=False)
+        self.assertEqual(0, comparison.returncode, "revert did not restore the baseline tree")
+
+    def test_exact_target_coordinates_render_and_lock_together(self) -> None:
+        consumer = self.make_consumer("real-lock")
+        environment = dict(
+            os.environ,
+            **GIT_ENV,
+            SOURCE_DATE_EPOCH="0",
+            ORINOCO_TEST_ENGINE_WHEEL=self.engine_wheel.as_posix(),
+            PATH=f"{self.fake_bin}{os.pathsep}{os.environ['PATH']}",
+        )
+        result = subprocess.run(
+            self.update_command(skip_pixi_lock=False),
+            cwd=consumer,
+            env=environment,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+        manifest = tomllib.loads((consumer / "pixi.toml").read_text(encoding="utf-8"))
+        self.assertEqual(
+            f"{TARGET_ENGINE_URL}#sha256={self.engine_sha256}",
+            manifest["pypi-dependencies"]["orinoco-lite"]["url"],
+        )
+        answers = yaml.safe_load(
+            (consumer / ".copier-answers.yml").read_text(encoding="utf-8")
+        )
+        lock = yaml.safe_load(
+            (consumer / "orinoco.lock").read_text(encoding="utf-8")
+        )
+        pixi_lock = yaml.safe_load(
+            (consumer / "pixi.lock").read_text(encoding="utf-8")
+        )
+        self.assertEqual("0.1.1", answers["engine_version"])
+        self.assertEqual(TARGET_ENGINE_URL, answers["engine_url"])
+        self.assertEqual(self.engine_sha256, answers["engine_sha256"])
+        self.assertEqual("v0.1.1", answers["template_version"])
+        self.assertEqual("v0.1.1", answers["_commit"])
+        self.assertNotIn("template_commit", answers)
+        self.assertEqual("0.1.1", answers["runtime_version"])
+        self.assertEqual(TARGET_RUNTIME_URL, answers["runtime_url"])
+        self.assertEqual(TARGET_RUNTIME_SHA256, answers["runtime_sha256"])
+        self.assertEqual(
+            TARGET_RUNTIME_MANIFEST_SHA256,
+            answers["runtime_manifest_sha256"],
+        )
+        self.assertEqual("example/orinoco", answers["workflow_repository"])
+        self.assertEqual(TARGET_WORKFLOW_SHA, answers["workflow_sha"])
+        self.assertEqual(TARGET_WORKFLOW_REF, answers["workflow_ref"])
+        self.assertEqual("0.1.1", lock["engine"]["version"])
+        self.assertEqual(TARGET_ENGINE_URL, lock["engine"]["url"])
+        self.assertEqual(self.engine_sha256, lock["engine"]["sha256"])
+        self.assertEqual("v0.1.1", lock["template"]["version"])
+        self.assertNotIn("commit", lock["template"])
+        self.assertEqual("0.1.1", lock["runtime"]["version"])
+        self.assertEqual(TARGET_RUNTIME_URL, lock["runtime"]["url"])
+        self.assertEqual(TARGET_RUNTIME_SHA256, lock["runtime"]["sha256"])
+        self.assertEqual(
+            TARGET_RUNTIME_MANIFEST_SHA256,
+            lock["runtime"]["manifest_sha256"],
+        )
+        self.assertEqual("example/orinoco", lock["workflow"]["repository"])
+        self.assertEqual(TARGET_WORKFLOW_SHA, lock["workflow"]["sha"])
+        self.assertEqual(TARGET_WORKFLOW_REF, lock["workflow"]["ref"])
+        self.assertIn(
+            f"uses: {TARGET_WORKFLOW_REF}",
+            (
+                consumer / ".github" / "workflows" / "validate.yml"
+            ).read_text(encoding="utf-8"),
+        )
+        self.assertEqual(
+            {
+                "pypi": (
+                    "direct+"
+                    f"{TARGET_ENGINE_URL}#sha256={self.engine_sha256}"
+                ),
+                "name": "orinoco-lite",
+                "version": "0.1.1",
+            },
+            pixi_lock["packages"][0],
+        )
+
+    def test_unresolvable_template_tag_fails_before_mutation(self) -> None:
+        consumer = self.make_consumer("missing-tag")
+        command = self.update_command()
+        command[command.index("v0.1.1")] = "v9.9.9"
+
+        result = run(command, consumer, check=False)
+
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("cannot resolve Copier template tag 'v9.9.9'", result.stderr)
+        status = run(
+            ["git", "status", "--porcelain", "--untracked-files=normal"],
+            consumer,
+        )
+        self.assertEqual("", status.stdout)
+
+    def test_lock_refresh_cannot_change_generated_projection(self) -> None:
+        consumer = self.make_consumer("projection-tamper")
+        original = (
+            consumer / "generated" / "projection" / "records.jsonl"
+        ).read_bytes()
+        environment = dict(
+            os.environ,
+            **GIT_ENV,
+            SOURCE_DATE_EPOCH="0",
+            ORINOCO_TEST_ENGINE_WHEEL=self.engine_wheel.as_posix(),
+            ORINOCO_TEST_TAMPER_PROJECTION="1",
+            PATH=f"{self.fake_bin}{os.pathsep}{os.environ['PATH']}",
+        )
+        result = subprocess.run(
+            self.update_command(skip_pixi_lock=False)
+            + [
+                "--migration",
+                "projection=attempted generated migration",
+                "--allow-site-change",
+                "generated/**",
+            ],
+            cwd=consumer,
+            env=environment,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("generated/projection/records.jsonl", result.stderr)
+        ledger = json.loads(
+            (consumer / "generated" / "manifests" / "framework-update.json").read_text()
+        )
+        self.assertEqual("rejected-site-change", ledger["status"])
+        self.assertIn(
+            "generated/projection/records.jsonl",
+            ledger["site_owned"]["changed"],
+        )
+        self.assertNotEqual(
+            original,
+            (consumer / "generated" / "projection" / "records.jsonl").read_bytes(),
+        )
+
+    def test_intentional_template_conflict_fails_visibly(self) -> None:
+        consumer = self.make_consumer("conflict")
+        readme = consumer / "README.md"
+        original_content = (consumer / "metadata" / "records" / "complete.yml").read_bytes()
+        lines = readme.read_text(encoding="utf-8").splitlines()
+        lines[0] = "# Orinoco Lite Site — downstream customization"
+        readme.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        commit_all(consumer, "docs: customize framework-owned heading")
+
+        result = run(self.update_command(), consumer, check=False)
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("conflict", (result.stdout + result.stderr).lower())
+        conflicts = list(consumer.rglob("*.rej"))
+        self.assertTrue(conflicts, "expected Copier to leave a visible .rej conflict")
+        ledger = json.loads(
+            (consumer / "generated" / "manifests" / "framework-update.json").read_text()
+        )
+        self.assertEqual("conflicts", ledger["status"])
+        self.assertTrue(ledger["conflicts"])
+        self.assertEqual(
+            original_content,
+            (consumer / "metadata" / "records" / "complete.yml").read_bytes(),
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()

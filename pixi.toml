@@ -1,0 +1,18 @@
+[workspace]
+name = "orinoco-lite-template"
+channels = ["conda-forge"]
+platforms = [{ platform = "osx-arm64", macos = "14.0" }, "linux-64"]
+
+[dependencies]
+python = ">=3.12,<3.13"
+copier = "==9.10.3"
+pyyaml = "==6.0.2"
+
+[tasks]
+render = "python tools/render_github_template.py"
+check-render = "python tools/render_github_template.py --check"
+publish-github-template-branch = "python tools/publish_github_template_branch.py --publish"
+check-github-template-branch = "python tools/publish_github_template_branch.py --check"
+test = "python -m unittest discover -s tests -p 'test_*.py'"
+check = { depends-on = ["check-render", "test"] }
+release-check = { depends-on = ["check", "check-github-template-branch"] }
