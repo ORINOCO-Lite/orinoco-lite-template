@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.3 - 2026-08-12
+
+- Update the engine and runtime to immutable v0.1.6 release artifacts.
+- Run hosted source smoke tests against the frozen released engine environment.
+- Reconcile only three-way-equivalent bootstrap edits and redundant placeholders.
+- Require explicit update dispatch and attribute automated framework commits.
+
 ## 0.1.2 - 2026-08-12
 
 - Update the engine and runtime to v0.1.4 for complete downstream snapshots.

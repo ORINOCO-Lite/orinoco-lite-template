@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-import json
 import hashlib
+import inspect
+import json
 import os
 import re
 import shutil
@@ -15,13 +16,6 @@ import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
-LOCAL_ENGINE_SOURCE = (
-    ROOT.parent
-    / "orinoco-milestone-4-dev"
-    / "packages"
-    / "orinoco-lite"
-    / "src"
-)
 
 
 class TemplateSourceTests(unittest.TestCase):
@@ -81,8 +75,8 @@ class TemplateSourceTests(unittest.TestCase):
             (ROOT / "github-template" / ".copier-answers.yml").read_text()
         )
         self.assertEqual("gh:con/orinoco-lite-template", answers["_src_path"])
-        self.assertEqual("v0.1.2", answers["_commit"])
-        self.assertEqual("v0.1.2", answers["template_version"])
+        self.assertEqual("v0.1.3", answers["_commit"])
+        self.assertEqual("v0.1.3", answers["template_version"])
 
     def test_rendered_configuration_loads_with_the_actual_engine(self) -> None:
         script = """
@@ -92,27 +86,36 @@ root = Path(__import__('sys').argv[1])
 workspace = load_config_path(root / 'orinoco.yaml')
 assert workspace.path('canonical').resolve() == (root / 'metadata' / 'records').resolve()
 """
-        environment = dict(os.environ)
+        environment = dict(os.environ, PIXI_FROZEN="true", PIXI_NO_CONFIG="true")
         configured_source = environment.get("ORINOCO_ENGINE_SOURCE")
         if configured_source:
             engine_source = Path(configured_source).resolve()
             self.assertTrue(engine_source.is_dir(), engine_source)
             environment["PYTHONPATH"] = engine_source.as_posix()
+            command = [
+                sys.executable,
+                "-c",
+                script,
+                (ROOT / "github-template").as_posix(),
+            ]
         else:
-            import_probe = subprocess.run(
-                [sys.executable, "-c", "import orinoco_lite.config"],
-                cwd=ROOT,
-                env=environment,
-                text=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                check=False,
+            pixi = shutil.which("pixi")
+            self.assertIsNotNone(
+                pixi,
+                "Pixi is required for the released-engine smoke test",
             )
-            if import_probe.returncode:
-                self.assertTrue(LOCAL_ENGINE_SOURCE.is_dir(), LOCAL_ENGINE_SOURCE)
-                environment["PYTHONPATH"] = LOCAL_ENGINE_SOURCE.as_posix()
+            command = [
+                str(pixi),
+                "run",
+                "--manifest-path",
+                (ROOT / "github-template" / "pixi.toml").as_posix(),
+                "python",
+                "-c",
+                script,
+                (ROOT / "github-template").as_posix(),
+            ]
         result = subprocess.run(
-            [sys.executable, "-c", script, (ROOT / "github-template").as_posix()],
+            command,
             cwd=ROOT,
             env=environment,
             text=True,
@@ -121,6 +124,15 @@ assert workspace.path('canonical').resolve() == (root / 'metadata' / 'records').
             check=False,
         )
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    def test_hosted_engine_smoke_does_not_require_a_sibling_checkout(self) -> None:
+        source = inspect.getsource(
+            self.test_rendered_configuration_loads_with_the_actual_engine
+        )
+        self.assertNotIn("ROOT.parent", source)
+        self.assertNotIn("LOCAL_ENGINE_SOURCE", source)
+        self.assertIn('"--manifest-path",', source)
+        self.assertIn('PIXI_FROZEN="true"', source)
 
     def test_default_coordinates_are_concrete_published_release_pins(self) -> None:
         lock = yaml.safe_load((ROOT / "github-template" / "orinoco.lock").read_text())

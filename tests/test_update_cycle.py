@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import json
 import hashlib
+import json
 import os
 import shutil
 import subprocess
@@ -29,6 +29,23 @@ TARGET_WORKFLOW_REF = (
     "example/orinoco/.github/workflows/orinoco-consumer-ci.yml@"
     f"{TARGET_WORKFLOW_SHA}"
 )
+BOOTSTRAP_SOURCE_PATHS = (
+    "copier-template/.github/workflows/pages.yml",
+    "copier-template/.github/workflows/update-orinoco.yml",
+    "copier-template/.github/workflows/validate.yml.jinja",
+    "copier-template/tests/template/test_downstream_contract.py",
+)
+BOOTSTRAP_RENDERED_PATHS = (
+    ".github/workflows/pages.yml",
+    ".github/workflows/update-orinoco.yml",
+    ".github/workflows/validate.yml",
+    "tests/template/test_downstream_contract.py",
+)
+BOOTSTRAP_EQUIVALENT_PATHS = (
+    *BOOTSTRAP_RENDERED_PATHS,
+    "tools/update_orinoco.py",
+)
+OLD_UPDATER_MARKER = "v0.1.0 updater requires reviewed bootstrap"
 GIT_ENV = {
     "GIT_AUTHOR_NAME": "Orinoco Template Test",
     "GIT_AUTHOR_EMAIL": "template-test@example.invalid",
@@ -65,6 +82,33 @@ def commit_all(repository: Path, message: str) -> str:
     run(["git", "add", "--all"], repository)
     run(["git", "commit", "-m", message], repository)
     return run(["git", "rev-parse", "HEAD"], repository).stdout.strip()
+
+
+def replace_pixi_pin(path: Path, current: str, replacement: str) -> None:
+    text = path.read_text(encoding="utf-8")
+    updated = text.replace(current, replacement)
+    if updated == text:
+        raise AssertionError(f"expected a Pixi version pin in {path}")
+    path.write_text(updated, encoding="utf-8")
+
+
+def protected_bytes(repository: Path) -> dict[str, bytes]:
+    protected_roots = (
+        "metadata",
+        "editorial",
+        "assets",
+        "site",
+        "integrations",
+        "extensions",
+        "generated",
+    )
+    excluded = "generated/manifests/framework-update.json"
+    return {
+        path.relative_to(repository).as_posix(): path.read_bytes()
+        for root in protected_roots
+        for path in (repository / root).rglob("*")
+        if path.is_file() and path.relative_to(repository).as_posix() != excluded
+    }
 
 
 def fake_pixi_executable(directory: Path) -> Path:
@@ -131,11 +175,35 @@ class UpdateCycleTests(unittest.TestCase):
         self.template.mkdir()
         shutil.copy2(ROOT / "copier.yml", self.template / "copier.yml")
         shutil.copytree(ROOT / "copier-template", self.template / "copier-template")
+        updater = self.template / "copier-template/tools/update_orinoco.py"
+        self.target_updater = updater.read_bytes()
+        updater.write_text(
+            "#!/usr/bin/env python3\n"
+            f"raise SystemExit({OLD_UPDATER_MARKER!r})\n",
+            encoding="utf-8",
+        )
+        for relative in BOOTSTRAP_SOURCE_PATHS:
+            replace_pixi_pin(
+                self.template / relative,
+                "pixi-version: v0.73.0",
+                "pixi-version: 0.73.0",
+            )
         run(["git", "init", "-b", "main"], self.template)
         self.template_v010_commit = commit_all(
             self.template, "feat: release template 0.1.0"
         )
         run(["git", "tag", "v0.1.0"], self.template)
+
+        updater.write_bytes(self.target_updater)
+        for relative in BOOTSTRAP_SOURCE_PATHS:
+            path = self.template / relative
+            text = path.read_text(encoding="utf-8")
+            updated = text.replace(
+                "pixi-version: 0.73.0",
+                "pixi-version: v0.73.0",
+            )
+            self.assertNotEqual(text, updated, relative)
+            path.write_text(updated, encoding="utf-8")
 
         readme = self.template / "copier-template" / "README.md.jinja"
         readme.write_text(
@@ -172,7 +240,12 @@ class UpdateCycleTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.temporary.cleanup()
 
-    def make_consumer(self, name: str) -> Path:
+    def make_consumer(
+        self,
+        name: str,
+        *,
+        bootstrap_updater: bool = True,
+    ) -> Path:
         consumer = self.workspace / name
         initial_sha = "3" * 40
         command = [
@@ -226,7 +299,36 @@ class UpdateCycleTests(unittest.TestCase):
             "projection-byte-contract\n", encoding="utf-8"
         )
         commit_all(consumer, "feat: add complete site and customization")
+        if bootstrap_updater:
+            self.bootstrap_target_updater(consumer)
         return consumer
+
+    def bootstrap_target_updater(self, consumer: Path) -> None:
+        updater = consumer / "tools/update_orinoco.py"
+        self.assertIn(OLD_UPDATER_MARKER, updater.read_text(encoding="utf-8"))
+        updater.write_bytes(self.target_updater)
+        self.assertEqual(self.target_updater, updater.read_bytes())
+        commit_all(consumer, "chore: bootstrap reviewed framework updater")
+
+    def preapply_bootstrap_edits(
+        self,
+        consumer: Path,
+        *,
+        pages_replacement: str = "pixi-version: v0.73.0",
+    ) -> None:
+        for relative in BOOTSTRAP_RENDERED_PATHS:
+            path = consumer / relative
+            replacement = (
+                pages_replacement
+                if relative == ".github/workflows/pages.yml"
+                else "pixi-version: v0.73.0"
+            )
+            replace_pixi_pin(
+                path,
+                "pixi-version: 0.73.0",
+                replacement,
+            )
+        commit_all(consumer, "chore: apply reviewed Pixi bootstrap")
 
     def update_command(self, *, skip_pixi_lock: bool = True) -> list[str]:
         command = [
@@ -405,6 +507,129 @@ class UpdateCycleTests(unittest.TestCase):
             },
             pixi_lock["packages"][0],
         )
+
+    def test_target_equivalent_bootstrap_edits_are_reconciled_safely(self) -> None:
+        consumer = self.make_consumer("equivalent-bootstrap")
+        before = protected_bytes(consumer)
+        self.preapply_bootstrap_edits(consumer)
+
+        result = run(self.update_command(), consumer, check=False)
+
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertEqual([], list(consumer.rglob("*.rej")))
+        ledger = json.loads(
+            (consumer / "generated/manifests/framework-update.json").read_text()
+        )
+        self.assertEqual(
+            list(BOOTSTRAP_EQUIVALENT_PATHS),
+            ledger["reconciled_target_equivalent"],
+        )
+        self.assertEqual(before, protected_bytes(consumer))
+        self.assertIn(
+            TARGET_WORKFLOW_REF,
+            (consumer / ".github/workflows/validate.yml").read_text(
+                encoding="utf-8"
+            ),
+        )
+
+    def test_v010_updater_is_synced_exactly_before_framework_update(self) -> None:
+        consumer = self.make_consumer(
+            "updater-bootstrap",
+            bootstrap_updater=False,
+        )
+        old_updater = consumer / "tools/update_orinoco.py"
+        self.assertIn(OLD_UPDATER_MARKER, old_updater.read_text(encoding="utf-8"))
+
+        self.bootstrap_target_updater(consumer)
+        result = run(self.update_command(), consumer, check=False)
+
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertEqual(
+            self.target_updater,
+            (consumer / "tools/update_orinoco.py").read_bytes(),
+        )
+
+    def test_non_equivalent_bootstrap_override_remains_a_conflict(self) -> None:
+        consumer = self.make_consumer("non-equivalent-bootstrap")
+        before = protected_bytes(consumer)
+        self.preapply_bootstrap_edits(
+            consumer,
+            pages_replacement=(
+                "pixi-version: v0.73.0 # downstream override"
+            ),
+        )
+
+        result = run(self.update_command(), consumer, check=False)
+
+        self.assertNotEqual(0, result.returncode)
+        ledger = json.loads(
+            (consumer / "generated/manifests/framework-update.json").read_text()
+        )
+        self.assertEqual("conflicts", ledger["status"])
+        self.assertIn(
+            ".github/workflows/pages.yml.rej",
+            ledger["conflicts"],
+        )
+        self.assertNotIn(
+            ".github/workflows/pages.yml",
+            ledger["reconciled_target_equivalent"],
+        )
+        self.assertTrue(
+            (consumer / ".github/workflows/pages.yml.rej").is_file()
+        )
+        self.assertEqual(before, protected_bytes(consumer))
+
+    def test_target_placeholders_are_removed_only_from_populated_paths(self) -> None:
+        consumer = self.make_consumer("placeholder-reconciliation")
+        populated = {
+            "metadata/records/.gitkeep": "metadata/records/complete.yml",
+            "integrations/.gitkeep": "integrations/zotero/evidence.json",
+            "generated/manifests/.gitkeep": (
+                "generated/manifests/source-import.json"
+            ),
+            "site/config/.gitkeep": "site/config/site.yaml",
+        }
+        for placeholder, real_file in populated.items():
+            (consumer / placeholder).unlink()
+            destination = consumer / real_file
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_text(f"evidence: {real_file}\n", encoding="utf-8")
+        empty_placeholder = consumer / "assets/.gitkeep"
+        self.assertTrue(empty_placeholder.is_file())
+        commit_all(consumer, "feat: populate imported site paths")
+        before = protected_bytes(consumer)
+
+        result = run(self.update_command(), consumer, check=False)
+
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        ledger = json.loads(
+            (consumer / "generated/manifests/framework-update.json").read_text()
+        )
+        self.assertEqual(sorted(populated), ledger["removed_populated_placeholders"])
+        for placeholder in populated:
+            self.assertFalse((consumer / placeholder).exists(), placeholder)
+        self.assertTrue(empty_placeholder.is_file())
+        self.assertEqual(before, protected_bytes(consumer))
+
+    def test_preexisting_protected_rejection_fails_before_mutation(self) -> None:
+        consumer = self.make_consumer("preexisting-rejection")
+        rejection = consumer / "metadata/records/manual.rej"
+        rejection.write_text("review required\n", encoding="utf-8")
+        run(["git", "add", "--force", rejection.as_posix()], consumer)
+        commit_all(consumer, "test: preserve unresolved content rejection")
+        baseline = run(["git", "rev-parse", "HEAD"], consumer).stdout.strip()
+
+        result = run(self.update_command(), consumer, check=False)
+
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("pre-existing conflict artifacts", result.stderr)
+        self.assertTrue(rejection.is_file())
+        comparison = run(
+            ["git", "diff", "--quiet", baseline, "--", "."],
+            consumer,
+            check=False,
+        )
+        self.assertEqual(0, comparison.returncode)
 
     def test_unresolvable_template_tag_fails_before_mutation(self) -> None:
         consumer = self.make_consumer("missing-tag")
