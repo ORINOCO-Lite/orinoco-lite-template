@@ -1,19 +1,19 @@
-_commit: v0.1.0
+_commit: v0.1.1
 _src_path: gh:con/orinoco-lite-template
 project_name: Orinoco Lite Site
 project_slug: orinoco-site
 site_description: A site built with Orinoco Lite.
 repository_slug: example/orinoco-site
 site_base_url: https://example.invalid/orinoco-site/
-engine_version: 0.1.2
-engine_url: https://github.com/con/orinoco-lite-dev/releases/download/v0.1.2/orinoco_lite-0.1.2-py3-none-any.whl
-engine_sha256: 317a26324150814592ded4c28ac2394cc7f43ed590d30e6461749130a0d0ea67
-runtime_version: 0.1.2
-runtime_url: https://github.com/con/orinoco-lite-dev/releases/download/v0.1.2/orinoco-runtime-0.1.2.tar.gz
-runtime_sha256: fced1d7def6cf85d247a4720baa7a94fa8449aa0781c786a44b62605a74b287c
-runtime_manifest_sha256: bb43e79fc5a2b9761221cf53bf815ecd625b359b018a42304764ec540bdf7e35
+engine_version: 0.1.3
+engine_url: https://github.com/con/orinoco-lite-dev/releases/download/v0.1.3/orinoco_lite-0.1.3-py3-none-any.whl
+engine_sha256: 133cc6aa68baa5d39553ab2f3e8c7f206298e2b4391fb6c6625760ba0555d412
+runtime_version: 0.1.3
+runtime_url: https://github.com/con/orinoco-lite-dev/releases/download/v0.1.3/orinoco-runtime-0.1.3.tar.gz
+runtime_sha256: d8370f6efab8a61d803c36f6a48c57ccb8c25b6cdfe7f95403e3f53a05155f00
+runtime_manifest_sha256: f32c712d499a810601bfc0d809015cbde1e8a3c8019501c5d51ee3bedf03dc02
 template_source: gh:con/orinoco-lite-template
-template_version: v0.1.0
+template_version: v0.1.1
 workflow_repository: con/orinoco-lite-dev
-workflow_sha: e7fe3de4fdacffdc2f2e601ed6da1708c8ac2753
-workflow_ref: con/orinoco-lite-dev/.github/workflows/orinoco-consumer-ci.yml@e7fe3de4fdacffdc2f2e601ed6da1708c8ac2753
+workflow_sha: 86dd18b3384e3e491c3345a77a6fe5aa8eca2a4a
+workflow_ref: con/orinoco-lite-dev/.github/workflows/orinoco-consumer-ci.yml@86dd18b3384e3e491c3345a77a6fe5aa8eca2a4a

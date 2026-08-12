@@ -26,6 +26,10 @@ LOCAL_ENGINE_SOURCE = (
 
 class TemplateSourceTests(unittest.TestCase):
     def test_checked_default_tree_matches_copier_source(self) -> None:
+        renderer = (ROOT / "tools" / "render_github_template.py").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('"--vcs-ref",\n        "HEAD",', renderer)
         result = subprocess.run(
             ["python", "tools/render_github_template.py", "--check"],
             cwd=ROOT,
@@ -77,8 +81,8 @@ class TemplateSourceTests(unittest.TestCase):
             (ROOT / "github-template" / ".copier-answers.yml").read_text()
         )
         self.assertEqual("gh:con/orinoco-lite-template", answers["_src_path"])
-        self.assertEqual("v0.1.0", answers["_commit"])
-        self.assertEqual("v0.1.0", answers["template_version"])
+        self.assertEqual("v0.1.1", answers["_commit"])
+        self.assertEqual("v0.1.1", answers["template_version"])
 
     def test_rendered_configuration_loads_with_the_actual_engine(self) -> None:
         script = """

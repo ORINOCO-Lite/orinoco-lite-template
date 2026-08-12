@@ -41,6 +41,8 @@ def render(destination: Path) -> bool:
         "--quiet",
         "--defaults",
         "--overwrite",
+        "--vcs-ref",
+        "HEAD",
         "--data-file",
         ANSWERS.as_posix(),
         ROOT.as_posix(),
