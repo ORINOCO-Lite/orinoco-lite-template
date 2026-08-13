@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.9 - 2026-08-13
+
+- Pass the configured Pages base URL through a validated argv wrapper so Pixi
+  cannot pass the literal `${ORINOCO_BASE_URL}` expression to Orinoco.
+
 ## 0.1.8 - 2026-08-13
 
 - Build one deterministic local artifact with host-neutral root-relative links
