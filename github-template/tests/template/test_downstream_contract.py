@@ -129,6 +129,11 @@ class DownstreamContractTests(unittest.TestCase):
         self.assertIn("test-browser", tasks["test-all"]["depends-on"])
         self.assertIn("verify-deterministic", tasks["test-all"]["depends-on"])
         self.assertIn("verify-hugo", tasks["test-all"]["depends-on"])
+        self.assertEqual(
+            "npx --prefix tests/browser playwright install --with-deps "
+            "chromium webkit",
+            tasks["install-browser-browsers"]["cmd"],
+        )
 
     def test_local_build_and_serve_share_the_root_base_url(self) -> None:
         pixi = tomllib.loads((ROOT / "pixi.toml").read_text(encoding="utf-8"))

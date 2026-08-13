@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.5 - 2026-08-12
+
+- Install Playwright's pinned Linux host dependencies with Chromium and WebKit
+  so the complete browser gate runs on hosted Ubuntu as well as macOS.
+
 ## 0.1.4 - 2026-08-12
 
 - Accept Hugo distribution revision suffixes while preserving the exact

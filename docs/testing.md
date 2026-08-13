@@ -14,5 +14,8 @@ The template suite proves that:
 - the normal cold-clone gate hydrates declared assets before verifying them, while the denied-network proof warms once and then invokes only asset verification; and
 - the complete downstream gate includes exact Hugo Extended 0.154.5, deterministic repeat-build digest comparison, and Chromium/WebKit tests.
 
+The browser-install task uses Playwright's `--with-deps` mode.
+Playwright installs its pinned native browser libraries on supported Linux hosts and keeps the ordinary browser installation behavior on macOS.
+
 Consumer repositories add their complete content, build, browser, integration, and provenance suites.
 Template tests are not a substitute for those tests.
