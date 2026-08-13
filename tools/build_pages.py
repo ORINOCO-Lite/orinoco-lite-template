@@ -22,8 +22,9 @@ def _base_url() -> str:
     return value.rstrip("/") + "/"
 
 
-def main() -> int:
-    destination = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("build/pages")
+def main(argv: list[str] | None = None) -> int:
+    args = sys.argv[1:] if argv is None else argv
+    destination = Path(args[0]) if args else Path("build/pages")
     subprocess.run(
         [
             "orinoco",
