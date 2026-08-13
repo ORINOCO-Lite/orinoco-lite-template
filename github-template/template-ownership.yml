@@ -13,6 +13,7 @@ classes:
       - docs/ownership.md
       - docs/updating.md
       - docs/importing.md
+      - docs/getting-started.md
       - tools/template_contract.py
       - tools/update_orinoco.py
       - tools/verify_template_ownership.py

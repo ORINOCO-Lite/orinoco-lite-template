@@ -1,7 +1,7 @@
 # Importing a complete site bundle
 
 The template is intentionally content-neutral.
-`import_site_bundle.py` moves a prepared, reviewed site's complete visible inputs into the ordinary downstream layout without importing its Git ancestry or framework topology.
+`import_site_bundle.py` moves a prepared, reviewed site's complete visible inputs into the ordinary consumer layout without importing its Git ancestry or framework topology.
 
 The source bundle may contain every path classified as site-owned or replaceable by `template-ownership.yml`, including:
 
@@ -28,3 +28,7 @@ Existing non-placeholder files are never overwritten unless `--replace` is given
 Even with `--replace`, `.git` components, `.gitmodules`, repository-root `.github/` workflows, template-owned documentation and tools, credentials, and symlinks are rejected.
 Inert nested `.github/` metadata belonging to a classified site-owned vendor tree, such as `site/framework/themes/congo/.github/`, is allowed without granting it root workflow ownership.
 The result is a site-owned import ledger under `metadata/provenance/`.
+
+Import ends at the consumer ownership boundary.
+Engine and template release pins continue to come from `orinoco.lock`, and future framework changes continue through the [content-preserving updater](updating.md).
+Site-specific review and operating guidance may live in `site/README.md` alongside the imported presentation tree.
