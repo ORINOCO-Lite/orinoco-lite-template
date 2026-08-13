@@ -32,7 +32,7 @@ Original template, updater, workflow, and test code is
 inherit the MIT grant for their generic Orinoco Lite facade, but site owners
 must license their own content, media, and presentation separately. See
 [`LICENSES.md`](LICENSES.md) and the accepted engine human-review decision
-[HR-003](https://github.com/con/orinoco-lite-dev/blob/codex/milestone-4/docs/human-review-decisions.md#hr-003--establish-authority-and-a-project-license-matrix).
+[HR-003](https://github.com/con/orinoco-lite-dev/blob/main/docs/human-review-decisions.md#hr-003--establish-authority-and-a-project-license-matrix).
 
 ## Creating a consumer
 

@@ -24,7 +24,7 @@ The generic Orinoco Lite facade is MIT licensed and its original documentation
 is CC BY 4.0. Those terms do not license site-owned records, editorial prose,
 media, branding, presentation, or imported third-party material. Document those
 rights separately and preserve every upstream notice. See engine human-review
-decision [HR-003](https://github.com/con/orinoco-lite-dev/blob/codex/milestone-4/docs/human-review-decisions.md#hr-003--establish-authority-and-a-project-license-matrix).
+decision [HR-003](https://github.com/con/orinoco-lite-dev/blob/main/docs/human-review-decisions.md#hr-003--establish-authority-and-a-project-license-matrix).
 
 ## Routine commands
 
