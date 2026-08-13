@@ -20,10 +20,11 @@ Start with [creation and configuration](docs/getting-started.md) for a new consu
 
 ## Rights and intended use
 
-No repository-wide reuse license is currently declared for Orinoco Lite or for content and assets that a consumer may contain.
-Public visibility and these build, creation, and update instructions do not by themselves grant permission to use, modify, or redistribute otherwise unlicensed material.
-Until an explicit license matrix is approved, treat the generic framework and public test consumers as evaluation and integration-test evidence only unless you have separate permission.
-See engine human-review decision [HR-003](https://github.com/con/orinoco-lite-dev/blob/codex/milestone-4/docs/human-review-decisions.md#hr-003--establish-authority-and-a-project-license-matrix), and document any site-specific rights separately.
+The generic Orinoco Lite facade is MIT licensed and its original documentation
+is CC BY 4.0. Those terms do not license site-owned records, editorial prose,
+media, branding, presentation, or imported third-party material. Document those
+rights separately and preserve every upstream notice. See engine human-review
+decision [HR-003](https://github.com/con/orinoco-lite-dev/blob/codex/milestone-4/docs/human-review-decisions.md#hr-003--establish-authority-and-a-project-license-matrix).
 
 ## Routine commands
 
