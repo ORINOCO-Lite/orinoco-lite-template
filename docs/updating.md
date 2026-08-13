@@ -29,8 +29,11 @@ It stops if site content changed, a template conflict exists, or a pin is incomp
 Before changing the checkout, the updater independently renders the current and
 target template releases. A pre-applied template-owned bootstrap edit is accepted
 only when a three-way merge of the downstream file, current release, and target
-release produces the exact target bytes and mode. Arbitrary framework edits and
-all site-owned or generated changes still stop visibly. If Copier reintroduces a
+release produces the exact target bytes and mode, or when the downstream file is
+byte-for-byte an exact stable intervening template release of that same
+template-owned path. This permits a reviewed bootstrap from an earlier immutable
+release to advance without treating arbitrary framework edits as safe. All
+site-owned or generated changes still stop visibly. If Copier reintroduces a
 template `.gitkeep` into an already populated protected directory, the updater
 removes only that new placeholder; placeholders in empty directories and every
 pre-existing protected byte remain unchanged.
