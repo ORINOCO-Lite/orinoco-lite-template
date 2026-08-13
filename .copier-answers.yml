@@ -1,4 +1,4 @@
-_commit: v0.1.5
+_commit: v0.1.6
 _src_path: gh:con/orinoco-lite-template
 project_name: Orinoco Lite Site
 project_slug: orinoco-site
@@ -13,7 +13,7 @@ runtime_url: https://github.com/con/orinoco-lite-dev/releases/download/v0.1.9/or
 runtime_sha256: 7850eb9af3205034fcb97c5034ec0a3811df7d174332c7563d011bb0b5bcbba0
 runtime_manifest_sha256: afef6b7d5a61131cbdb6db6a136e6f381bdf8eb9caf1a641a35df3ef94da07bc
 template_source: gh:con/orinoco-lite-template
-template_version: v0.1.5
+template_version: v0.1.6
 workflow_repository: con/orinoco-lite-dev
 workflow_sha: 0a0b0891e4e7ae3648d4e9d7d6e7e988194600aa
 workflow_ref: con/orinoco-lite-dev/.github/workflows/orinoco-consumer-ci.yml@0a0b0891e4e7ae3648d4e9d7d6e7e988194600aa
