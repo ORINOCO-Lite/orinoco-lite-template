@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.7 - 2026-08-12
+
+- Preserve Playwright 1.62.1 on ordinary platforms while overlaying the
+  revision-compatible 1.61.1 client on macOS 14 only.
+- Verify all installed Playwright package versions and preserve the exact
+  consumer-owned browser manifest and lock bytes across installation.
+
 ## 0.1.6 - 2026-08-12
 
 - Run Chromium before Playwright changes hosted Linux dependencies, then install

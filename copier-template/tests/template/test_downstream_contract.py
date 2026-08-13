@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import importlib
 import io
+import json
 import tempfile
 import sys
 import tomllib
@@ -131,6 +132,10 @@ class DownstreamContractTests(unittest.TestCase):
         self.assertIn("verify-hugo", tasks["test-all"]["depends-on"])
         self.assertNotIn("install-browser-browsers", tasks)
         self.assertEqual(
+            "python tools/install_browser_tests.py",
+            tasks["install-browser-tests"],
+        )
+        self.assertEqual(
             ["install-browser-tests"],
             tasks["install-browser-chromium"]["depends-on"],
         )
@@ -167,6 +172,28 @@ class DownstreamContractTests(unittest.TestCase):
             {"depends-on": ["test-browser-webkit"]},
             tasks["test-browser"],
         )
+
+    def test_browser_installer_respects_the_ownership_boundary(self) -> None:
+        verifier = load_verifier()
+        ownership = verifier.load_yaml(ROOT / "template-ownership.yml")
+        classes = verifier.ownership_classes(ownership)
+        self.assertEqual(
+            ["template_owned"],
+            verifier.classify("tools/install_browser_tests.py", classes),
+        )
+        for relative in (
+            "tests/browser/package.json",
+            "tests/browser/package-lock.json",
+        ):
+            with self.subTest(path=relative):
+                self.assertEqual(
+                    ["consumer_tests"],
+                    verifier.classify(relative, classes),
+                )
+        package = json.loads(
+            (ROOT / "tests/browser/package.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual("1.62.1", package["devDependencies"]["@playwright/test"])
 
     def test_local_build_and_serve_share_the_root_base_url(self) -> None:
         pixi = tomllib.loads((ROOT / "pixi.toml").read_text(encoding="utf-8"))
