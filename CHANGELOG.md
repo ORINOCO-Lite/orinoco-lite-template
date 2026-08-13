@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.8 - 2026-08-13
+
+- Build one deterministic local artifact with host-neutral root-relative links
+  so previews work through either loopback hostname.
+- Verify both loopback hostnames and their same-origin entry-point resources
+  while preserving explicit Pages project-path builds.
+- Update the engine, runtime, and reusable workflow to the immutable v0.1.10
+  release artifacts.
+
 ## 0.1.7 - 2026-08-12
 
 - Preserve Playwright 1.62.1 on ordinary platforms while overlaying the
