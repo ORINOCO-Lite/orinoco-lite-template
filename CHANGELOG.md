@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.6 - 2026-08-12
+
+- Run Chromium before Playwright changes hosted Linux dependencies, then install
+  WebKit's pinned host dependencies and run WebKit. This preserves the complete
+  checked browser matrix while avoiding a Chromium teardown hang on Ubuntu.
+
 ## 0.1.5 - 2026-08-12
 
 - Install Playwright's pinned Linux host dependencies with Chromium and WebKit

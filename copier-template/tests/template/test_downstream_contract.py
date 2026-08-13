@@ -129,10 +129,43 @@ class DownstreamContractTests(unittest.TestCase):
         self.assertIn("test-browser", tasks["test-all"]["depends-on"])
         self.assertIn("verify-deterministic", tasks["test-all"]["depends-on"])
         self.assertIn("verify-hugo", tasks["test-all"]["depends-on"])
+        self.assertNotIn("install-browser-browsers", tasks)
         self.assertEqual(
-            "npx --prefix tests/browser playwright install --with-deps "
-            "chromium webkit",
-            tasks["install-browser-browsers"]["cmd"],
+            ["install-browser-tests"],
+            tasks["install-browser-chromium"]["depends-on"],
+        )
+        self.assertEqual(
+            "npx --prefix tests/browser playwright install chromium",
+            tasks["install-browser-chromium"]["cmd"],
+        )
+        self.assertNotIn("--with-deps", tasks["install-browser-chromium"]["cmd"])
+        self.assertEqual(
+            ["build-browser-pages", "install-browser-chromium"],
+            tasks["test-browser-chromium"]["depends-on"],
+        )
+        self.assertEqual(
+            "npm --prefix tests/browser test -- --project=chromium",
+            tasks["test-browser-chromium"]["cmd"],
+        )
+        self.assertEqual(
+            ["test-browser-chromium"],
+            tasks["install-browser-webkit"]["depends-on"],
+        )
+        self.assertEqual(
+            "npx --prefix tests/browser playwright install --with-deps webkit",
+            tasks["install-browser-webkit"]["cmd"],
+        )
+        self.assertEqual(
+            ["install-browser-webkit"],
+            tasks["test-browser-webkit"]["depends-on"],
+        )
+        self.assertEqual(
+            "npm --prefix tests/browser test -- --project=webkit",
+            tasks["test-browser-webkit"]["cmd"],
+        )
+        self.assertEqual(
+            {"depends-on": ["test-browser-webkit"]},
+            tasks["test-browser"],
         )
 
     def test_local_build_and_serve_share_the_root_base_url(self) -> None:
