@@ -226,6 +226,23 @@ class UpdateCycleTests(unittest.TestCase):
             ["git", "rev-parse", "v0.1.1"], self.template
         ).stdout.strip()
 
+        readme.write_text(
+            readme.read_text(encoding="utf-8")
+            + "\nExact intervening release state.\n",
+            encoding="utf-8",
+        )
+        commit_all(self.template, "docs: release template 0.1.2")
+        run(["git", "tag", "v0.1.2"], self.template)
+        readme.write_text(
+            readme.read_text(encoding="utf-8").replace(
+                "Exact intervening release state.",
+                "Exact target release state.",
+            ),
+            encoding="utf-8",
+        )
+        commit_all(self.template, "docs: release template 0.1.3")
+        run(["git", "tag", "v0.1.3"], self.template)
+
         self.engine_wheel = self.workspace / "orinoco_lite-0.1.1-py3-none-any.whl"
         with zipfile.ZipFile(self.engine_wheel, "w") as archive:
             archive.writestr(
@@ -530,6 +547,43 @@ class UpdateCycleTests(unittest.TestCase):
             (consumer / ".github/workflows/validate.yml").read_text(
                 encoding="utf-8"
             ),
+        )
+
+    def test_exact_intervening_release_state_advances_safely(self) -> None:
+        consumer = self.make_consumer("intervening-release")
+        before = protected_bytes(consumer)
+        rendered = self.workspace / "rendered-v012"
+        run(
+            [
+                "copier",
+                "copy",
+                "--quiet",
+                "--defaults",
+                "--overwrite",
+                "--vcs-ref",
+                "v0.1.2",
+                self.template.as_posix(),
+                rendered.as_posix(),
+            ],
+            self.workspace,
+        )
+        (consumer / "README.md").write_bytes((rendered / "README.md").read_bytes())
+        commit_all(consumer, "docs: apply exact v0.1.2 framework state")
+        command = self.update_command()
+        command[command.index("v0.1.1")] = "v0.1.3"
+
+        result = run(command, consumer, check=False)
+
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertEqual([], list(consumer.rglob("*.rej")))
+        ledger = json.loads(
+            (consumer / "generated/manifests/framework-update.json").read_text()
+        )
+        self.assertIn("README.md", ledger["reconciled_target_equivalent"])
+        self.assertEqual(before, protected_bytes(consumer))
+        self.assertIn(
+            "Exact target release state.",
+            (consumer / "README.md").read_text(encoding="utf-8"),
         )
 
     def test_v010_updater_is_synced_exactly_before_framework_update(self) -> None:

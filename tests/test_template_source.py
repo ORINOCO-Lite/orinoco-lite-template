@@ -75,8 +75,8 @@ class TemplateSourceTests(unittest.TestCase):
             (ROOT / "github-template" / ".copier-answers.yml").read_text()
         )
         self.assertEqual("gh:con/orinoco-lite-template", answers["_src_path"])
-        self.assertEqual("v0.1.3", answers["_commit"])
-        self.assertEqual("v0.1.3", answers["template_version"])
+        self.assertEqual("v0.1.4", answers["_commit"])
+        self.assertEqual("v0.1.4", answers["template_version"])
 
     def test_rendered_configuration_loads_with_the_actual_engine(self) -> None:
         script = """
@@ -183,6 +183,21 @@ assert workspace.path('canonical').resolve() == (root / 'metadata' / 'records').
             with self.subTest(workflow=name):
                 self.assertIn("github.event.repository.default_branch", workflow)
                 self.assertNotIn("branches: [main]", workflow)
+
+        pages = (
+            ROOT / "github-template" / ".github" / "workflows" / "pages.yml"
+        ).read_text(encoding="utf-8")
+        self.assertNotIn(
+            "github.event_name == 'workflow_dispatch' ||",
+            pages,
+        )
+        self.assertEqual(
+            pages.count(
+                "github.ref == format('refs/heads/{0}', "
+                "github.event.repository.default_branch)"
+            ),
+            2,
+        )
 
     def test_source_ci_covers_both_platforms_with_full_action_pins(self) -> None:
         workflow = (ROOT / ".github" / "workflows" / "source-ci.yml").read_text(

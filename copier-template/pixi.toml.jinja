@@ -20,8 +20,8 @@ projection-verify = "orinoco projection verify"
 assets-hydrate = "orinoco assets hydrate"
 assets-verify = "orinoco assets verify"
 assets-prepare-online = { depends-on = ["assets-hydrate"], cmd = "orinoco assets verify" }
-build = "orinoco build --destination build/site"
-build-repeat = "orinoco build --destination build/site-repeat"
+build = "orinoco build --destination build/site --base-url http://127.0.0.1:8765/"
+build-repeat = "orinoco build --destination build/site-repeat --base-url http://127.0.0.1:8765/"
 verify-deterministic = { depends-on = ["build", "build-repeat"], cmd = "python tools/verify_deterministic_build.py build/site build/site-repeat --manifest build/deterministic-build.json" }
 verify-build = { depends-on = ["verify-deterministic"] }
 build-pages = "orinoco build --destination build/pages --base-url \"${ORINOCO_BASE_URL}\""

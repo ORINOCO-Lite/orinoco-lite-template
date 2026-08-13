@@ -36,6 +36,9 @@ Once warmed, `pixi run assets-verify` confirms that the checked manifest and loc
 The ordinary online `pixi run test-all` gate runs those two phases in that order through `assets-prepare-online`, so it also works from a cold clone.
 
 `pixi run test-all` is the complete acceptance gate: configuration, projection, and runtime validation, exact Hugo Extended 0.154.5, all consumer tests, two independent byte-compared static builds, and the checked Chromium/WebKit browser scenarios.
+`pixi run build` and `pixi run serve` share the local root URL
+`http://127.0.0.1:8765/`; Pages and browser-project builds retain their
+separate project-path base URLs.
 
 ## Network boundary
 
