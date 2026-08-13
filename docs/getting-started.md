@@ -8,9 +8,11 @@ This repository is a consumer of two versioned framework layers:
 The consumer owns its records, presentation, policy, tests, review, and deployment.
 Framework updates do not choose or rewrite those things.
 
-> **Rights notice:** these instructions describe an evaluation and integration-test workflow; they are not a license grant.
-> Public visibility does not by itself authorize use, modification, or redistribution of otherwise unlicensed engine, template, content, or asset material.
-> Use these artifacts only where you have permission while the explicit license matrix remains open in engine human-review decision [HR-003](https://github.com/con/orinoco-lite-dev/blob/codex/milestone-4/docs/human-review-decisions.md#hr-003--establish-authority-and-a-project-license-matrix).
+> **Rights notice:** the generic Orinoco Lite facade is MIT licensed and its
+> original documentation is CC BY 4.0. Those terms do not license site-owned or
+> third-party content, media, branding, or presentation. Record those rights
+> separately and preserve every upstream notice, as required by accepted engine
+> human-review decision [HR-003](https://github.com/con/orinoco-lite-dev/blob/codex/milestone-4/docs/human-review-decisions.md#hr-003--establish-authority-and-a-project-license-matrix).
 
 > **Release identity notice:** immutable tags `v0.1.10` and `v0.1.11` retain `v0.1.9` in their embedded Copier answers and lock metadata.
 > Do not use either tag for a new Copier-first site or `copier recopy`.
