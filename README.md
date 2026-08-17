@@ -36,12 +36,12 @@ must license their own content, media, and presentation separately. See
 
 ## Creating a consumer
 
-> **Release identity notice:** immutable tags `v0.1.10` and `v0.1.11` retain `v0.1.9` in their embedded Copier answers and lock metadata.
-> Existing reviewed consumers can update through explicit coordinates, but those two tags must not be used for a new Copier-first site or `copier recopy`.
-> Wait for the next release whose tag, answers, lock, and changelog agree.
+> **Historical release notice:** immutable tags `v0.1.10` and `v0.1.11`
+> retain `v0.1.9` in their embedded Copier answers and lock metadata. Do not
+> use those two tags for a new Copier-first site or `copier recopy`.
 
-No currently published tag is eligible for the Copier-first command below; do not run it until an aligned release newer than `v0.1.11` exists.
-The GitHub-template route is an evaluation/bootstrap path in the meantime and remains subject to the rights notice above.
+Use `v0.1.12` or a later internally aligned release for the Copier-first
+command below.
 
 Copier-first creation is the preferred path when the site's identity and Pages project path are already known:
 

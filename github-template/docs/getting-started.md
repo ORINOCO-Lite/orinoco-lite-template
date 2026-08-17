@@ -14,12 +14,11 @@ Framework updates do not choose or rewrite those things.
 > separately and preserve every upstream notice, as required by accepted engine
 > human-review decision [HR-003](https://github.com/con/orinoco-lite-dev/blob/main/docs/human-review-decisions.md#hr-003--establish-authority-and-a-project-license-matrix).
 
-> **Release identity notice:** immutable tags `v0.1.10` and `v0.1.11` retain `v0.1.9` in their embedded Copier answers and lock metadata.
-> Do not use either tag for a new Copier-first site or `copier recopy`.
-> Existing consumers use the reviewed updater with explicit coordinates; new creation should wait for the next internally aligned release.
+> **Historical release notice:** immutable tags `v0.1.10` and `v0.1.11`
+> retain `v0.1.9` in their embedded Copier answers and lock metadata. Do not
+> use those two tags for a new Copier-first site or `copier recopy`.
 
-No currently published tag is eligible for Copier-first creation.
-Do not run the command below until an aligned release newer than `v0.1.11` exists; the GitHub-template route is an evaluation/bootstrap path in the meantime and remains subject to the rights notice above.
+Use `v0.1.12` or a later internally aligned release for Copier-first creation.
 
 ## Copier-first creation
 
