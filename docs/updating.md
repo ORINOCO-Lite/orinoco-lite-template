@@ -37,18 +37,23 @@ pixi run update-orinoco -- \
 The updater:
 
 1. resolves the current and target template tags to peeled commits;
-2. snapshots all protected site-owned files and the existing generated projection;
+2. snapshots all protected site-owned files;
 3. renders both releases to prove any pre-applied template bootstrap is three-way equivalent;
 4. runs Copier with `.rej` conflicts;
 5. updates `orinoco.lock`, `.copier-answers.yml`, and the frozen `pixi.lock`;
 6. proves protected bytes did not change; and
-7. writes `generated/manifests/framework-update.json`.
+7. writes an ignored diagnostic ledger under `.orinoco-lite/state/`.
 
 It stops on a moving or unavailable tag, an incomplete pin, a template-owned conflict, or an undeclared protected change.
 A newly introduced `.gitkeep` may be removed only when the protected directory already contains real data.
 
-Consumers older than template v0.1.3 require the narrow updater bootstrap documented by that target release: copy only `copier-template/tools/update_orinoco.py` from the exact reviewed tag into `tools/update_orinoco.py`, verify it byte-for-byte, and commit it separately.
-Do not bootstrap site-owned or generated paths.
+Consumers older than template v0.1.3 require the narrow updater bootstrap
+documented by that target release. Moving existing protected tests and
+provenance into `.orinoco-lite/` is a one-time semantic layout migration, not
+an ordinary framework update: review and merge that dedicated migration first.
+Afterward, the normal Pixi task invokes `.orinoco-lite/tools/update_orinoco.py`
+for subsequent updates.
+Do not bootstrap site-owned paths.
 
 ## Review and commit
 
@@ -56,7 +61,7 @@ After a successful update:
 
 ```console
 pixi run test-all
-pixi run python tools/finalize_update_ledger.py \
+pixi run python .orinoco-lite/tools/finalize_update_ledger.py \
   --status passed \
   --command "pixi run test-all"
 git diff --check
@@ -65,9 +70,8 @@ git status --short
 
 Review at least:
 
-- old and new coordinates and peeled template commits in the ledger;
 - the complete `orinoco.lock`, `.copier-answers.yml`, and `pixi.lock` diffs;
-- `site_owned.changed`, which must be empty for a normal update;
+- confirmation that protected site-owned paths did not change;
 - any `.rej` file or recorded reconciliation;
 - validation status and commands; and
 - the generated site and browser behavior appropriate to this consumer.
@@ -102,7 +106,7 @@ Never use that cleanup when the starting tree contained independent untracked wo
 Revert the complete update commit with `git revert <update-commit>`, review the inverse diff, run `pixi run test-all`, and merge the revert normally.
 Do not run Copier backward or move release tags.
 
-Reverting the single update commit restores its previous facade, answers, locks, ledger, and any generated outputs together.
+Reverting the single update commit restores its previous facade, answers, and locks together.
 If the update included an explicit semantic migration, the revert also includes that declared content diff; review its domain meaning instead of assuming it is mechanically safe.
 
 ## Ownership exception for semantic migrations

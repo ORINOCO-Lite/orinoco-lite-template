@@ -27,19 +27,19 @@ REQUIRED_TEMPLATE_FILES = {
     ".gitignore",
     ".copier-answers.yml",
     "pixi.toml",
-    "template-ownership.yml",
+    ".orinoco-lite/template-ownership.yml",
     ".github/workflows/validate.yml",
     ".github/workflows/pages.yml",
     ".github/workflows/update-orinoco.yml",
-    "tools/template_contract.py",
-    "tools/update_orinoco.py",
-    "tools/verify_template_ownership.py",
-    "tools/import_site_bundle.py",
-    "tools/finalize_update_ledger.py",
-    "tools/verify_deterministic_build.py",
-    "tools/verify_local_preview.py",
-    "tools/verify_hugo.py",
-    "tools/install_browser_tests.py",
+    ".orinoco-lite/README.md",
+    ".orinoco-lite/tools/template_contract.py",
+    ".orinoco-lite/tools/update_orinoco.py",
+    ".orinoco-lite/tools/verify_template_ownership.py",
+    ".orinoco-lite/tools/finalize_update_ledger.py",
+    ".orinoco-lite/tools/verify_deterministic_build.py",
+    ".orinoco-lite/tools/verify_local_preview.py",
+    ".orinoco-lite/tools/verify_hugo.py",
+    ".orinoco-lite/tools/install_browser_tests.py",
 }
 ACTION_REFERENCE = re.compile(r"^\s*-?\s*uses:\s*([^\s#]+)", re.MULTILINE)
 FULL_SHA_ACTION = re.compile(
@@ -91,7 +91,7 @@ def verify_engine_environment(
 
 def verify(root: Path) -> list[str]:
     failures: list[str] = []
-    ownership = load_yaml(root / "template-ownership.yml")
+    ownership = load_yaml(root / ".orinoco-lite/template-ownership.yml")
     classes = ownership_classes(ownership)
 
     missing = sorted(path for path in REQUIRED_TEMPLATE_FILES if not (root / path).is_file())

@@ -17,6 +17,7 @@ IGNORED_PARTS = {
     ".orinoco",
     "__pycache__",
     "build",
+    "generated",
     "node_modules",
     "playwright-report",
     "test-results",
@@ -27,8 +28,8 @@ SITE_OWNED_CLASSES = {
     "consumer_tests",
     "site_policy",
 }
-PROTECTED_UPDATE_CLASSES = SITE_OWNED_CLASSES | {"generated"}
-UPDATE_MUTABLE_PATHS = {"generated/manifests/framework-update.json"}
+PROTECTED_UPDATE_CLASSES = SITE_OWNED_CLASSES
+UPDATE_MUTABLE_PATHS: set[str] = set()
 
 
 class ContractError(RuntimeError):
@@ -116,6 +117,8 @@ def iter_files(root: Path) -> Iterable[Path]:
     for path in sorted(root.rglob("*")):
         relative = path.relative_to(root)
         if any(part in IGNORED_PARTS for part in relative.parts):
+            continue
+        if relative.parts[:2] == (".orinoco-lite", "state"):
             continue
         if path.is_symlink():
             yield path

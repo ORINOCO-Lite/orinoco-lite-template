@@ -32,7 +32,7 @@ from template_contract import (
 )
 
 
-LEDGER_PATH = Path("generated/manifests/framework-update.json")
+LEDGER_PATH = Path(".orinoco-lite/state/framework-update.json")
 CLASSIFICATIONS = ("security", "compatibility", "presentation")
 WORKFLOW_REFERENCE = re.compile(
     r"^(?P<repository>[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)"
@@ -427,9 +427,11 @@ def equivalent_bootstrap_targets(
         target = workspace / "target"
         render_release(root, source, previous_version, base_data, base)
         render_release(root, source, target_version, target_data, target)
-        base_classes = ownership_classes(load_yaml(base / "template-ownership.yml"))
+        base_classes = ownership_classes(
+            load_yaml(base / ".orinoco-lite/template-ownership.yml")
+        )
         target_classes = ownership_classes(
-            load_yaml(target / "template-ownership.yml")
+            load_yaml(target / ".orinoco-lite/template-ownership.yml")
         )
         release_coordinate_keys = set(copier_data(args)) | {"template_source"}
         release_data = {
@@ -447,7 +449,7 @@ def equivalent_bootstrap_targets(
                 (
                     release,
                     ownership_classes(
-                        load_yaml(release / "template-ownership.yml")
+                        load_yaml(release / ".orinoco-lite/template-ownership.yml")
                     ),
                 )
             )
@@ -717,13 +719,12 @@ def disallowed_protected_changes(
     classes: dict[str, list[str]],
     allowed_site_patterns: list[str],
 ) -> list[str]:
-    """Reject every generated change and undeclared site-owned change."""
+    """Reject every undeclared site-owned change."""
 
     return [
         path
         for path in changes
-        if "generated" in classify(path, classes)
-        or not any(path_matches(path, pattern) for pattern in allowed_site_patterns)
+        if not any(path_matches(path, pattern) for pattern in allowed_site_patterns)
     ]
 
 
@@ -795,7 +796,7 @@ def execute(args: argparse.Namespace) -> int:
         print("Copier update check completed without changing the checkout")
         return 0
 
-    ownership = load_yaml(root / "template-ownership.yml")
+    ownership = load_yaml(root / ".orinoco-lite/template-ownership.yml")
     classes = ownership_classes(ownership)
     lock_path = root / "orinoco.lock"
     lock_before = load_yaml(lock_path)
@@ -833,7 +834,7 @@ def execute(args: argparse.Namespace) -> int:
             root, conflicts, approved_equivalent
         )
         updated_classes = ownership_classes(
-            load_yaml(root / "template-ownership.yml")
+            load_yaml(root / ".orinoco-lite/template-ownership.yml")
         )
         removed_placeholders = reconcile_populated_placeholders(
             root, content_before, classes, updated_classes
@@ -862,7 +863,7 @@ def execute(args: argparse.Namespace) -> int:
     site_changes = changed_paths(content_before, content_after)
 
     ledger: dict[str, Any] = {
-        "ledger_version": 1,
+        "ledger_version": 2,
         "created_at": timestamp(),
         "classification": args.classification,
         "status": "failed" if result.returncode else "updating",
@@ -879,8 +880,7 @@ def execute(args: argparse.Namespace) -> int:
             template_commit=target_template_commit,
         ),
         "site_owned": {
-            "before": content_before,
-            "after": content_after,
+            "checked_files": len(content_before),
             "changed": site_changes,
         },
         "conflicts": conflicts,
@@ -910,7 +910,7 @@ def execute(args: argparse.Namespace) -> int:
         ledger["status"] = "rejected-site-change"
         write_ledger(root, ledger)
         raise ContractError(
-            "Copier changed protected site or generated content: "
+            "Copier changed protected site content: "
             + ", ".join(site_changes)
         )
 
@@ -964,7 +964,7 @@ def execute(args: argparse.Namespace) -> int:
         args.allow_site_change,
     )
     if disallowed_final or (final_changes and not migrations):
-        ledger["site_owned"]["after"] = content_final
+        ledger["site_owned"]["checked_files"] = len(content_final)
         ledger["site_owned"]["changed"] = final_changes
         ledger["status"] = "rejected-site-change"
         write_ledger(root, ledger)
@@ -981,7 +981,7 @@ def execute(args: argparse.Namespace) -> int:
         template_version=args.to_template,
         template_commit=target_template_commit,
     )
-    ledger["site_owned"]["after"] = content_final
+    ledger["site_owned"]["checked_files"] = len(content_final)
     ledger["site_owned"]["changed"] = final_changes
     ledger["status"] = "human-review" if migrations else "ready-for-review"
     write_ledger(root, ledger)

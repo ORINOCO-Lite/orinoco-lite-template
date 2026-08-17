@@ -8,31 +8,22 @@ classes:
       - .gitignore
       - .copier-answers.yml
       - pixi.toml
-      - template-ownership.yml
+      - .orinoco-lite/template-ownership.yml
+      - .agents/skills/**
       - .github/workflows/**
       - docs/ownership.md
       - docs/updating.md
-      - docs/importing.md
       - docs/getting-started.md
-      - tools/template_contract.py
-      - tools/update_orinoco.py
-      - tools/verify_template_ownership.py
-      - tools/import_site_bundle.py
-      - tools/finalize_update_ledger.py
-      - tools/verify_deterministic_build.py
-      - tools/verify_local_preview.py
-      - tools/build_pages.py
-      - tools/verify_hugo.py
-      - tools/install_browser_tests.py
-      - tests/template/**
+      - .orinoco-lite/README.md
+      - .orinoco-lite/tools/**
   initialized_site_owned:
     behavior: create-once-never-overwrite
     paths:
       - orinoco.yaml
-      - orinoco-site-bundle.json
+      - .orinoco-lite/provenance/**
       - metadata/**
-      - editorial/**
-      - assets/**
+      - custom/editorial/**
+      - custom/assets/**
       - site/**
       - integrations/**
   engine_lock:
@@ -47,13 +38,11 @@ classes:
   consumer_tests:
     behavior: site-owned-acceptance
     paths:
-      - tests/__init__.py
-      - tests/contract/**
-      - tests/browser/**
-      - tests/integrations/**
-      - tests/offline/**
-      - tests/parity/**
-      - tests/traceability.json
+      - .orinoco-lite/tests/__init__.py
+      - .orinoco-lite/tests/contract/**
+      - .orinoco-lite/tests/browser/**
+      - .orinoco-lite/tests/integrations/**
+      - .orinoco-lite/tests/offline/**
       - package.json
       - package-lock.json
       - playwright.config.*
@@ -65,7 +54,7 @@ classes:
       - CONTRIBUTING*
       - CODE_OF_CONDUCT*
   generated:
-    behavior: replace-after-validation
+    behavior: ignored-runtime-output
     paths:
       - generated/**
 

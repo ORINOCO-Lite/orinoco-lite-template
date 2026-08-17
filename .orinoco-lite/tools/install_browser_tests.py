@@ -245,7 +245,7 @@ def parser() -> argparse.ArgumentParser:
     result.add_argument(
         "--browser-directory",
         type=Path,
-        default=Path("tests/browser"),
+        default=Path(".orinoco-lite/tests/browser"),
     )
     return result
 

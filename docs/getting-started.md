@@ -71,7 +71,7 @@ Do not run `copier recopy` on a repository made with the GitHub button; the publ
 
 ### 5. Commit and test
 
-Commit this identity bootstrap before importing or authoring content, then run:
+Commit this identity bootstrap before authoring content, then run:
 
 ```console
 pixi run validate
@@ -86,6 +86,5 @@ Later framework changes use the updater described in [Framework updates](updatin
 ## What to read next
 
 - [File ownership](ownership.md) explains which paths the template may update.
-- [Importing a complete site bundle](importing.md) covers provenance-preserving transfer into site-owned paths.
 - The repository README explains local, Pages, and acceptance build targets.
 - A populated integration example is available in the [downstream test website](https://github.com/con/test-orinoco-downstream-website).

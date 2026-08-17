@@ -23,13 +23,13 @@ def main(argv: list[str] | None = None) -> int:
     args = parser().parse_args(argv)
     try:
         root = find_root(args.root)
-        path = root / "generated" / "manifests" / "framework-update.json"
+        path = root / ".orinoco-lite" / "state" / "framework-update.json"
         try:
             ledger = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as error:
             raise ContractError(f"cannot read update ledger {path}: {error}") from error
-        if not isinstance(ledger, dict) or ledger.get("ledger_version") != 1:
-            raise ContractError("update ledger must use ledger_version 1")
+        if not isinstance(ledger, dict) or ledger.get("ledger_version") != 2:
+            raise ContractError("update ledger must use ledger_version 2")
         ledger["validation"] = {
             "status": args.status,
             "commands": args.command,
