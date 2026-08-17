@@ -64,8 +64,8 @@ This repository deliberately has two branch roles:
 GitHub's template button copies the default branch, not an arbitrary subdirectory.
 The dedicated publication branch is therefore required; the `github-template/` directory on `main` is never exposed as a nested directory to a new consumer.
 
-The default tree contains no organization records, editorial claims, assets, publication data, or inherited site history.
-A complete reviewed site bundle can be imported into site-owned paths without making that content part of the template.
+The default tree contains no organization records, editorial claims, assets,
+publication data, inherited site history, or migration evidence.
 
 ## Maintainer commands
 
