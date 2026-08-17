@@ -70,7 +70,10 @@ Do not use `assets-prepare-online` in that denied-network phase; it represents t
 - `metadata/records/` contains canonical YAML records.
 - `metadata/reference/` contains the explicit reference closure.
 - `.orinoco-lite/` contains implementation support behind the checked commands.
-- `editorial/`, `assets/`, and `site/` contain site-owned presentation inputs.
+- `custom/editorial/`, `custom/assets/`, and `site/` contain site-owned
+  presentation inputs.
+- `.agents/skills/manage-orinoco-content/` guides agents through focused
+  editorial and asset changes.
 - `integrations/` contains optional, read-only source-ingestion evidence and tools; it is not a deployed runtime dependency.
 - `extensions/` is the stable downstream customization surface.
 - `generated/` contains ignored projection output recreated by validation and

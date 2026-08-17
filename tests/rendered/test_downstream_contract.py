@@ -53,8 +53,8 @@ class DownstreamContractTests(unittest.TestCase):
             "metadata/records",
             "metadata/reference",
             ".orinoco-lite/provenance",
-            "editorial",
-            "assets",
+            "custom/editorial",
+            "custom/assets",
             "site",
             "integrations",
             "extensions",
@@ -64,7 +64,9 @@ class DownstreamContractTests(unittest.TestCase):
 
     def test_offline_acceptance_is_site_owned(self) -> None:
         verifier = load_verifier()
-        ownership = verifier.load_yaml(ROOT / "template-ownership.yml")
+        ownership = verifier.load_yaml(
+            ROOT / ".orinoco-lite/template-ownership.yml"
+        )
         classes = verifier.ownership_classes(ownership)
         self.assertEqual(
             ["consumer_tests"],
@@ -195,7 +197,9 @@ class DownstreamContractTests(unittest.TestCase):
 
     def test_browser_installer_respects_the_ownership_boundary(self) -> None:
         verifier = load_verifier()
-        ownership = verifier.load_yaml(ROOT / "template-ownership.yml")
+        ownership = verifier.load_yaml(
+            ROOT / ".orinoco-lite/template-ownership.yml"
+        )
         classes = verifier.ownership_classes(ownership)
         self.assertEqual(
             ["template_owned"],
@@ -243,7 +247,9 @@ class DownstreamContractTests(unittest.TestCase):
         )
 
         verifier = load_verifier()
-        ownership = verifier.load_yaml(ROOT / "template-ownership.yml")
+        ownership = verifier.load_yaml(
+            ROOT / ".orinoco-lite/template-ownership.yml"
+        )
         classes = verifier.ownership_classes(ownership)
         self.assertEqual(
             ["template_owned"],

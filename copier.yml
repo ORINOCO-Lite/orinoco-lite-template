@@ -19,8 +19,8 @@ _skip_if_exists:
   - .orinoco-lite/tests/__init__.py
   - .orinoco-lite/tests/browser/**
   - metadata/**
-  - editorial/**
-  - assets/**
+  - custom/editorial/**
+  - custom/assets/**
   - site/**
   - integrations/**
   - extensions/**

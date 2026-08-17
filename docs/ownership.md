@@ -1,12 +1,13 @@
 # Template ownership contract
 
-`copier-template/template-ownership.yml` is the machine-readable authority.
-The checked render contains the same contract at `github-template/template-ownership.yml`.
+`copier-template/.orinoco-lite/template-ownership.yml` is the machine-readable
+authority. The checked render contains the same contract at
+`github-template/.orinoco-lite/template-ownership.yml`.
 
 | Class | Update behavior | Representative paths |
 | --- | --- | --- |
 | `template_owned` | Copier three-way update; overlapping downstream edits stop as conflicts | workflows, command facade, updater, ownership verifier, generic contract documentation |
-| `initialized_site_owned` | Created once and excluded from later Copier overwrites | `orinoco.yaml`, metadata, editorial material, assets, site presentation, and integrations |
+| `initialized_site_owned` | Created once and excluded from later Copier overwrites | `orinoco.yaml`, metadata, `custom/`, site presentation, and integrations |
 | `engine_lock` | Structured replacement by the pinned updater | `orinoco.lock` and the frozen `pixi.lock` |
 | `extensions` | Stable site-owned customization hook | `extensions/` |
 | `consumer_tests` | Created once, then owned and extended by the site | browser, integration, and offline behavior tests |

@@ -93,8 +93,7 @@ def replace_pixi_pin(path: Path, current: str, replacement: str) -> None:
 def protected_bytes(repository: Path) -> dict[str, bytes]:
     protected_roots = (
         "metadata",
-        "editorial",
-        "assets",
+        "custom",
         "site",
         "integrations",
         "extensions",
@@ -610,7 +609,7 @@ class UpdateCycleTests(unittest.TestCase):
             destination = consumer / real_file
             destination.parent.mkdir(parents=True, exist_ok=True)
             destination.write_text(f"evidence: {real_file}\n", encoding="utf-8")
-        empty_placeholder = consumer / "assets/.gitkeep"
+        empty_placeholder = consumer / "custom/assets/.gitkeep"
         self.assertTrue(empty_placeholder.is_file())
         commit_all(consumer, "feat: populate imported site paths")
         before = protected_bytes(consumer)
