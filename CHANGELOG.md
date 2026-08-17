@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.1.12 - 2026-08-17
+
+- Cull generated consumers to the essential downstream interface while keeping
+  implementation support below `.orinoco-lite/`.
+- Restore a self-consistent template release identity after the historical
+  v0.1.10 and v0.1.11 publication defects.
+- Update the engine, runtime, and reusable workflow to the immutable v0.1.11
+  release, including support for the configured `custom/assets` root.
+
+## 0.1.11 - 2026-08-13
+
+- Make the Pages build wrapper independently testable.
+- Retain the historical v0.1.9 embedded release identity; this release is not
+  eligible for Copier-first creation or recopy.
+
+## 0.1.10 - 2026-08-13
+
+- Classify the Pages build wrapper in the template ownership contract.
+- Retain the historical v0.1.9 embedded release identity; this release is not
+  eligible for Copier-first creation or recopy.
+
 ## 0.1.9 - 2026-08-13
 
 - Pass the configured Pages base URL through a validated argv wrapper so Pixi
