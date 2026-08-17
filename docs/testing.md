@@ -9,8 +9,8 @@ The template suite proves that:
 - a divergent template-owned file produces an explicit conflict;
 - workflow action references are full immutable commit SHAs;
 - ownership patterns classify every checked consumer file;
-- the importer rejects repository metadata and unreviewed overwrites;
-- the rendered Pixi facade exposes projection refresh and verification through the locked engine;
+- the rendered Pixi facade generates ignored projection output before
+  validation and builds;
 - the normal cold-clone gate hydrates declared assets before verifying them, while the denied-network proof warms once and then invokes only asset verification; and
 - the complete downstream gate includes exact Hugo Extended 0.154.5, deterministic repeat-build digest comparison, and Chromium/WebKit tests.
 
@@ -21,5 +21,6 @@ a hosted Ubuntu Chromium teardown hang caused by the WebKit host-dependency
 installation while preserving the exact four-test matrix. On macOS,
 Playwright keeps the ordinary browser installation behavior.
 
-Consumer repositories add their complete content, build, browser, integration, and provenance suites.
+Consumer repositories add their content, build, browser, integration, and
+site-behavior suites.
 Template tests are not a substitute for those tests.

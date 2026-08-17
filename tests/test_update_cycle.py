@@ -33,17 +33,15 @@ BOOTSTRAP_SOURCE_PATHS = (
     "copier-template/.github/workflows/pages.yml",
     "copier-template/.github/workflows/update-orinoco.yml",
     "copier-template/.github/workflows/validate.yml.jinja",
-    "copier-template/tests/template/test_downstream_contract.py",
 )
 BOOTSTRAP_RENDERED_PATHS = (
     ".github/workflows/pages.yml",
     ".github/workflows/update-orinoco.yml",
     ".github/workflows/validate.yml",
-    "tests/template/test_downstream_contract.py",
 )
 BOOTSTRAP_EQUIVALENT_PATHS = (
     *BOOTSTRAP_RENDERED_PATHS,
-    "tools/update_orinoco.py",
+    ".orinoco-lite/tools/update_orinoco.py",
 )
 OLD_UPDATER_MARKER = "v0.1.0 updater requires reviewed bootstrap"
 GIT_ENV = {
@@ -95,19 +93,16 @@ def replace_pixi_pin(path: Path, current: str, replacement: str) -> None:
 def protected_bytes(repository: Path) -> dict[str, bytes]:
     protected_roots = (
         "metadata",
-        "editorial",
-        "assets",
+        "custom",
         "site",
         "integrations",
         "extensions",
-        "generated",
     )
-    excluded = "generated/manifests/framework-update.json"
     return {
         path.relative_to(repository).as_posix(): path.read_bytes()
         for root in protected_roots
         for path in (repository / root).rglob("*")
-        if path.is_file() and path.relative_to(repository).as_posix() != excluded
+        if path.is_file()
     }
 
 
@@ -155,11 +150,6 @@ if declared_digest != observed_digest:
     ),
     encoding='utf-8',
 )
-if __import__('os').environ.get('ORINOCO_TEST_TAMPER_PROJECTION'):
-    (root / 'generated/projection/records.jsonl').write_text(
-        '{"pid":"tampered"}\\n',
-        encoding='utf-8',
-    )
 """,
         encoding="utf-8",
     )
@@ -175,7 +165,7 @@ class UpdateCycleTests(unittest.TestCase):
         self.template.mkdir()
         shutil.copy2(ROOT / "copier.yml", self.template / "copier.yml")
         shutil.copytree(ROOT / "copier-template", self.template / "copier-template")
-        updater = self.template / "copier-template/tools/update_orinoco.py"
+        updater = self.template / "copier-template/.orinoco-lite/tools/update_orinoco.py"
         self.target_updater = updater.read_bytes()
         updater.write_text(
             "#!/usr/bin/env python3\n"
@@ -307,21 +297,13 @@ class UpdateCycleTests(unittest.TestCase):
         (extensions / "custom.css").write_text(
             ":root { --site-accent: #123456; }\n", encoding="utf-8"
         )
-        projection = consumer / "generated" / "projection"
-        projection.mkdir(parents=True)
-        (projection / "records.jsonl").write_text(
-            '{"pid":"example:complete"}\n', encoding="utf-8"
-        )
-        (projection / "SHA256SUMS").write_text(
-            "projection-byte-contract\n", encoding="utf-8"
-        )
         commit_all(consumer, "feat: add complete site and customization")
         if bootstrap_updater:
             self.bootstrap_target_updater(consumer)
         return consumer
 
     def bootstrap_target_updater(self, consumer: Path) -> None:
-        updater = consumer / "tools/update_orinoco.py"
+        updater = consumer / ".orinoco-lite/tools/update_orinoco.py"
         self.assertIn(OLD_UPDATER_MARKER, updater.read_text(encoding="utf-8"))
         updater.write_bytes(self.target_updater)
         self.assertEqual(self.target_updater, updater.read_bytes())
@@ -350,7 +332,7 @@ class UpdateCycleTests(unittest.TestCase):
     def update_command(self, *, skip_pixi_lock: bool = True) -> list[str]:
         command = [
             "python",
-            "tools/update_orinoco.py",
+            ".orinoco-lite/tools/update_orinoco.py",
             "--to-template",
             "v0.1.1",
             "--to-engine",
@@ -381,16 +363,11 @@ class UpdateCycleTests(unittest.TestCase):
         baseline = run(["git", "rev-parse", "HEAD"], consumer).stdout.strip()
         record = (consumer / "metadata" / "records" / "complete.yml").read_bytes()
         extension = (consumer / "extensions" / "custom.css").read_bytes()
-        projection = {
-            path.relative_to(consumer).as_posix(): path.read_bytes()
-            for path in (consumer / "generated" / "projection").rglob("*")
-            if path.is_file()
-        }
 
         result = run(self.update_command(), consumer, check=False)
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
         ledger = json.loads(
-            (consumer / "generated" / "manifests" / "framework-update.json").read_text()
+            (consumer / ".orinoco-lite" / "state" / "framework-update.json").read_text()
         )
         self.assertEqual("ready-for-review", ledger["status"])
         self.assertEqual("v0.1.0", ledger["previous"]["template"]["version"])
@@ -419,22 +396,9 @@ class UpdateCycleTests(unittest.TestCase):
         self.assertEqual([], ledger["site_owned"]["changed"])
         self.assertEqual(record, (consumer / "metadata" / "records" / "complete.yml").read_bytes())
         self.assertEqual(extension, (consumer / "extensions" / "custom.css").read_bytes())
-        self.assertEqual(
-            projection,
-            {
-                path.relative_to(consumer).as_posix(): path.read_bytes()
-                for path in (consumer / "generated" / "projection").rglob("*")
-                if path.is_file()
-            },
-        )
-        self.assertNotIn(
-            "generated/manifests/framework-update.json",
-            ledger["site_owned"]["before"],
-        )
-        self.assertNotIn(
-            "generated/manifests/framework-update.json",
-            ledger["site_owned"]["after"],
-        )
+        self.assertGreater(ledger["site_owned"]["checked_files"], 0)
+        self.assertNotIn("before", ledger["site_owned"])
+        self.assertNotIn("after", ledger["site_owned"])
         self.assertIn("— updated", (consumer / "README.md").read_text())
 
         commit_all(consumer, "chore(deps): update Orinoco framework")
@@ -535,7 +499,7 @@ class UpdateCycleTests(unittest.TestCase):
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
         self.assertEqual([], list(consumer.rglob("*.rej")))
         ledger = json.loads(
-            (consumer / "generated/manifests/framework-update.json").read_text()
+            (consumer / ".orinoco-lite/state/framework-update.json").read_text()
         )
         self.assertEqual(
             list(BOOTSTRAP_EQUIVALENT_PATHS),
@@ -577,7 +541,7 @@ class UpdateCycleTests(unittest.TestCase):
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
         self.assertEqual([], list(consumer.rglob("*.rej")))
         ledger = json.loads(
-            (consumer / "generated/manifests/framework-update.json").read_text()
+            (consumer / ".orinoco-lite/state/framework-update.json").read_text()
         )
         self.assertIn("README.md", ledger["reconciled_target_equivalent"])
         self.assertEqual(before, protected_bytes(consumer))
@@ -591,7 +555,7 @@ class UpdateCycleTests(unittest.TestCase):
             "updater-bootstrap",
             bootstrap_updater=False,
         )
-        old_updater = consumer / "tools/update_orinoco.py"
+        old_updater = consumer / ".orinoco-lite/tools/update_orinoco.py"
         self.assertIn(OLD_UPDATER_MARKER, old_updater.read_text(encoding="utf-8"))
 
         self.bootstrap_target_updater(consumer)
@@ -600,7 +564,7 @@ class UpdateCycleTests(unittest.TestCase):
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
         self.assertEqual(
             self.target_updater,
-            (consumer / "tools/update_orinoco.py").read_bytes(),
+            (consumer / ".orinoco-lite/tools/update_orinoco.py").read_bytes(),
         )
 
     def test_non_equivalent_bootstrap_override_remains_a_conflict(self) -> None:
@@ -617,7 +581,7 @@ class UpdateCycleTests(unittest.TestCase):
 
         self.assertNotEqual(0, result.returncode)
         ledger = json.loads(
-            (consumer / "generated/manifests/framework-update.json").read_text()
+            (consumer / ".orinoco-lite/state/framework-update.json").read_text()
         )
         self.assertEqual("conflicts", ledger["status"])
         self.assertIn(
@@ -638,9 +602,6 @@ class UpdateCycleTests(unittest.TestCase):
         populated = {
             "metadata/records/.gitkeep": "metadata/records/complete.yml",
             "integrations/.gitkeep": "integrations/zotero/evidence.json",
-            "generated/manifests/.gitkeep": (
-                "generated/manifests/source-import.json"
-            ),
             "site/config/.gitkeep": "site/config/site.yaml",
         }
         for placeholder, real_file in populated.items():
@@ -648,7 +609,7 @@ class UpdateCycleTests(unittest.TestCase):
             destination = consumer / real_file
             destination.parent.mkdir(parents=True, exist_ok=True)
             destination.write_text(f"evidence: {real_file}\n", encoding="utf-8")
-        empty_placeholder = consumer / "assets/.gitkeep"
+        empty_placeholder = consumer / "custom/assets/.gitkeep"
         self.assertTrue(empty_placeholder.is_file())
         commit_all(consumer, "feat: populate imported site paths")
         before = protected_bytes(consumer)
@@ -657,7 +618,7 @@ class UpdateCycleTests(unittest.TestCase):
 
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
         ledger = json.loads(
-            (consumer / "generated/manifests/framework-update.json").read_text()
+            (consumer / ".orinoco-lite/state/framework-update.json").read_text()
         )
         self.assertEqual(sorted(populated), ledger["removed_populated_placeholders"])
         for placeholder in populated:
@@ -700,48 +661,6 @@ class UpdateCycleTests(unittest.TestCase):
         )
         self.assertEqual("", status.stdout)
 
-    def test_lock_refresh_cannot_change_generated_projection(self) -> None:
-        consumer = self.make_consumer("projection-tamper")
-        original = (
-            consumer / "generated" / "projection" / "records.jsonl"
-        ).read_bytes()
-        environment = dict(
-            os.environ,
-            **GIT_ENV,
-            SOURCE_DATE_EPOCH="0",
-            ORINOCO_TEST_ENGINE_WHEEL=self.engine_wheel.as_posix(),
-            ORINOCO_TEST_TAMPER_PROJECTION="1",
-            PATH=f"{self.fake_bin}{os.pathsep}{os.environ['PATH']}",
-        )
-        result = subprocess.run(
-            self.update_command(skip_pixi_lock=False)
-            + [
-                "--migration",
-                "projection=attempted generated migration",
-                "--allow-site-change",
-                "generated/**",
-            ],
-            cwd=consumer,
-            env=environment,
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            check=False,
-        )
-        self.assertNotEqual(0, result.returncode)
-        self.assertIn("generated/projection/records.jsonl", result.stderr)
-        ledger = json.loads(
-            (consumer / "generated" / "manifests" / "framework-update.json").read_text()
-        )
-        self.assertEqual("rejected-site-change", ledger["status"])
-        self.assertIn(
-            "generated/projection/records.jsonl",
-            ledger["site_owned"]["changed"],
-        )
-        self.assertNotEqual(
-            original,
-            (consumer / "generated" / "projection" / "records.jsonl").read_bytes(),
-        )
 
     def test_intentional_template_conflict_fails_visibly(self) -> None:
         consumer = self.make_consumer("conflict")
@@ -758,7 +677,7 @@ class UpdateCycleTests(unittest.TestCase):
         conflicts = list(consumer.rglob("*.rej"))
         self.assertTrue(conflicts, "expected Copier to leave a visible .rej conflict")
         ledger = json.loads(
-            (consumer / "generated" / "manifests" / "framework-update.json").read_text()
+            (consumer / ".orinoco-lite" / "state" / "framework-update.json").read_text()
         )
         self.assertEqual("conflicts", ledger["status"])
         self.assertTrue(ledger["conflicts"])

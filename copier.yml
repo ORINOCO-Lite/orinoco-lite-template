@@ -15,16 +15,15 @@ _exclude:
 _skip_if_exists:
   - orinoco.yaml
   - orinoco.lock
-  - orinoco-site-bundle.json
+  - .orinoco-lite/provenance/**
+  - .orinoco-lite/tests/__init__.py
+  - .orinoco-lite/tests/browser/**
   - metadata/**
-  - editorial/**
-  - assets/**
+  - custom/editorial/**
+  - custom/assets/**
   - site/**
   - integrations/**
   - extensions/**
-  - generated/**
-  - tests/__init__.py
-  - tests/browser/**
 
 project_name:
   type: str

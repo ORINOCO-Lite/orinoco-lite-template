@@ -16,12 +16,15 @@
 11. Set `github-template` as GitHub's default branch and template-button source; keep source pull requests and version tags on `main`.
 12. Exercise creation with **Include all branches** unchecked and run one update against the full integration consumer.
 13. Confirm that the created repository root contains `orinoco.yaml` and does not contain `copier.yml`, `copier-template/`, or a nested `github-template/`.
-14. Confirm that the update ledger records the peeled release-tag commit, then recommend the release to other sites.
+14. Confirm that an updater rehearsal resolves the release tag to the reviewed
+    commit, then recommend the release to other sites.
 
 The release commit is deliberately not embedded in `copier.yml`, the rendered answers, or `orinoco.lock`.
 Embedding a commit in the tree whose commit it identifies is self-referential and cannot satisfy the exact `main:github-template/` publication contract.
-Instead, the published coordinate is an immutable release tag; the updater resolves that tag immediately before and after Copier runs and records the resolved commit as review evidence.
-An initial import may record the resolved tag commit in an external migration ledger after the release exists.
+Instead, the published coordinate is an immutable release tag; the updater
+resolves that tag immediately before and after Copier runs. Its detailed
+diagnostics remain ignored runtime state.
 
 Framework releases do not merge automatically.
-Security fixes use the `security` classification in the generated update ledger, but still produce an ordinary reviewable pull request.
+Security fixes use the `security` classification in ignored updater state, but
+still produce an ordinary reviewable pull request.

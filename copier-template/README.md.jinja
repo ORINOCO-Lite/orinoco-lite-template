@@ -41,8 +41,9 @@ pixi run test-all
 pixi run update-check
 ```
 
-After editing canonical metadata, `projection-update` refreshes the committed projection for review.
-`projection-verify` proves that it remains reproducible.
+After editing canonical metadata, `validate` regenerates the ignored projection
+and checks it. `build` does the same before rendering, so the source commit
+shows the metadata change rather than a duplicate generated tree.
 `assets-hydrate` is the explicit networked retrieval step for declared remote assets; `assets-verify` checks already-local payloads without fetching.
 
 ## Build targets
@@ -68,23 +69,14 @@ Do not use `assets-prepare-online` in that denied-network phase; it represents t
 
 - `metadata/records/` contains canonical YAML records.
 - `metadata/reference/` contains the explicit reference closure.
-- `metadata/provenance/` records source and review decisions.
-- `editorial/`, `assets/`, and `site/` contain site-owned presentation inputs.
+- `.orinoco-lite/` contains implementation support behind the checked commands.
+- `custom/editorial/`, `custom/assets/`, and `site/` contain site-owned
+  presentation inputs.
+- `.agents/skills/manage-orinoco-content/` guides agents through focused
+  editorial and asset changes.
 - `integrations/` contains optional, read-only source-ingestion evidence and tools; it is not a deployed runtime dependency.
 - `extensions/` is the stable downstream customization surface.
-- `generated/` contains replaceable, reproducible outputs.
+- `generated/` contains ignored projection output recreated by validation and
+  builds.
 
-To ingest a complete prepared site without transferring its Git history or framework topology:
-
-```console
-pixi run import-site -- /path/to/site-bundle \
-  --source-repository https://example.org/owner/site \
-  --source-commit 0123456789abcdef0123456789abcdef01234567 \
-  --scope full
-```
-
-The importer accepts only declared site-owned roots, verifies optional bundle digests, and writes an import provenance record.
-It never imports `.git`, `.gitmodules`, repository workflows, credentials, or framework tools.
-
-See [site-bundle import](docs/importing.md) for the complete transfer contract.
 A populated generic integration example is available in the [downstream test website](https://github.com/con/test-orinoco-downstream-website).

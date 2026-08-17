@@ -48,7 +48,9 @@ That tree carries neutral identity defaults.
 A new operator follows its checked `docs/getting-started.md` identity bootstrap before adding site content while leaving all recorded release pins unchanged.
 The rendered validation and Pages workflows discover the new repository's default branch at runtime, so they remain correct whether GitHub preserves the publication branch name or applies the destination account's configured default-branch name.
 Copier updates later use the exact tagged source recorded in `.copier-answers.yml`; they do not merge either template branch.
-The updater resolves lightweight and annotated tags to the peeled commit before and after applying an update, rejects a tag that cannot be resolved or moves during the operation, and records the resolved commit in `generated/manifests/framework-update.json`.
+The updater resolves lightweight and annotated tags to the peeled commit before
+and after applying an update and rejects a tag that cannot be resolved or moves
+during the operation. Detailed update diagnostics remain ignored runtime state.
 That runtime proof avoids the impossible requirement that a release tree contain its own commit ID.
 
 These settings are external publication actions.

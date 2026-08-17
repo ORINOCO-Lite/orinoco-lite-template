@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import hashlib
 import inspect
-import json
 import os
 import re
 import shutil
@@ -40,9 +39,9 @@ class TemplateSourceTests(unittest.TestCase):
         for root in (
             "metadata/records",
             "metadata/reference",
-            "metadata/provenance",
-            "editorial",
-            "assets",
+            ".orinoco-lite/provenance",
+            "custom/editorial",
+            "custom/assets",
             "site/config",
             "site/layouts",
             "site/static",
@@ -58,9 +57,9 @@ class TemplateSourceTests(unittest.TestCase):
 
         browser_files = [
             path
-            for path in (destination / "tests" / "browser").rglob("*")
+            for path in (destination / ".orinoco-lite" / "tests" / "browser").rglob("*")
             if path.is_file()
-        ] if (destination / "tests" / "browser").is_dir() else []
+        ] if (destination / ".orinoco-lite" / "tests" / "browser").is_dir() else []
         self.assertTrue(browser_files)
         browser_text = "\n".join(
             path.read_text(encoding="utf-8")
@@ -236,6 +235,8 @@ assert workspace.path('canonical').resolve() == (root / 'metadata' / 'records').
                 ".orinoco/cache/cache.bin",
                 ".orinoco/downloads/runtime.tar.gz",
                 ".orinoco/runtime/runtime-manifest.json",
+                ".orinoco-lite/state/framework-update.json",
+                "generated/projection/records.jsonl",
             ]
             for relative in candidates:
                 path = consumer / relative
@@ -262,222 +263,6 @@ assert workspace.path('canonical').resolve() == (root / 'metadata' / 'records').
             self.assertEqual(0, trackable.returncode, trackable.stderr)
             self.assertNotIn(".orinoco/", trackable.stdout)
 
-    def test_bundle_import_preserves_full_scope_and_rejects_git_metadata(self) -> None:
-        with tempfile.TemporaryDirectory() as temporary:
-            workspace = Path(temporary)
-            consumer = workspace / "consumer"
-            shutil.copytree(ROOT / "github-template", consumer)
-            bundle = workspace / "bundle"
-            (bundle / "metadata" / "records").mkdir(parents=True)
-            (bundle / "editorial").mkdir()
-            (bundle / "generated" / "projection").mkdir(parents=True)
-            (bundle / "tests" / "parity").mkdir(parents=True)
-            (bundle / "tests" / "offline").mkdir(parents=True)
-            (bundle / "site" / "framework" / "themes" / "congo" / ".github" / "workflows").mkdir(
-                parents=True
-            )
-            (bundle / "metadata" / "records" / "all.yml").write_text(
-                "pid: example:all\n", encoding="utf-8"
-            )
-            (bundle / "editorial" / "index.md").write_text(
-                "# Complete site\n", encoding="utf-8"
-            )
-            (bundle / "generated" / "projection" / "records.jsonl").write_text(
-                '{"pid":"example:all"}\n', encoding="utf-8"
-            )
-            (bundle / "tests" / "parity" / "test_full_site.py").write_text(
-                "# Site-owned parity proof.\n", encoding="utf-8"
-            )
-            (bundle / "tests" / "offline" / "test_no_network.py").write_text(
-                "# Site-owned offline proof.\n", encoding="utf-8"
-            )
-            (
-                bundle
-                / "site"
-                / "framework"
-                / "themes"
-                / "congo"
-                / ".github"
-                / "workflows"
-                / "theme.yml"
-            ).write_text("name: inert theme metadata\n", encoding="utf-8")
-            declared_paths = [
-                "metadata/records/all.yml",
-                "editorial/index.md",
-                "generated/projection/records.jsonl",
-                "tests/parity/test_full_site.py",
-                "tests/offline/test_no_network.py",
-                "site/framework/themes/congo/.github/workflows/theme.yml",
-            ]
-            classifications = {
-                path: (
-                    "generated"
-                    if path.startswith("generated/")
-                    else "consumer_tests"
-                    if path.startswith("tests/")
-                    else "initialized_site_owned"
-                )
-                for path in declared_paths
-            }
-            digests = {
-                path: hashlib.sha256((bundle / path).read_bytes()).hexdigest()
-                for path in declared_paths
-            }
-            sizes = {path: (bundle / path).stat().st_size for path in declared_paths}
-            bundle_manifest = {
-                "format": "orinoco-site-bundle-v1",
-                "source": {
-                    "repository": "https://example.invalid/full-site",
-                    "commit": "a" * 40,
-                    "scope": "full",
-                },
-                "files": digests,
-                "classifications": classifications,
-                "sizes": sizes,
-                "summary": {
-                    "bytes": sum(sizes.values()),
-                    "classes": {
-                        "consumer_tests": 2,
-                        "generated": 1,
-                        "initialized_site_owned": 3,
-                    },
-                    "files": 6,
-                },
-            }
-            manifest_text = json.dumps(bundle_manifest, indent=2, sort_keys=True) + "\n"
-            (bundle / "orinoco-site-bundle.json").write_text(
-                manifest_text, encoding="utf-8"
-            )
-            command = [
-                "python",
-                "tools/import_site_bundle.py",
-                bundle.as_posix(),
-                "--source-repository",
-                "https://example.invalid/full-site",
-                "--source-commit",
-                "a" * 40,
-                "--scope",
-                "full",
-            ]
-            env = dict(os.environ, SOURCE_DATE_EPOCH="0")
-            result = subprocess.run(
-                command,
-                cwd=consumer,
-                env=env,
-                text=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                check=False,
-            )
-            self.assertEqual(0, result.returncode, result.stdout + result.stderr)
-            self.assertEqual(
-                "pid: example:all\n",
-                (consumer / "metadata" / "records" / "all.yml").read_text(),
-            )
-            self.assertEqual(
-                '{"pid":"example:all"}\n',
-                (
-                    consumer / "generated" / "projection" / "records.jsonl"
-                ).read_text(),
-            )
-            self.assertTrue(
-                (consumer / "tests" / "parity" / "test_full_site.py").is_file()
-            )
-            self.assertTrue(
-                (consumer / "tests" / "offline" / "test_no_network.py").is_file()
-            )
-            self.assertEqual(
-                "name: inert theme metadata\n",
-                (
-                    consumer
-                    / "site"
-                    / "framework"
-                    / "themes"
-                    / "congo"
-                    / ".github"
-                    / "workflows"
-                    / "theme.yml"
-                ).read_text(encoding="utf-8"),
-            )
-            self.assertEqual(
-                manifest_text,
-                (consumer / "orinoco-site-bundle.json").read_text(encoding="utf-8"),
-            )
-            ledgers = list((consumer / "metadata" / "provenance").glob("site-import-*.json"))
-            self.assertEqual(1, len(ledgers))
-            ledger = json.loads(ledgers[0].read_text())
-            self.assertEqual("full", ledger["source"]["scope"])
-            self.assertEqual(6, ledger["source"]["declared_files"])
-            self.assertEqual(6, len(ledger["files"]))
-            preserved = json.loads(
-                (consumer / "orinoco-site-bundle.json").read_text(encoding="utf-8")
-            )
-            self.assertEqual(6, preserved["summary"]["files"])
-            self.assertEqual(
-                set(preserved["files"]),
-                {entry["path"] for entry in ledger["files"]},
-            )
-            self.assertNotIn(
-                ledgers[0].relative_to(consumer).as_posix(), preserved["files"]
-            )
-            self.assertNotIn("pixi.toml", preserved["files"])
-
-            stale = workspace / "stale-summary"
-            shutil.copytree(bundle, stale)
-            stale_manifest = json.loads(
-                (stale / "orinoco-site-bundle.json").read_text(encoding="utf-8")
-            )
-            stale_manifest["summary"]["files"] = 7
-            (stale / "orinoco-site-bundle.json").write_text(
-                json.dumps(stale_manifest, indent=2, sort_keys=True) + "\n",
-                encoding="utf-8",
-            )
-            rejected_summary = subprocess.run(
-                command[:2]
-                + [stale.as_posix()]
-                + command[3:]
-                + ["--replace"],
-                cwd=consumer,
-                text=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                check=False,
-            )
-            self.assertNotEqual(0, rejected_summary.returncode)
-            self.assertIn("summary.files must be 6", rejected_summary.stderr)
-
-            forbidden = workspace / "forbidden"
-            forbidden.mkdir()
-            (forbidden / ".gitmodules").write_text("forbidden\n")
-            rejected = subprocess.run(
-                command[:2] + [forbidden.as_posix()] + command[3:] + ["--replace"],
-                cwd=consumer,
-                text=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                check=False,
-            )
-            self.assertNotEqual(0, rejected.returncode)
-            self.assertIn("forbidden", rejected.stderr)
-
-            root_workflow = workspace / "root-workflow"
-            (root_workflow / ".github" / "workflows").mkdir(parents=True)
-            (root_workflow / ".github" / "workflows" / "attack.yml").write_text(
-                "name: forbidden root workflow\n", encoding="utf-8"
-            )
-            rejected_workflow = subprocess.run(
-                command[:2]
-                + [root_workflow.as_posix()]
-                + command[3:]
-                + ["--replace"],
-                cwd=consumer,
-                text=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                check=False,
-            )
-            self.assertNotEqual(0, rejected_workflow.returncode)
-            self.assertIn("forbidden root workflow", rejected_workflow.stderr)
 
 
 if __name__ == "__main__":
