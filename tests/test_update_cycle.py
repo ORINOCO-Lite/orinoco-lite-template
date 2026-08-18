@@ -291,6 +291,7 @@ class UpdateCycleTests(unittest.TestCase):
         run(["git", "init", "-b", "main"], consumer)
         records = consumer / "metadata" / "records"
         extensions = consumer / "extensions"
+        records.mkdir(parents=True)
         (records / "complete.yml").write_text(
             "pid: example:complete\ntitle: Site-owned content\n", encoding="utf-8"
         )
@@ -600,7 +601,6 @@ class UpdateCycleTests(unittest.TestCase):
     def test_target_placeholders_are_removed_only_from_populated_paths(self) -> None:
         consumer = self.make_consumer("placeholder-reconciliation")
         populated = {
-            "metadata/records/.gitkeep": "metadata/records/complete.yml",
             "source-adapters/.gitkeep": "source-adapters/zotero/config.toml",
             "site/config/.gitkeep": "site/config/site.yaml",
         }

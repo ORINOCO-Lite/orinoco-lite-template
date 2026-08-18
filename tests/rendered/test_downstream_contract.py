@@ -50,7 +50,6 @@ class DownstreamContractTests(unittest.TestCase):
 
     def test_site_owned_paths_are_present(self) -> None:
         for path in (
-            "metadata/records",
             ".orinoco-lite/provenance",
             "custom/editorial",
             "custom/assets",
@@ -61,10 +60,8 @@ class DownstreamContractTests(unittest.TestCase):
             with self.subTest(path=path):
                 self.assertTrue((ROOT / path).is_dir())
 
-        self.assertEqual(
-            [ROOT / "metadata" / "records"],
-            sorted(path for path in (ROOT / "metadata").iterdir()),
-        )
+        self.assertFalse((ROOT / "metadata").exists())
+        self.assertFalse((ROOT / "metadata/records/.gitkeep").exists())
 
     def test_offline_acceptance_is_site_owned(self) -> None:
         verifier = load_verifier()

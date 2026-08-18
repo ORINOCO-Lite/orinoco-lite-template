@@ -40,9 +40,12 @@ Change it only for an explicit framework-maintenance task.
 TODO: Define the stable shared interface after multiple source adapters have been exercised and reviewed.
 Until then, keep each concrete adapter under `source-adapters/<name>/`, read its own README and tests, and do not generalize one adapter's modes or report format into a downstream-wide contract.
 
-An adapter may import, enrich, scrape, extract, or report.
+Upstream tools use the concrete roles importer, enricher, and scraper.
+`source adapter` is Orinoco Lite's local umbrella, and `report` may be an adapter mode; do not present either as an upstream plugin interface.
 Its documentation must say which site metadata it reads and writes.
 Every Thing that participates in projection belongs under `metadata/records/`.
 Adapter-only matching data belongs with that adapter, not under `metadata/`.
 Generic template-managed adapters and their support data belong under `.orinoco-lite/source-adapters/`; site-owned adapter configuration remains at the repository root.
+Prefer released upstream acquisition, matching, query, and enrichment helpers.
+Use upstream PAV source annotations where they add useful attribution, but do not impose a universal field-ownership gate during the prototype: a documented mode may propose arbitrary changes and pull-request review remains authoritative.
 Review the ordinary Git diff for every run; generated reports belong under ignored build output rather than beside the user-facing metadata records.

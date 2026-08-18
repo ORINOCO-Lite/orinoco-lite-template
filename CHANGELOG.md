@@ -2,8 +2,9 @@
 
 ## Unreleased
 
-- Establish `source-adapters/` as the sole downstream source-adapter surface and align the rendered documentation and agent guidance with upstream importer, enricher, scraper, extractor, and reporter terms.
+- Establish `source-adapters/` as the sole downstream source-adapter surface and align the rendered documentation and agent guidance with upstream importer, enricher, and scraper terms.
 - Make `metadata/records/` the sole metadata Things input and establish configuration contract version 2 with `paths.records` and `paths.source_adapters`.
+- Treat a fresh render as a content-neutral facade awaiting an explicit site profile; do not place non-Thing placeholders in `metadata/records/` or advertise validation before profile installation.
 
 ## 0.1.12 - 2026-08-17
 

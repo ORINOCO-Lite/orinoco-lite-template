@@ -37,7 +37,6 @@ class TemplateSourceTests(unittest.TestCase):
         destination = ROOT / "github-template"
         self.assertFalse((destination / ".gitmodules").exists())
         for root in (
-            "metadata/records",
             ".orinoco-lite/provenance",
             "custom/editorial",
             "custom/assets",
@@ -54,10 +53,8 @@ class TemplateSourceTests(unittest.TestCase):
             ]
             self.assertEqual([], files, root)
 
-        self.assertEqual(
-            [destination / "metadata" / "records"],
-            sorted(path for path in (destination / "metadata").iterdir()),
-        )
+        self.assertFalse((destination / "metadata").exists())
+        self.assertFalse((destination / "metadata/records/.gitkeep").exists())
 
         browser_files = [
             path

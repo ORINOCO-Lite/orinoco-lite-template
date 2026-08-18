@@ -34,8 +34,8 @@ See [`LICENSES.md`](LICENSES.md) and the accepted engine human-review decision [
 
 ## Creating a consumer
 
-> **Historical release notice:** immutable tags `v0.1.10` and `v0.1.11` > retain `v0.1.9` in their embedded Copier answers and lock metadata.
-Do not > use those two tags for a new Copier-first site or `copier recopy`.
+**Historical release notice:** immutable tags `v0.1.10` and `v0.1.11` retain `v0.1.9` in their embedded Copier answers and lock metadata.
+Do not use those two tags for a new Copier-first site or `copier recopy`.
 
 Use `v0.1.12` or a later internally aligned release for the Copier-first command below.
 
@@ -49,6 +49,7 @@ Replace `vX.Y.Z` with an exact tag from the [immutable template releases](https:
 
 For a GitHub-first review, use the repository's **Use this template** action, leave **Include all branches** unchecked, then follow the rendered [GitHub-template bootstrap](github-template/docs/getting-started.md) before adding content.
 Both routes retain an exact recorded Copier release and frozen engine environment.
+They create a content-neutral repository facade; a reviewed site profile must supply records, projection policy, assets, and presentation before `validate` or `build` can succeed.
 
 ## Repository topology
 
