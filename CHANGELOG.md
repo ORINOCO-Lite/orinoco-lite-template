@@ -10,6 +10,7 @@
 - Make `metadata/records/` the sole metadata Things input and establish configuration contract version 2 with `paths.records` and `paths.source_adapters`.
 - Treat a fresh render as a content-neutral facade awaiting an explicit site profile; do not place non-Thing placeholders in `metadata/records/` or advertise validation before profile installation.
 - Let the fresh facade's test task succeed without placeholder Python tests while continuing to propagate failures from site-owned tests.
+- Keep render parity repeatable after local verification by excluding only the declared ignored runtime and cache roots.
 - Update the engine, runtime, and reusable workflow to the immutable v0.1.12 release and configuration contract 2.
 
 ## 0.1.11 - 2026-08-13

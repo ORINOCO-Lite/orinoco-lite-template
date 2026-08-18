@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import importlib.util
 import inspect
 import os
 import re
@@ -17,7 +18,47 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def load_renderer():
+    path = ROOT / "tools" / "render_github_template.py"
+    spec = importlib.util.spec_from_file_location("render_github_template", path)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 class TemplateSourceTests(unittest.TestCase):
+    def test_render_comparison_ignores_only_declared_runtime_state(self) -> None:
+        renderer = load_renderer()
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            rendered = root / "rendered"
+            checked = root / "checked"
+            rendered.mkdir()
+            checked.mkdir()
+            (rendered / ".orinoco-lite").mkdir()
+            (checked / ".orinoco-lite").mkdir()
+            for relative in (
+                ".orinoco/runtime/cache",
+                ".pixi/envs/default",
+                ".orinoco-lite/state/update",
+                "build/site",
+                "generated/projection",
+                "node_modules/package",
+                "playwright-report/results",
+                "test-results/browser",
+            ):
+                path = checked / relative
+                path.mkdir(parents=True)
+                (path / "ignored.txt").write_text("runtime\n", encoding="utf-8")
+
+            self.assertEqual([], renderer.differences(rendered, checked))
+            (checked / "visible.txt").write_text("checked\n", encoding="utf-8")
+            self.assertEqual(
+                ["only checked: visible.txt"],
+                renderer.differences(rendered, checked),
+            )
+
     def test_checked_default_tree_matches_copier_source(self) -> None:
         renderer = (ROOT / "tools" / "render_github_template.py").read_text(
             encoding="utf-8"
