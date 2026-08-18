@@ -102,8 +102,17 @@ def render(destination: Path) -> bool:
     defaults = yaml.safe_load(ANSWERS.read_text(encoding="utf-8"))
     rendered_answers_path = destination / ".copier-answers.yml"
     rendered_answers = yaml.safe_load(rendered_answers_path.read_text(encoding="utf-8"))
-    rendered_answers["_src_path"] = defaults["template_source"]
-    rendered_answers["_commit"] = defaults["template_version"]
+    # Copier orders these bookkeeping keys according to the VCS checkout. A
+    # shallow CI clone can therefore produce a different byte order than a
+    # full local clone even when the values are identical. Normalize both
+    # keys so the checked publication tree is reproducible everywhere.
+    rendered_answers.pop("_src_path", None)
+    rendered_answers.pop("_commit", None)
+    rendered_answers = {
+        "_src_path": defaults["template_source"],
+        **rendered_answers,
+        "_commit": defaults["template_version"],
+    }
     rendered_answers_path.write_text(
         yaml.safe_dump(rendered_answers, sort_keys=False, allow_unicode=True),
         encoding="utf-8",

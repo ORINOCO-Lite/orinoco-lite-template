@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.15 - 2026-08-18
 
 - Split metadata-adapter operation from ordinary content editing and add agent
   guidance for version-aware provenance, durable human decision memory, and
