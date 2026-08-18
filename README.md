@@ -16,17 +16,16 @@ Building, previewing, and updating it requires neither Git submodules nor an eng
 It records exact engine, runtime, template, and reusable-workflow coordinates; the frozen `pixi.lock` realizes that reviewed environment.
 PyPI publication is optional and is not required by this repository.
 
-Start with [creation and configuration](docs/getting-started.md) for a new consumer, [file ownership](docs/ownership.md) before customizing the facade, and [framework updates](docs/updating.md) before changing release pins.
+Start with [creation and configuration](docs/getting-started.md) for the required site-profile step, [file ownership](docs/ownership.md) before customizing the facade, and [framework updates](docs/updating.md) before changing release pins.
 
 ## Rights and intended use
 
-The generic Orinoco Lite facade is MIT licensed and its original documentation
-is CC BY 4.0. Those terms do not license site-owned records, editorial prose,
-media, branding, presentation, or imported third-party material. Document those
-rights separately and preserve every upstream notice. See engine human-review
-decision [HR-003](https://github.com/con/orinoco-lite-dev/blob/main/docs/human-review-decisions.md#hr-003--establish-authority-and-a-project-license-matrix).
+The generic Orinoco Lite facade is MIT licensed and its original documentation is CC BY 4.0.
+Those terms do not license site-owned records, editorial prose, media, branding, presentation, or imported third-party material.
+Document those rights separately and preserve every upstream notice.
+See engine human-review decision [HR-003](https://github.com/con/orinoco-lite-dev/blob/main/docs/human-review-decisions.md#hr-003--establish-authority-and-a-project-license-matrix).
 
-## Routine commands
+## Routine commands after adding a site profile
 
 ```console
 pixi run validate
@@ -41,9 +40,8 @@ pixi run test-all
 pixi run update-check
 ```
 
-After editing metadata records, `validate` regenerates the ignored projection
-and checks it. `build` does the same before rendering, so the source commit
-shows the metadata change rather than a duplicate generated tree.
+After editing metadata records, `validate` regenerates the ignored projection and checks it.
+`build` does the same before rendering, so the source commit shows the metadata change rather than a duplicate generated tree.
 `assets-hydrate` is the explicit networked retrieval step for declared remote assets; `assets-verify` checks already-local payloads without fetching.
 
 ## Build targets
@@ -69,14 +67,12 @@ Do not use `assets-prepare-online` in that denied-network phase; it represents t
 
 - `metadata/records/` contains every YAML Thing used as projection input.
 - `.orinoco-lite/` contains implementation support behind the checked commands.
-- `custom/editorial/`, `custom/assets/`, and `site/` contain site-owned
-  presentation inputs.
-- `.agents/skills/manage-orinoco-content/` guides agents through focused
-  editorial and asset changes.
-- `source-adapters/` contains optional site-owned importers, enrichers,
-  scrapers, extractors, and reporters; it is not a deployed runtime dependency.
+- `custom/editorial/`, `custom/assets/`, and `site/` contain site-owned presentation inputs.
+- `.agents/skills/manage-orinoco-content/` guides agents through focused editorial and asset changes.
+- `source-adapters/` contains optional site-owned importers, enrichers, and scrapers; it is not a deployed runtime dependency.
 - `extensions/` is the stable downstream customization surface.
-- `generated/` contains ignored projection output recreated by validation and
-  builds.
+- `generated/` contains ignored projection output recreated by validation and builds.
 
-Populated source-adapter examples are available in the [downstream test website](https://github.com/con/test-orinoco-downstream-website).
+A newly created repository is a content-neutral facade, not an empty but buildable website.
+Add a reviewed site profile as described in [creation and configuration](docs/getting-started.md) before running validation or build commands.
+A populated profile and source-adapter examples are available in the [downstream test website](https://github.com/con/test-orinoco-downstream-website).
