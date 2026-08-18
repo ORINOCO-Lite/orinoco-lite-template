@@ -8,7 +8,9 @@ import test_update_cycle as update_cycle
 
 DECISION_BYTES = b"""format: orinoco-lite-curation-decisions-prototype-v1
 decisions:
-  - candidate_id: curation-candidate-v1:c6ae85c4af4c96edd6a96d929783502b2601cbb18d209ff488b8a15f7607a222
+  - decision_id: curation-decision-v1:70427ad1a877584eb316a9d606c580904523b433efb5e8c21d8afa0e95ed2f8d
+    supersedes_decision_id: null
+    candidate_id: curation-candidate-v1:c6ae85c4af4c96edd6a96d929783502b2601cbb18d209ff488b8a15f7607a222
     adapter_id: zotero
     source_namespace: zotero:group:6197458
     source_record_id: https://doi.org/10.1000/example
@@ -23,8 +25,8 @@ decisions:
       - https://example.invalid/review/example
 transactions:
   - inventory_id: curation-inventory-v1:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-    candidate_ids:
-      - curation-candidate-v1:c6ae85c4af4c96edd6a96d929783502b2601cbb18d209ff488b8a15f7607a222
+    decision_ids:
+      - curation-decision-v1:70427ad1a877584eb316a9d606c580904523b433efb5e8c21d8afa0e95ed2f8d
 """
 CROSSWALK_BYTES = (
     b"subject_id\tpredicate_id\tobject_id\tmapping_justification\n"
