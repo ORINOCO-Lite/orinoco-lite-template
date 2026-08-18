@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Split metadata-adapter operation from ordinary content editing and add agent
+  guidance for version-aware provenance, durable human decision memory, and
+  static review pull requests.
+
 ## 0.1.14 - 2026-08-18
 
 - Select the stable Ubuntu archive before Playwright installs Linux WebKit host dependencies, while preserving bounded retries and timeouts.
