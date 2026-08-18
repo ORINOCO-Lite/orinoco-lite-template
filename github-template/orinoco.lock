@@ -14,9 +14,9 @@ runtime:
 
 template:
   source: "gh:con/orinoco-lite-template"
-  version: "v0.1.12"
+  version: "v0.1.13"
 
 workflow:
   repository: "con/orinoco-lite-dev"
-  sha: "dd19a61489ba14c8f47a8baf33ab3c65bde0db47"
-  ref: "con/orinoco-lite-dev/.github/workflows/orinoco-consumer-ci.yml@dd19a61489ba14c8f47a8baf33ab3c65bde0db47"
+  sha: "424301a8bd5da46207cd5fcb42ebc926400624f2"
+  ref: "con/orinoco-lite-dev/.github/workflows/orinoco-consumer-ci.yml@424301a8bd5da46207cd5fcb42ebc926400624f2"

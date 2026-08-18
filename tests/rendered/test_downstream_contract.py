@@ -65,13 +65,13 @@ class DownstreamContractTests(unittest.TestCase):
 
     def test_offline_acceptance_is_site_owned(self) -> None:
         verifier = load_verifier()
-        ownership = verifier.load_yaml(
-            ROOT / ".orinoco-lite/template-ownership.yml"
-        )
+        ownership = verifier.load_yaml(ROOT / ".orinoco-lite/template-ownership.yml")
         classes = verifier.ownership_classes(ownership)
         self.assertEqual(
             ["consumer_tests"],
-            verifier.classify(".orinoco-lite/tests/offline/test_no_network.py", classes),
+            verifier.classify(
+                ".orinoco-lite/tests/offline/test_no_network.py", classes
+            ),
         )
         self.assertEqual(
             ["initialized_site_owned"],
@@ -83,7 +83,9 @@ class DownstreamContractTests(unittest.TestCase):
         )
 
     def test_engine_configuration_uses_the_supported_path_contract(self) -> None:
-        configuration = yaml.safe_load((ROOT / "orinoco.yaml").read_text(encoding="utf-8"))
+        configuration = yaml.safe_load(
+            (ROOT / "orinoco.yaml").read_text(encoding="utf-8")
+        )
         self.assertEqual(2, configuration["contract_version"])
         self.assertEqual(
             {
@@ -162,9 +164,7 @@ class DownstreamContractTests(unittest.TestCase):
             "python .orinoco-lite/tools/run_consumer_tests.py",
             tasks["test-consumer"],
         )
-        self.assertEqual(
-            ["build"], tasks["verify-local-preview"]["depends-on"]
-        )
+        self.assertEqual(["build"], tasks["verify-local-preview"]["depends-on"])
         self.assertEqual(
             "python .orinoco-lite/tools/verify_local_preview.py build/site",
             tasks["verify-local-preview"]["cmd"],
@@ -173,22 +173,26 @@ class DownstreamContractTests(unittest.TestCase):
             ["verify-deterministic", "verify-local-preview"],
             tasks["verify-build"]["depends-on"],
         )
-        self.assertNotIn("install-browser-browsers", tasks)
         self.assertEqual(
             "python .orinoco-lite/tools/install_browser_tests.py",
             tasks["install-browser-tests"],
         )
         self.assertEqual(
             ["install-browser-tests"],
-            tasks["install-browser-chromium"]["depends-on"],
+            tasks["prepare-browser-binaries"]["depends-on"],
         )
         self.assertEqual(
-            "npx --prefix .orinoco-lite/tests/browser playwright install chromium",
-            tasks["install-browser-chromium"]["cmd"],
+            "python .orinoco-lite/tools/prepare_browser_runtime.py browsers",
+            tasks["prepare-browser-binaries"]["cmd"],
         )
-        self.assertNotIn("--with-deps", tasks["install-browser-chromium"]["cmd"])
         self.assertEqual(
-            ["build-browser-pages", "install-browser-chromium"],
+            {"PLAYWRIGHT_BROWSERS_PATH": "build/playwright-browsers"},
+            tasks["prepare-browser-binaries"]["env"],
+        )
+        self.assertNotIn("install-browser-chromium", tasks)
+        self.assertNotIn("install-browser-webkit", tasks)
+        self.assertEqual(
+            ["build-browser-pages", "prepare-browser-binaries"],
             tasks["test-browser-chromium"]["depends-on"],
         )
         self.assertEqual(
@@ -197,14 +201,16 @@ class DownstreamContractTests(unittest.TestCase):
         )
         self.assertEqual(
             ["test-browser-chromium"],
-            tasks["install-browser-webkit"]["depends-on"],
+            tasks["prepare-browser-webkit-host"]["depends-on"],
         )
         self.assertEqual(
-            "npx --prefix .orinoco-lite/tests/browser playwright install --with-deps webkit",
-            tasks["install-browser-webkit"]["cmd"],
+            "python .orinoco-lite/tools/prepare_browser_runtime.py "
+            "linux-host-dependencies",
+            tasks["prepare-browser-webkit-host"]["cmd"],
         )
+        self.assertNotIn("env", tasks["prepare-browser-webkit-host"])
         self.assertEqual(
-            ["install-browser-webkit"],
+            ["prepare-browser-webkit-host"],
             tasks["test-browser-webkit"]["depends-on"],
         )
         self.assertEqual(
@@ -218,13 +224,17 @@ class DownstreamContractTests(unittest.TestCase):
 
     def test_browser_installer_respects_the_ownership_boundary(self) -> None:
         verifier = load_verifier()
-        ownership = verifier.load_yaml(
-            ROOT / ".orinoco-lite/template-ownership.yml"
-        )
+        ownership = verifier.load_yaml(ROOT / ".orinoco-lite/template-ownership.yml")
         classes = verifier.ownership_classes(ownership)
         self.assertEqual(
             ["template_owned"],
             verifier.classify(".orinoco-lite/tools/install_browser_tests.py", classes),
+        )
+        self.assertEqual(
+            ["template_owned"],
+            verifier.classify(
+                ".orinoco-lite/tools/prepare_browser_runtime.py", classes
+            ),
         )
         for relative in (
             ".orinoco-lite/tests/browser/package.json",
@@ -236,7 +246,9 @@ class DownstreamContractTests(unittest.TestCase):
                     verifier.classify(relative, classes),
                 )
         package = json.loads(
-            (ROOT / ".orinoco-lite/tests/browser/package.json").read_text(encoding="utf-8")
+            (ROOT / ".orinoco-lite/tests/browser/package.json").read_text(
+                encoding="utf-8"
+            )
         )
         self.assertEqual("1.62.1", package["devDependencies"]["@playwright/test"])
 
@@ -268,9 +280,7 @@ class DownstreamContractTests(unittest.TestCase):
         )
 
         verifier = load_verifier()
-        ownership = verifier.load_yaml(
-            ROOT / ".orinoco-lite/template-ownership.yml"
-        )
+        ownership = verifier.load_yaml(ROOT / ".orinoco-lite/template-ownership.yml")
         classes = verifier.ownership_classes(ownership)
         self.assertEqual(
             ["template_owned"],
@@ -283,11 +293,14 @@ class DownstreamContractTests(unittest.TestCase):
 
     def test_pages_builder_expands_and_validates_the_environment_url(self) -> None:
         builder = load_tool("build_pages")
-        with patch.dict(
-            builder.os.environ,
-            {"ORINOCO_BASE_URL": "https://con.github.io/example"},
-            clear=False,
-        ), patch.object(builder.subprocess, "run") as run:
+        with (
+            patch.dict(
+                builder.os.environ,
+                {"ORINOCO_BASE_URL": "https://con.github.io/example"},
+                clear=False,
+            ),
+            patch.object(builder.subprocess, "run") as run,
+        ):
             self.assertEqual(0, builder.main(["build/pages"]))
         run.assert_called_once_with(
             [
@@ -331,8 +344,7 @@ class DownstreamContractTests(unittest.TestCase):
         accepted = (
             "hugo v0.154.5-conda-forge+extended linux/amd64 "
             "BuildDate=unknown VendorInfo=conda-forge",
-            "hugo v0.154.5+extended darwin/arm64 "
-            "BuildDate=unknown VendorInfo=brew",
+            "hugo v0.154.5+extended darwin/arm64 BuildDate=unknown VendorInfo=brew",
         )
         for output in accepted:
             with self.subTest(output=output):
@@ -390,9 +402,7 @@ class DownstreamContractTests(unittest.TestCase):
             "engine"
         ]
         requirement = pixi["pypi-dependencies"]["orinoco-lite"]["url"]
-        self.assertEqual(
-            f"{engine['url']}#sha256={engine['sha256']}", requirement
-        )
+        self.assertEqual(f"{engine['url']}#sha256={engine['sha256']}", requirement)
         lock = yaml.safe_load((ROOT / "pixi.lock").read_text(encoding="utf-8"))
         matches = [
             package
@@ -422,9 +432,9 @@ class DownstreamContractTests(unittest.TestCase):
                     )
 
     def test_pages_deploys_only_the_destination_default_branch(self) -> None:
-        workflow_text = (
-            ROOT / ".github" / "workflows" / "pages.yml"
-        ).read_text(encoding="utf-8")
+        workflow_text = (ROOT / ".github" / "workflows" / "pages.yml").read_text(
+            encoding="utf-8"
+        )
         self.assertIn("\n  workflow_dispatch:\n", workflow_text)
         self.assertNotIn(
             "github.event_name == 'workflow_dispatch' ||",
