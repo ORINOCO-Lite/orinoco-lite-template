@@ -9,7 +9,7 @@ It supplies a small consumer facade while keeping site content independent from 
 | --- | --- | --- |
 | [Orinoco Lite engine](https://github.com/con/orinoco-lite-dev) | CLI behavior, the Python wheel, runtime archive, validation and projection behavior, and reusable CI | Copier topology or any site's content |
 | This template | Creation, file-ownership classes, pinned release coordinates, update tooling, and the generic consumer documentation facade | Engine internals or organization-specific records and policy |
-| Rendered consumer | Canonical records, editorial material, assets, presentation, integrations, extensions, site tests, review, and deployment | Publication of engine or template releases |
+| Rendered consumer | Metadata records, editorial material, assets, presentation, source adapters, extensions, site tests, review, and deployment | Publication of engine or template releases |
 
 ```mermaid
 flowchart LR
@@ -23,25 +23,21 @@ flowchart LR
 
 The template refers upward through exact engine, runtime, and workflow pins.
 It projects downward into a normal consumer repository that can be reviewed, built, and deployed without this maintenance checkout.
-See the [checked consumer documentation](github-template/README.md) and the [populated integration consumer](https://github.com/con/test-orinoco-downstream-website) for those lower-level views.
+See the [checked consumer documentation](github-template/README.md) and the [populated source-adapter consumer](https://github.com/con/test-orinoco-downstream-website) for those lower-level views.
 
 ## Rights and intended use
 
-Original template, updater, workflow, and test code is
-[MIT licensed](LICENSE). Original documentation is CC BY 4.0. Generated sites
-inherit the MIT grant for their generic Orinoco Lite facade, but site owners
-must license their own content, media, and presentation separately. See
-[`LICENSES.md`](LICENSES.md) and the accepted engine human-review decision
-[HR-003](https://github.com/con/orinoco-lite-dev/blob/main/docs/human-review-decisions.md#hr-003--establish-authority-and-a-project-license-matrix).
+Original template, updater, workflow, and test code is [MIT licensed](LICENSE).
+Original documentation is CC BY 4.0.
+Generated sites inherit the MIT grant for their generic Orinoco Lite facade, but site owners must license their own content, media, and presentation separately.
+See [`LICENSES.md`](LICENSES.md) and the accepted engine human-review decision [HR-003](https://github.com/con/orinoco-lite-dev/blob/main/docs/human-review-decisions.md#hr-003--establish-authority-and-a-project-license-matrix).
 
 ## Creating a consumer
 
-> **Historical release notice:** immutable tags `v0.1.10` and `v0.1.11`
-> retain `v0.1.9` in their embedded Copier answers and lock metadata. Do not
-> use those two tags for a new Copier-first site or `copier recopy`.
+> **Historical release notice:** immutable tags `v0.1.10` and `v0.1.11` > retain `v0.1.9` in their embedded Copier answers and lock metadata.
+Do not > use those two tags for a new Copier-first site or `copier recopy`.
 
-Use `v0.1.12` or a later internally aligned release for the Copier-first
-command below.
+Use `v0.1.12` or a later internally aligned release for the Copier-first command below.
 
 Copier-first creation is the preferred path when the site's identity and Pages project path are already known:
 
@@ -64,8 +60,7 @@ This repository deliberately has two branch roles:
 GitHub's template button copies the default branch, not an arbitrary subdirectory.
 The dedicated publication branch is therefore required; the `github-template/` directory on `main` is never exposed as a nested directory to a new consumer.
 
-The default tree contains no organization records, editorial claims, assets,
-publication data, inherited site history, or migration evidence.
+The default tree contains no organization records, editorial claims, assets, publication data, inherited site history, or migration evidence.
 
 ## Maintainer commands
 

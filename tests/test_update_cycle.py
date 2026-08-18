@@ -95,7 +95,7 @@ def protected_bytes(repository: Path) -> dict[str, bytes]:
         "metadata",
         "custom",
         "site",
-        "integrations",
+        "source-adapters",
         "extensions",
     )
     return {
@@ -601,7 +601,7 @@ class UpdateCycleTests(unittest.TestCase):
         consumer = self.make_consumer("placeholder-reconciliation")
         populated = {
             "metadata/records/.gitkeep": "metadata/records/complete.yml",
-            "integrations/.gitkeep": "integrations/zotero/evidence.json",
+            "source-adapters/.gitkeep": "source-adapters/zotero/config.toml",
             "site/config/.gitkeep": "site/config/site.yaml",
         }
         for placeholder, real_file in populated.items():

@@ -1,66 +1,55 @@
 # Changelog
 
+## Unreleased
+
+- Establish `source-adapters/` as the sole downstream source-adapter surface and align the rendered documentation and agent guidance with upstream importer, enricher, scraper, extractor, and reporter terms.
+- Make `metadata/records/` the sole metadata Things input and establish configuration contract version 2 with `paths.records` and `paths.source_adapters`.
+
 ## 0.1.12 - 2026-08-17
 
-- Cull generated consumers to the essential downstream interface while keeping
-  implementation support below `.orinoco-lite/`.
-- Restore a self-consistent template release identity after the historical
-  v0.1.10 and v0.1.11 publication defects.
-- Update the engine, runtime, and reusable workflow to the immutable v0.1.11
-  release, including support for the configured `custom/assets` root.
+- Cull generated consumers to the essential downstream interface while keeping implementation support below `.orinoco-lite/`.
+- Restore a self-consistent template release identity after the historical v0.1.10 and v0.1.11 publication defects.
+- Update the engine, runtime, and reusable workflow to the immutable v0.1.11 release, including support for the configured `custom/assets` root.
 
 ## 0.1.11 - 2026-08-13
 
 - Make the Pages build wrapper independently testable.
-- Retain the historical v0.1.9 embedded release identity; this release is not
-  eligible for Copier-first creation or recopy.
+- Retain the historical v0.1.9 embedded release identity; this release is not eligible for Copier-first creation or recopy.
 
 ## 0.1.10 - 2026-08-13
 
 - Classify the Pages build wrapper in the template ownership contract.
-- Retain the historical v0.1.9 embedded release identity; this release is not
-  eligible for Copier-first creation or recopy.
+- Retain the historical v0.1.9 embedded release identity; this release is not eligible for Copier-first creation or recopy.
 
 ## 0.1.9 - 2026-08-13
 
-- Pass the configured Pages base URL through a validated argv wrapper so Pixi
-  cannot pass the literal `${ORINOCO_BASE_URL}` expression to Orinoco.
+- Pass the configured Pages base URL through a validated argv wrapper so Pixi cannot pass the literal `${ORINOCO_BASE_URL}` expression to Orinoco.
 
 ## 0.1.8 - 2026-08-13
 
-- Build one deterministic local artifact with host-neutral root-relative links
-  so previews work through either loopback hostname.
-- Verify both loopback hostnames and their same-origin entry-point resources
-  while preserving explicit Pages project-path builds.
-- Update the engine, runtime, and reusable workflow to the immutable v0.1.10
-  release artifacts.
+- Build one deterministic local artifact with host-neutral root-relative links so previews work through either loopback hostname.
+- Verify both loopback hostnames and their same-origin entry-point resources while preserving explicit Pages project-path builds.
+- Update the engine, runtime, and reusable workflow to the immutable v0.1.10 release artifacts.
 
 ## 0.1.7 - 2026-08-12
 
-- Preserve Playwright 1.62.1 on ordinary platforms while overlaying the
-  revision-compatible 1.61.1 client on macOS 14 only.
-- Verify all installed Playwright package versions and preserve the exact
-  consumer-owned browser manifest and lock bytes across installation.
+- Preserve Playwright 1.62.1 on ordinary platforms while overlaying the revision-compatible 1.61.1 client on macOS 14 only.
+- Verify all installed Playwright package versions and preserve the exact consumer-owned browser manifest and lock bytes across installation.
 
 ## 0.1.6 - 2026-08-12
 
-- Run Chromium before Playwright changes hosted Linux dependencies, then install
-  WebKit's pinned host dependencies and run WebKit. This preserves the complete
-  checked browser matrix while avoiding a Chromium teardown hang on Ubuntu.
+- Run Chromium before Playwright changes hosted Linux dependencies, then install WebKit's pinned host dependencies and run WebKit.
+This preserves the complete checked browser matrix while avoiding a Chromium teardown hang on Ubuntu.
 
 ## 0.1.5 - 2026-08-12
 
-- Install Playwright's pinned Linux host dependencies with Chromium and WebKit
-  so the complete browser gate runs on hosted Ubuntu as well as macOS.
+- Install Playwright's pinned Linux host dependencies with Chromium and WebKit so the complete browser gate runs on hosted Ubuntu as well as macOS.
 
 ## 0.1.4 - 2026-08-12
 
-- Accept Hugo distribution revision suffixes while preserving the exact
-  Extended 0.154.5 gate.
-- Update the engine, runtime, and reusable workflow to the immutable v0.1.9
-  release artifacts.
-- Align local deterministic builds with the root URL served on port 8765 while
-  retaining project-path bases for Pages and browser acceptance.
+- Accept Hugo distribution revision suffixes while preserving the exact Extended 0.154.5 gate.
+- Update the engine, runtime, and reusable workflow to the immutable v0.1.9 release artifacts.
+- Align local deterministic builds with the root URL served on port 8765 while retaining project-path bases for Pages and browser acceptance.
 
 ## 0.1.3 - 2026-08-12
 

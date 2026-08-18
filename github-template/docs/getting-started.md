@@ -8,15 +8,12 @@ This repository is a consumer of two versioned framework layers:
 The consumer owns its records, presentation, policy, tests, review, and deployment.
 Framework updates do not choose or rewrite those things.
 
-> **Rights notice:** the generic Orinoco Lite facade is MIT licensed and its
-> original documentation is CC BY 4.0. Those terms do not license site-owned or
-> third-party content, media, branding, or presentation. Record those rights
-> separately and preserve every upstream notice, as required by accepted engine
-> human-review decision [HR-003](https://github.com/con/orinoco-lite-dev/blob/main/docs/human-review-decisions.md#hr-003--establish-authority-and-a-project-license-matrix).
+> **Rights notice:** the generic Orinoco Lite facade is MIT licensed and its > original documentation is CC BY 4.0.
+Those terms do not license site-owned or > third-party content, media, branding, or presentation.
+Record those rights > separately and preserve every upstream notice, as required by accepted engine > human-review decision [HR-003](https://github.com/con/orinoco-lite-dev/blob/main/docs/human-review-decisions.md#hr-003--establish-authority-and-a-project-license-matrix).
 
-> **Historical release notice:** immutable tags `v0.1.10` and `v0.1.11`
-> retain `v0.1.9` in their embedded Copier answers and lock metadata. Do not
-> use those two tags for a new Copier-first site or `copier recopy`.
+> **Historical release notice:** immutable tags `v0.1.10` and `v0.1.11` > retain `v0.1.9` in their embedded Copier answers and lock metadata.
+Do not > use those two tags for a new Copier-first site or `copier recopy`.
 
 Use `v0.1.12` or a later internally aligned release for Copier-first creation.
 
@@ -86,4 +83,4 @@ Later framework changes use the updater described in [Framework updates](updatin
 
 - [File ownership](ownership.md) explains which paths the template may update.
 - The repository README explains local, Pages, and acceptance build targets.
-- A populated integration example is available in the [downstream test website](https://github.com/con/test-orinoco-downstream-website).
+- A populated source-adapter example is available in the [downstream test website](https://github.com/con/test-orinoco-downstream-website).

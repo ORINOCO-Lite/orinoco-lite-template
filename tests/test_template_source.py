@@ -38,14 +38,13 @@ class TemplateSourceTests(unittest.TestCase):
         self.assertFalse((destination / ".gitmodules").exists())
         for root in (
             "metadata/records",
-            "metadata/reference",
             ".orinoco-lite/provenance",
             "custom/editorial",
             "custom/assets",
             "site/config",
             "site/layouts",
             "site/static",
-            "integrations",
+            "source-adapters",
             "extensions",
         ):
             files = [
@@ -54,6 +53,11 @@ class TemplateSourceTests(unittest.TestCase):
                 if path.is_file() and path.name != ".gitkeep"
             ]
             self.assertEqual([], files, root)
+
+        self.assertEqual(
+            [destination / "metadata" / "records"],
+            sorted(path for path in (destination / "metadata").iterdir()),
+        )
 
         browser_files = [
             path
@@ -83,7 +87,8 @@ from pathlib import Path
 from orinoco_lite.config import load_config_path
 root = Path(__import__('sys').argv[1])
 workspace = load_config_path(root / 'orinoco.yaml')
-assert workspace.path('canonical').resolve() == (root / 'metadata' / 'records').resolve()
+assert workspace.path('records').resolve() == (root / 'metadata' / 'records').resolve()
+assert workspace.path('source_adapters').resolve() == (root / 'source-adapters').resolve()
 """
         environment = dict(os.environ, PIXI_FROZEN="true", PIXI_NO_CONFIG="true")
         configured_source = environment.get("ORINOCO_ENGINE_SOURCE")

@@ -18,11 +18,11 @@ _skip_if_exists:
   - .orinoco-lite/provenance/**
   - .orinoco-lite/tests/__init__.py
   - .orinoco-lite/tests/browser/**
-  - metadata/**
+  - metadata/records/**
   - custom/editorial/**
   - custom/assets/**
   - site/**
-  - integrations/**
+  - source-adapters/**
   - extensions/**
 
 project_name:

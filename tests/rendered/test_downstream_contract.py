@@ -51,16 +51,20 @@ class DownstreamContractTests(unittest.TestCase):
     def test_site_owned_paths_are_present(self) -> None:
         for path in (
             "metadata/records",
-            "metadata/reference",
             ".orinoco-lite/provenance",
             "custom/editorial",
             "custom/assets",
             "site",
-            "integrations",
+            "source-adapters",
             "extensions",
         ):
             with self.subTest(path=path):
                 self.assertTrue((ROOT / path).is_dir())
+
+        self.assertEqual(
+            [ROOT / "metadata" / "records"],
+            sorted(path for path in (ROOT / "metadata").iterdir()),
+        )
 
     def test_offline_acceptance_is_site_owned(self) -> None:
         verifier = load_verifier()
@@ -76,12 +80,28 @@ class DownstreamContractTests(unittest.TestCase):
             ["initialized_site_owned"],
             verifier.classify(".orinoco-lite/provenance/external.json", classes),
         )
+        self.assertEqual(
+            ["initialized_site_owned"],
+            verifier.classify("source-adapters/zotero/config.toml", classes),
+        )
 
     def test_engine_configuration_uses_the_supported_path_contract(self) -> None:
         configuration = yaml.safe_load((ROOT / "orinoco.yaml").read_text(encoding="utf-8"))
-        self.assertEqual(1, configuration["contract_version"])
-        self.assertEqual("metadata/records", configuration["paths"]["canonical"])
-        self.assertNotIn("records", configuration["paths"])
+        self.assertEqual(2, configuration["contract_version"])
+        self.assertEqual(
+            {
+                "records": "metadata/records",
+                "provenance": ".orinoco-lite/provenance",
+                "editorial": "custom/editorial",
+                "assets": "custom/assets",
+                "site": "site",
+                "source_adapters": "source-adapters",
+                "generated": "generated",
+                "extensions": "extensions",
+                "build": "build",
+            },
+            configuration["paths"],
+        )
 
         # Run the actual engine loader when this downstream suite is executing
         # in the locked Orinoco environment. The structural assertions above
