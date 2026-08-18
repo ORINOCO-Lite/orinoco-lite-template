@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.1.13 - 2026-08-18
+
+- Prepare Chromium headless-shell and WebKit before either browser suite, avoiding the unused full Chromium download while preserving both engines' acceptance coverage.
+- Keep Linux WebKit host-library installation after Chromium while separating it from browser downloads with live phase logs and bounded five- and ten-minute failures.
+- Pin the reusable consumer workflow that restores exact browser caches, bounds Linux package-manager network operations, and saves caches only from successful default-branch runs.
+
 ## 0.1.12 - 2026-08-18
 
 - Cull generated consumers to the essential downstream interface while keeping implementation support below `.orinoco-lite/`.

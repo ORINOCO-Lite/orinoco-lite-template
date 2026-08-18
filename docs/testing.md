@@ -13,10 +13,16 @@ The template suite proves that:
 - the normal cold-clone gate hydrates declared assets before verifying them, while the denied-network proof warms once and then invokes only asset verification; and
 - the complete downstream gate includes exact Hugo Extended 0.154.5, deterministic repeat-build digest comparison, and Chromium/WebKit tests.
 
-The browser gate installs Chromium without changing host dependencies and runs both Chromium scenarios first.
-It then installs WebKit with Playwright's `--with-deps` mode and runs the same two scenarios in WebKit.
-This order avoids a hosted Ubuntu Chromium teardown hang caused by the WebKit host-dependency installation while preserving the exact four-test matrix.
-On macOS, Playwright keeps the ordinary browser installation behavior.
+The browser gate installs the locked Playwright client, then prepares Chromium headless-shell and WebKit before either suite begins.
+It uses Playwright's `--only-shell` mode so the unused full Chromium binary is not downloaded, while preserving the exact four-test matrix.
+Warm browser caches remain valid: the preparation command verifies each required browser and downloads only missing payloads.
+
+Browser downloads have a ten-minute bound and finish before Chromium runs.
+After Chromium finishes, Linux WebKit host-library installation runs as its own phase with inherited live output and a five-minute bound; WebKit runs only after that succeeds.
+This retains the established Ubuntu ordering in which WebKit host changes never precede the Chromium suite.
+Each phase has explicit start, completion, and failure messages, and a timeout terminates the phase's process group.
+The Linux host-library phase still runs on a browser-cache hit because browser binaries and runner packages have different lifecycles.
+macOS skips host-library installation and keeps the exact macOS 14 Playwright 1.61.1 compatibility overlay before preparing both browsers.
 
 Consumer repositories add their content, build, browser, source-adapter, and site-behavior suites.
 Template tests are not a substitute for those tests.

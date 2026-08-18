@@ -56,6 +56,7 @@ Browser acceptance uses a controlled local project-path URL matching the reposit
 Neither target changes the canonical public identity recorded in `orinoco.yaml`.
 
 `pixi run test-all` is the complete acceptance gate: asset preparation, configuration and runtime validation, projection verification, the pinned Hugo Extended version, consumer tests, byte-compared repeat builds, dual-loopback local-link checks, and the checked Chromium/WebKit scenarios.
+Its browser preparation makes both engines available before testing; on Linux, the post-Chromium WebKit host-library step and browser downloads are separate, logged, bounded phases.
 
 ## Network boundary
 

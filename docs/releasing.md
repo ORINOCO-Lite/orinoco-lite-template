@@ -1,7 +1,11 @@
 # Template release procedure
 
 1. Select an exact reviewed Orinoco engine and runtime release.
-2. Replace every engine, runtime, template, and workflow coordinate in both `.github-template-answers.yml` and the matching `copier.yml` defaults with the same immutable reviewed values for this release.
+2. Review every engine, runtime, template, and workflow coordinate in both
+   `.github-template-answers.yml` and the matching `copier.yml` defaults.
+   Replace each coordinate that advances with the same immutable reviewed
+   value in both files; retain unchanged released components at their existing
+   exact coordinates.
 3. Update `template_version` and the changelog.
 4. Run `pixi run render` and review the generated `copier-template/pixi.lock`; confirm it is byte-identical to `github-template/pixi.lock`.
 5. Run `pixi run check` on macOS ARM64 and Linux x86-64.
