@@ -28,6 +28,21 @@ def load_renderer():
 
 
 class TemplateSourceTests(unittest.TestCase):
+    def test_downstream_skills_separate_content_from_adapter_curation(self) -> None:
+        skills = ROOT / "copier-template" / ".agents" / "skills"
+        content = (skills / "manage-orinoco-content" / "SKILL.md").read_text(
+            encoding="utf-8"
+        )
+        adapters = (
+            skills / "operate-orinoco-metadata-adapters" / "SKILL.md"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("$operate-orinoco-metadata-adapters", content)
+        self.assertIn("decision-only", adapters)
+        self.assertIn("pull request", adapters)
+        self.assertIn("orinoco.lock", adapters)
+        self.assertIn("Remote latest is advisory", adapters)
+
     def test_render_comparison_ignores_only_declared_runtime_state(self) -> None:
         renderer = load_renderer()
         with tempfile.TemporaryDirectory() as temporary:
