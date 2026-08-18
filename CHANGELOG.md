@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.1.14 - 2026-08-18
+
+- Select the stable Ubuntu archive before Playwright installs Linux WebKit host dependencies, while preserving bounded retries and timeouts.
+
 ## 0.1.13 - 2026-08-18
 
 - Prepare Chromium headless-shell and WebKit before either browser suite, avoiding the unused full Chromium download while preserving both engines' acceptance coverage.
