@@ -159,6 +159,10 @@ class DownstreamContractTests(unittest.TestCase):
         self.assertIn("verify-build", tasks["test-all"]["depends-on"])
         self.assertIn("verify-hugo", tasks["test-all"]["depends-on"])
         self.assertEqual(
+            "python .orinoco-lite/tools/run_consumer_tests.py",
+            tasks["test-consumer"],
+        )
+        self.assertEqual(
             ["build"], tasks["verify-local-preview"]["depends-on"]
         )
         self.assertEqual(

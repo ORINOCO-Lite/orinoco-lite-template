@@ -2,15 +2,15 @@
 
 ## Unreleased
 
-- Establish `source-adapters/` as the sole downstream source-adapter surface and align the rendered documentation and agent guidance with upstream importer, enricher, and scraper terms.
-- Make `metadata/records/` the sole metadata Things input and establish configuration contract version 2 with `paths.records` and `paths.source_adapters`.
-- Treat a fresh render as a content-neutral facade awaiting an explicit site profile; do not place non-Thing placeholders in `metadata/records/` or advertise validation before profile installation.
-
-## 0.1.12 - 2026-08-17
+## 0.1.12 - 2026-08-18
 
 - Cull generated consumers to the essential downstream interface while keeping implementation support below `.orinoco-lite/`.
 - Restore a self-consistent template release identity after the historical v0.1.10 and v0.1.11 publication defects.
-- Update the engine, runtime, and reusable workflow to the immutable v0.1.11 release, including support for the configured `custom/assets` root.
+- Establish `source-adapters/` as the sole downstream source-adapter surface and align the rendered documentation and agent guidance with upstream importer, enricher, and scraper terms.
+- Make `metadata/records/` the sole metadata Things input and establish configuration contract version 2 with `paths.records` and `paths.source_adapters`.
+- Treat a fresh render as a content-neutral facade awaiting an explicit site profile; do not place non-Thing placeholders in `metadata/records/` or advertise validation before profile installation.
+- Let the fresh facade's test task succeed without placeholder Python tests while continuing to propagate failures from site-owned tests.
+- Update the engine, runtime, and reusable workflow to the immutable v0.1.12 release and configuration contract 2.
 
 ## 0.1.11 - 2026-08-13
 
