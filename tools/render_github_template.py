@@ -33,6 +33,17 @@ RELEASE_COORDINATES = (
     "workflow_sha",
     "workflow_ref",
 )
+IGNORED_RUNTIME_ROOTS = {
+    ".orinoco",
+    ".pixi",
+    "build",
+    "generated",
+    "node_modules",
+    "playwright-report",
+    "test-results",
+}
+IGNORED_RUNTIME_PATHS = {Path(".orinoco-lite/state")}
+IGNORED_NAMES = {".DS_Store", "__pycache__"}
 
 
 def verify_coordinate_defaults() -> None:
@@ -121,13 +132,50 @@ def render(destination: Path) -> bool:
     return lock_before != copied_lock.read_bytes()
 
 
-def differences(left: Path, right: Path) -> list[str]:
-    comparison = filecmp.dircmp(left, right, ignore=[".pixi", "__pycache__"])
-    result = [f"only rendered: {path}" for path in comparison.left_only]
-    result.extend(f"only checked: {path}" for path in comparison.right_only)
-    result.extend(f"different: {path}" for path in comparison.diff_files)
+def ignored_runtime_path(relative: Path) -> bool:
+    if not relative.parts:
+        return False
+    if relative.parts[0] in IGNORED_RUNTIME_ROOTS:
+        return True
+    if relative.name in IGNORED_NAMES:
+        return True
+    if relative.suffix in {".pyc", ".pyo", ".rej"}:
+        return True
+    return any(
+        relative == ignored or ignored in relative.parents
+        for ignored in IGNORED_RUNTIME_PATHS
+    )
+
+
+def differences(
+    left: Path,
+    right: Path,
+    relative: Path = Path(),
+) -> list[str]:
+    comparison = filecmp.dircmp(left, right)
+    result = [
+        f"only rendered: {path}"
+        for path in comparison.left_only
+        if not ignored_runtime_path(relative / path)
+    ]
+    result.extend(
+        f"only checked: {path}"
+        for path in comparison.right_only
+        if not ignored_runtime_path(relative / path)
+    )
+    result.extend(
+        f"different: {path}"
+        for path in comparison.diff_files
+        if not ignored_runtime_path(relative / path)
+    )
     for name, child in comparison.subdirs.items():
-        result.extend(f"{name}/{item}" for item in differences(child.left, child.right))
+        child_relative = relative / name
+        if ignored_runtime_path(child_relative):
+            continue
+        result.extend(
+            f"{name}/{item}"
+            for item in differences(child.left, child.right, child_relative)
+        )
     return sorted(result)
 
 

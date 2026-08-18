@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import importlib.util
 import inspect
 import os
 import re
@@ -17,7 +18,47 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def load_renderer():
+    path = ROOT / "tools" / "render_github_template.py"
+    spec = importlib.util.spec_from_file_location("render_github_template", path)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 class TemplateSourceTests(unittest.TestCase):
+    def test_render_comparison_ignores_only_declared_runtime_state(self) -> None:
+        renderer = load_renderer()
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            rendered = root / "rendered"
+            checked = root / "checked"
+            rendered.mkdir()
+            checked.mkdir()
+            (rendered / ".orinoco-lite").mkdir()
+            (checked / ".orinoco-lite").mkdir()
+            for relative in (
+                ".orinoco/runtime/cache",
+                ".pixi/envs/default",
+                ".orinoco-lite/state/update",
+                "build/site",
+                "generated/projection",
+                "node_modules/package",
+                "playwright-report/results",
+                "test-results/browser",
+            ):
+                path = checked / relative
+                path.mkdir(parents=True)
+                (path / "ignored.txt").write_text("runtime\n", encoding="utf-8")
+
+            self.assertEqual([], renderer.differences(rendered, checked))
+            (checked / "visible.txt").write_text("checked\n", encoding="utf-8")
+            self.assertEqual(
+                ["only checked: visible.txt"],
+                renderer.differences(rendered, checked),
+            )
+
     def test_checked_default_tree_matches_copier_source(self) -> None:
         renderer = (ROOT / "tools" / "render_github_template.py").read_text(
             encoding="utf-8"
@@ -37,15 +78,13 @@ class TemplateSourceTests(unittest.TestCase):
         destination = ROOT / "github-template"
         self.assertFalse((destination / ".gitmodules").exists())
         for root in (
-            "metadata/records",
-            "metadata/reference",
             ".orinoco-lite/provenance",
             "custom/editorial",
             "custom/assets",
             "site/config",
             "site/layouts",
             "site/static",
-            "integrations",
+            "source-adapters",
             "extensions",
         ):
             files = [
@@ -54,6 +93,9 @@ class TemplateSourceTests(unittest.TestCase):
                 if path.is_file() and path.name != ".gitkeep"
             ]
             self.assertEqual([], files, root)
+
+        self.assertFalse((destination / "metadata").exists())
+        self.assertFalse((destination / "metadata/records/.gitkeep").exists())
 
         browser_files = [
             path
@@ -83,7 +125,8 @@ from pathlib import Path
 from orinoco_lite.config import load_config_path
 root = Path(__import__('sys').argv[1])
 workspace = load_config_path(root / 'orinoco.yaml')
-assert workspace.path('canonical').resolve() == (root / 'metadata' / 'records').resolve()
+assert workspace.path('records').resolve() == (root / 'metadata' / 'records').resolve()
+assert workspace.path('source_adapters').resolve() == (root / 'source-adapters').resolve()
 """
         environment = dict(os.environ, PIXI_FROZEN="true", PIXI_NO_CONFIG="true")
         configured_source = environment.get("ORINOCO_ENGINE_SOURCE")
