@@ -256,6 +256,23 @@ assert workspace.path('source_adapters').resolve() == (root / 'source-adapters')
             2,
         )
 
+    def test_datalad_runinfo_is_site_owned_review_evidence(self) -> None:
+        from importlib.util import module_from_spec, spec_from_file_location
+
+        path = ROOT / "github-template/.orinoco-lite/tools/template_contract.py"
+        spec = spec_from_file_location("curation_template_contract", path)
+        assert spec and spec.loader
+        contract = module_from_spec(spec)
+        spec.loader.exec_module(contract)
+        ownership = contract.load_yaml(
+            ROOT / "github-template/.orinoco-lite/template-ownership.yml"
+        )
+        classes = contract.ownership_classes(ownership)
+        self.assertEqual(
+            ["initialized_site_owned"],
+            contract.classify(".datalad/runinfo/transaction", classes),
+        )
+
     def test_source_ci_covers_both_platforms_with_full_action_pins(self) -> None:
         workflow = (ROOT / ".github" / "workflows" / "source-ci.yml").read_text(
             encoding="utf-8"
