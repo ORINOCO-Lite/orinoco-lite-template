@@ -22,6 +22,7 @@ classes:
     paths:
       - orinoco.yaml
       - .orinoco-lite/provenance/**
+      - .datalad/runinfo/**
       - metadata/records/**
       - custom/editorial/**
       - custom/assets/**

@@ -34,6 +34,16 @@ CROSSWALK_BYTES = (
     b"zotero:creator:ABCD1234\tskos:exactMatch\t"
     b"xyzrins:persons/example\tsemapv:ManualMappingCuration\n"
 )
+DATALAD_RUNINFO_BYTES = b"synthetic retained curation run evidence\n"
+CURATION_WORKFLOW_BYTES = b"""name: Site curation review
+on:
+  workflow_dispatch:
+jobs:
+  site-owned-example:
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo retained
+"""
 
 
 class SourceAdapterUpdatePreservationTests(unittest.TestCase):
@@ -44,11 +54,13 @@ class SourceAdapterUpdatePreservationTests(unittest.TestCase):
         self.update_fixture.setUp()
         self.addCleanup(self.update_fixture.tearDown)
 
-    def test_normal_update_preserves_decision_and_crosswalk_bytes(self) -> None:
+    def test_normal_update_preserves_site_curation_bytes(self) -> None:
         consumer = self.update_fixture.make_consumer("source-adapter-policy")
         artifacts = {
             "source-adapters/zotero/policy/curation-decisions-prototype-v1.yaml": DECISION_BYTES,
             "source-adapters/zotero/policy/creator-crosswalk.tsv": CROSSWALK_BYTES,
+            ".datalad/runinfo/0123456789abcdef0123456789abcdef": DATALAD_RUNINFO_BYTES,
+            ".github/workflows/curation-review.yml": CURATION_WORKFLOW_BYTES,
         }
         for relative, content in artifacts.items():
             path = consumer / relative
