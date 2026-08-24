@@ -6,35 +6,29 @@ import unittest
 import test_update_cycle as update_cycle
 
 
-DECISION_BYTES = b"""format: orinoco-lite-curation-decisions-prototype-v1
+DECISION_BYTES = b"""adapter: zotero
 decisions:
-  - decision_id: curation-decision-event-v1:683fd53cf1e9fb333f31db5fd596f97f52c5ff8c188829a7dd5c1960612ed531
-    claim_revision_id: curation-claim-revision-v1:bcd7bac6c802e4715116f8f960f127b0dee9897ab7ef50c28419cca504f52b4e
-    supersedes_decision_id: null
-    candidate_id: curation-candidate-v1:9c5be03b07f32697ff8434d90545463ace26a87c37e0388ee9ac4fa81f7a06c0
-    adapter_id: zotero
-    source_namespace: zotero:group:6197458
-    source_record_id: item:ABCD1234
-    claim_kind: record-import
-    material_fingerprint: sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-    relevant_policy_fingerprint: sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  xyzrins:publications/example:
+    claim_sha256: sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
     disposition: reject
-    reviewer: example-reviewer
-    decided_on: "2026-08-18"
-    rationale: The reviewed source claim does not identify the canonical record.
-    evidence:
-      - https://example.invalid/review/example
-transactions:
-  - inventory_id: curation-inventory-v1:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-    decision_ids:
-      - curation-decision-event-v1:683fd53cf1e9fb333f31db5fd596f97f52c5ff8c188829a7dd5c1960612ed531
+    review: github-comment:123456
+    source_record_id: item:ABCD1234
+format: orinoco-lite-curation-decisions-v1
+reviews:
+  github-comment:123456:
+    review_url: https://github.com/example/site/pull/42#issuecomment-123456
+    reviewed_at: '2026-08-20T18:42:00Z'
+    reviewer: https://github.com/example-reviewer
+    source_coordinate:
+      library_version: 451
 """
-CROSSWALK_BYTES = (
-    b"subject_id\tpredicate_id\tobject_id\tmapping_justification\n"
-    b"zotero:creator:ABCD1234\tskos:exactMatch\t"
-    b"xyzrins:persons/example\tsemapv:ManualMappingCuration\n"
-)
-DATALAD_RUNINFO_BYTES = b"synthetic retained curation run evidence\n"
+ANNOTATION_BYTES = b"""assertions:
+  - assertion_sha256: sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    path: /identifiers/0
+    pav:importedBy: xyzrins:source-adapters/zotero/v1
+    pav:importedFrom: https://api.zotero.org/groups/6197458/items/ABCD1234
+record: xyzrins:publications/example
+"""
 CURATION_WORKFLOW_BYTES = b"""name: Site curation review
 on:
   workflow_dispatch:
@@ -57,9 +51,8 @@ class SourceAdapterUpdatePreservationTests(unittest.TestCase):
     def test_normal_update_preserves_site_curation_bytes(self) -> None:
         consumer = self.update_fixture.make_consumer("source-adapter-policy")
         artifacts = {
-            "source-adapters/zotero/policy/curation-decisions-prototype-v1.yaml": DECISION_BYTES,
-            "source-adapters/zotero/policy/creator-crosswalk.tsv": CROSSWALK_BYTES,
-            ".datalad/runinfo/0123456789abcdef0123456789abcdef": DATALAD_RUNINFO_BYTES,
+            "source-adapters/zotero/policy/curation-decisions.yaml": DECISION_BYTES,
+            "metadata/overlays/annotations/XYZPublication/example.yaml": ANNOTATION_BYTES,
             ".github/workflows/curation-review.yml": CURATION_WORKFLOW_BYTES,
         }
         for relative, content in artifacts.items():

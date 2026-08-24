@@ -18,7 +18,9 @@ _skip_if_exists:
   - .orinoco-lite/provenance/**
   - .orinoco-lite/tests/__init__.py
   - .orinoco-lite/tests/browser/**
+  - .github/workflows/curation-review.yml
   - metadata/records/**
+  - metadata/overlays/annotations/**
   - custom/editorial/**
   - custom/assets/**
   - site/**
@@ -61,7 +63,7 @@ site_base_url:
 engine_version:
   type: str
   help: Exact orinoco-lite Python distribution version
-  default: 0.1.12
+  default: 0.2.0rc2
   validator: >-
     <% if not (engine_version | regex_search('^[0-9]+\.[0-9]+\.[0-9]+([a-z0-9.-]+)?$')) %>
     Use an exact release version such as 0.1.0.
@@ -70,7 +72,7 @@ engine_version:
 engine_url:
   type: str
   help: Immutable orinoco-lite wheel release URL
-  default: https://github.com/con/orinoco-lite-dev/releases/download/v0.1.12/orinoco_lite-0.1.12-py3-none-any.whl
+  default: https://github.com/con/orinoco-lite-dev/releases/download/v0.2.0rc2/orinoco_lite-0.2.0rc2-py3-none-any.whl
   validator: >-
     <% if '#' in engine_url %>
     Supply the wheel URL without a fragment; the template adds the reviewed SHA-256 fragment.
@@ -79,7 +81,7 @@ engine_url:
 engine_sha256:
   type: str
   help: SHA-256 digest of the immutable orinoco-lite wheel
-  default: "7bcba4c4124873d5a985233c4fef84aa3cd3902dfa401bbdfefb951785c36173"
+  default: "f504d1fb9f2dfdbdd224dcbbcc663843a7ac34107c304d0eb5ed538e45a43198"
   validator: >-
     <% if not (engine_sha256 | regex_search('^[0-9a-f]{64}$')) %>
     Supply exactly 64 lower-case hexadecimal characters.
@@ -88,17 +90,17 @@ engine_sha256:
 runtime_version:
   type: str
   help: Exact immutable Orinoco runtime release version
-  default: 0.1.12
+  default: 0.2.0rc2
 
 runtime_url:
   type: str
   help: Immutable runtime archive URL
-  default: https://github.com/con/orinoco-lite-dev/releases/download/v0.1.12/orinoco-runtime-0.1.12.tar.gz
+  default: https://github.com/con/orinoco-lite-dev/releases/download/v0.2.0rc2/orinoco-runtime-0.2.0rc2.tar.gz
 
 runtime_sha256:
   type: str
   help: SHA-256 digest of the immutable runtime archive
-  default: "0d43cf6b3db4c324777a373c7d2178ab8dcdaf224795f19b4ce2c16e8f114a5a"
+  default: "a038f3810fe5a001d1cc28a30715cc0cf95c90365d0b1e6c344271a631db8e09"
   validator: >-
     <% if not (runtime_sha256 | regex_search('^[0-9a-f]{64}$')) %>
     Supply exactly 64 lower-case hexadecimal characters.
@@ -107,7 +109,7 @@ runtime_sha256:
 runtime_manifest_sha256:
   type: str
   help: SHA-256 digest of runtime-manifest.json inside the archive
-  default: "4751bab7bfe5fa65bdc95499aff05a77b48de2f7f194270293865d6f25ab200f"
+  default: "4ff3f2ff5a02d94084c262ca00ed5a8259a6ddfc420b9cfa0c4cd8cefe39bb3b"
   validator: >-
     <% if not (runtime_manifest_sha256 | regex_search('^[0-9a-f]{64}$')) %>
     Supply exactly 64 lower-case hexadecimal characters.
@@ -121,7 +123,7 @@ template_source:
 template_version:
   type: str
   help: Exact Copier template release
-  default: v0.1.15
+  default: v0.2.0rc2
   validator: >-
     <% if not (template_version | regex_search('^v[0-9]+\.[0-9]+\.[0-9]+([a-z0-9.-]+)?$')) %>
     Use an exact release tag such as v0.1.0.
@@ -135,7 +137,7 @@ workflow_repository:
 workflow_sha:
   type: str
   help: Full reviewed commit SHA associated with the release workflows
-  default: "fe01e297d3d22d1690bf891b40eaab36595cea9e"
+  default: "8bd328b17e359bf9594e83381c3efc1c7ab0ecac"
   validator: >-
     <% if not (workflow_sha | regex_search('^[0-9a-f]{40}$')) %>
     Supply exactly 40 lower-case hexadecimal characters.
@@ -144,7 +146,7 @@ workflow_sha:
 workflow_ref:
   type: str
   help: Full immutable reusable-workflow reference, including path and commit SHA
-  default: con/orinoco-lite-dev/.github/workflows/orinoco-consumer-ci.yml@fe01e297d3d22d1690bf891b40eaab36595cea9e
+  default: con/orinoco-lite-dev/.github/workflows/orinoco-consumer-ci.yml@8bd328b17e359bf9594e83381c3efc1c7ab0ecac
   validator: >-
     <% if not (workflow_ref | regex_search('^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/\.github/workflows/[A-Za-z0-9_.-]+\.ya?ml@[0-9a-f]{40}$')) %>
     Use owner/repository/.github/workflows/name.yml@ followed by a full commit SHA.

@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.0rc2 - 2026-08-24
+
+- Distribute the generic exact-head SHACL Vue handoff workflow and helper while
+  keeping concrete source-adapter acquisition and curation policy site-owned.
+- Protect annotation companions and the concrete curation workflow across
+  normal Copier updates, including an exact target-added workflow that a
+  downstream pre-applied during integration.
+- Replace obsolete prototype preservation fixtures with the compact current
+  decision cache and remove DataLad sidecar ownership.
+- Verify and export the pinned released runtime before importing site-owned
+  consumer tests, with no sibling engineering-worktree fallback.
+
 ## 0.1.15 - 2026-08-18
 
 - Split metadata-adapter operation from ordinary content editing and add agent
