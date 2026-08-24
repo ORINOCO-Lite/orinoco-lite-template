@@ -43,6 +43,14 @@ BOOTSTRAP_EQUIVALENT_PATHS = (
     *BOOTSTRAP_RENDERED_PATHS,
     ".orinoco-lite/tools/update_orinoco.py",
 )
+TARGET_ADDED_SOURCE_PATHS = (
+    "copier-template/.github/workflows/shacl-vue-proposal.yml",
+    "copier-template/.orinoco-lite/tools/shacl_vue_handoff.py",
+)
+TARGET_ADDED_RENDERED_PATHS = tuple(
+    path.removeprefix("copier-template/") for path in TARGET_ADDED_SOURCE_PATHS
+)
+TARGET_ADDED_WORKFLOW = ".github/workflows/shacl-vue-proposal.yml"
 OLD_UPDATER_MARKER = "v0.1.0 updater requires reviewed bootstrap"
 GIT_ENV = {
     "GIT_AUTHOR_NAME": "Orinoco Template Test",
@@ -165,6 +173,15 @@ class UpdateCycleTests(unittest.TestCase):
         self.template.mkdir()
         shutil.copy2(ROOT / "copier.yml", self.template / "copier.yml")
         shutil.copytree(ROOT / "copier-template", self.template / "copier-template")
+        self.target_added_files = {
+            relative: (
+                (self.template / relative).read_bytes(),
+                (self.template / relative).stat().st_mode & 0o777,
+            )
+            for relative in TARGET_ADDED_SOURCE_PATHS
+        }
+        for relative in TARGET_ADDED_SOURCE_PATHS:
+            (self.template / relative).unlink()
         updater = self.template / "copier-template/.orinoco-lite/tools/update_orinoco.py"
         self.target_updater = updater.read_bytes()
         updater.write_text(
@@ -184,6 +201,11 @@ class UpdateCycleTests(unittest.TestCase):
         )
         run(["git", "tag", "v0.1.0"], self.template)
 
+        for relative, (content, mode) in self.target_added_files.items():
+            path = self.template / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(content)
+            path.chmod(mode)
         updater.write_bytes(self.target_updater)
         for relative in BOOTSTRAP_SOURCE_PATHS:
             path = self.template / relative
@@ -512,6 +534,74 @@ class UpdateCycleTests(unittest.TestCase):
             (consumer / ".github/workflows/validate.yml").read_text(
                 encoding="utf-8"
             ),
+        )
+
+    def test_exact_target_added_files_are_reconciled_safely(self) -> None:
+        consumer = self.make_consumer("target-added-equivalent")
+        before = protected_bytes(consumer)
+        for source_relative, rendered_relative in zip(
+            TARGET_ADDED_SOURCE_PATHS,
+            TARGET_ADDED_RENDERED_PATHS,
+            strict=True,
+        ):
+            source = self.template / source_relative
+            destination = consumer / rendered_relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(source.read_bytes())
+            destination.chmod(source.stat().st_mode & 0o777)
+        commit_all(consumer, "feat: preapply target SHACL support")
+
+        result = run(self.update_command(), consumer, check=False)
+
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertEqual([], list(consumer.rglob("*.rej")))
+        ledger = json.loads(
+            (consumer / ".orinoco-lite/state/framework-update.json").read_text()
+        )
+        self.assertEqual(
+            list(TARGET_ADDED_RENDERED_PATHS),
+            [
+                path
+                for path in ledger["reconciled_target_equivalent"]
+                if path in TARGET_ADDED_RENDERED_PATHS
+            ],
+        )
+        for source_relative, rendered_relative in zip(
+            TARGET_ADDED_SOURCE_PATHS,
+            TARGET_ADDED_RENDERED_PATHS,
+            strict=True,
+        ):
+            self.assertEqual(
+                (self.template / source_relative).read_bytes(),
+                (consumer / rendered_relative).read_bytes(),
+            )
+        self.assertEqual(before, protected_bytes(consumer))
+
+    def test_divergent_target_added_workflow_remains_a_conflict(self) -> None:
+        consumer = self.make_consumer("target-added-divergent")
+        source = self.template / f"copier-template/{TARGET_ADDED_WORKFLOW}"
+        destination = consumer / TARGET_ADDED_WORKFLOW
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes(
+            source.read_bytes().replace(
+                b"name: Materialize SHACL Vue proposal",
+                b"name: Site-specific SHACL Vue proposal",
+                1,
+            )
+        )
+        commit_all(consumer, "feat: add divergent target workflow")
+
+        result = run(self.update_command(), consumer, check=False)
+
+        self.assertNotEqual(0, result.returncode)
+        ledger = json.loads(
+            (consumer / ".orinoco-lite/state/framework-update.json").read_text()
+        )
+        self.assertEqual("conflicts", ledger["status"])
+        self.assertIn(TARGET_ADDED_WORKFLOW + ".rej", ledger["conflicts"])
+        self.assertNotIn(
+            TARGET_ADDED_WORKFLOW,
+            ledger["reconciled_target_equivalent"],
         )
 
     def test_exact_intervening_release_state_advances_safely(self) -> None:

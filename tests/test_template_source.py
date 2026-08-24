@@ -131,8 +131,8 @@ class TemplateSourceTests(unittest.TestCase):
             (ROOT / "github-template" / ".copier-answers.yml").read_text()
         )
         self.assertEqual("gh:con/orinoco-lite-template", answers["_src_path"])
-        self.assertEqual("v0.1.15", answers["_commit"])
-        self.assertEqual("v0.1.15", answers["template_version"])
+        self.assertEqual("v0.2.0rc2", answers["_commit"])
+        self.assertEqual("v0.2.0rc2", answers["template_version"])
 
     def test_rendered_configuration_loads_with_the_actual_engine(self) -> None:
         script = """
@@ -256,7 +256,7 @@ assert workspace.path('source_adapters').resolve() == (root / 'source-adapters')
             2,
         )
 
-    def test_datalad_runinfo_is_site_owned_review_evidence(self) -> None:
+    def test_milestone_five_ownership_boundaries_are_explicit(self) -> None:
         from importlib.util import module_from_spec, spec_from_file_location
 
         path = ROOT / "github-template/.orinoco-lite/tools/template_contract.py"
@@ -270,7 +270,18 @@ assert workspace.path('source_adapters').resolve() == (root / 'source-adapters')
         classes = contract.ownership_classes(ownership)
         self.assertEqual(
             ["initialized_site_owned"],
-            contract.classify(".datalad/runinfo/transaction", classes),
+            contract.classify(
+                "metadata/overlays/annotations/XYZProject/example.yaml",
+                classes,
+            ),
+        )
+        self.assertEqual(
+            ["initialized_site_owned"],
+            contract.classify(".github/workflows/curation-review.yml", classes),
+        )
+        self.assertEqual(
+            ["template_owned"],
+            contract.classify(".github/workflows/shacl-vue-proposal.yml", classes),
         )
 
     def test_source_ci_covers_both_platforms_with_full_action_pins(self) -> None:

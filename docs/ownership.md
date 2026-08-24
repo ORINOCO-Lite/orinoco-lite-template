@@ -5,8 +5,8 @@ The checked render contains the same contract at `github-template/.orinoco-lite/
 
 | Class | Update behavior | Representative paths |
 | --- | --- | --- |
-| `template_owned` | Copier three-way update; overlapping downstream edits stop as conflicts | workflows, command facade, updater, ownership verifier, generic adapters, generic contract documentation |
-| `initialized_site_owned` | Created once and excluded from later Copier overwrites | `orinoco.yaml`, metadata, `custom/`, site presentation, and source adapters |
+| `template_owned` | Copier three-way update; overlapping downstream edits stop as conflicts | generic workflows, command facade, updater, ownership verifier, generic adapters, generic contract documentation |
+| `initialized_site_owned` | Created once and excluded from later Copier overwrites | `orinoco.yaml`, metadata, the concrete curation workflow, `custom/`, site presentation, and source adapters |
 | `engine_lock` | Structured replacement by the pinned updater | `orinoco.lock` and the frozen `pixi.lock` |
 | `extensions` | Stable site-owned customization hook | `extensions/` |
 | `consumer_tests` | Created once, then owned and extended by the site | browser, source-adapter, and offline behavior tests |
@@ -21,6 +21,9 @@ Ownership follows the path contract, not apparent similarity.
 A supported customization belongs under `extensions/`; copying a framework file into a site-owned directory does not silently transfer ownership of that framework behavior.
 
 Source adapters and their site-owned tests use only `source-adapters/` and `.orinoco-lite/tests/source-adapters/`, respectively.
+Their concrete curation workflow is site-owned. The generic SHACL Vue handoff
+workflow and helper are template-owned and operate only on exact Git
+coordinates plus canonical records and annotation companions.
 
 This layer never chooses a site's publication identity, content scope, collection policy, authorship, venue, content licensing, or production-cutover semantics.
 Those are consumer decisions.
