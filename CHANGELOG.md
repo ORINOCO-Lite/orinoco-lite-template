@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.0rc3 - 2026-08-24
+
+- Grant the trusted SHACL Vue proposal workflow pull-request write access for
+  its idempotent service-link comment and remove the redundant issues
+  permission.
+
 ## 0.2.0rc2 - 2026-08-24
 
 - Distribute the generic exact-head SHACL Vue handoff workflow and helper while

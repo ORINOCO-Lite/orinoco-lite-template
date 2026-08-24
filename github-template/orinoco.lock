@@ -14,7 +14,7 @@ runtime:
 
 template:
   source: "gh:con/orinoco-lite-template"
-  version: "v0.2.0rc2"
+  version: "v0.2.0rc3"
 
 workflow:
   repository: "con/orinoco-lite-dev"
