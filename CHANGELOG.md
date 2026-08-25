@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.0rc7 - 2026-08-25
+
+- Advance the default engine and runtime to the immutable `v0.2.0rc4` release, preserving unresolved `Identifier.creator` PIDs as scalars while keeping graph relationships locally closed.
+
 ## 0.2.0rc6 - 2026-08-25
 
 - Regenerate structured engine locks after Copier only when every rejection is confined to an engine-lock path across the previous, current, and target ownership contracts; preserve all witnesses for mixed conflicts.
