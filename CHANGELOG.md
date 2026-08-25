@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.0rc4 - 2026-08-24
+
+- Accept canonical metadata heads that merge an exact trusted base while
+  retaining per-commit path checks and the strict one-parent temporary SHACL
+  Vue handoff boundary.
+
 ## 0.2.0rc3 - 2026-08-24
 
 - Grant the trusted SHACL Vue proposal workflow pull-request write access for
