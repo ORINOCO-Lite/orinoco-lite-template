@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.0rc6 - 2026-08-25
+
+- Regenerate structured engine locks after Copier only when every rejection is confined to an engine-lock path across the previous, current, and target ownership contracts; preserve all witnesses for mixed conflicts.
+
 ## 0.2.0rc5 - 2026-08-25
 
 - Route hosted review and SHACL Vue handoffs through the canonical central service pages while keeping the downstream editor download-only.
