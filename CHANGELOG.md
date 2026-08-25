@@ -1,34 +1,28 @@
 # Changelog
 
+## 0.2.0rc5 - 2026-08-25
+
+- Route hosted review and SHACL Vue handoffs through the canonical central service pages while keeping the downstream editor download-only.
+- Advance the default engine and runtime to the reviewed immutable `v0.2.0rc3` release used by the accepted consumers.
+
 ## 0.2.0rc4 - 2026-08-24
 
-- Accept canonical metadata heads that merge an exact trusted base while
-  retaining per-commit path checks and the strict one-parent temporary SHACL
-  Vue handoff boundary.
+- Accept canonical metadata heads that merge an exact trusted base while retaining per-commit path checks and the strict one-parent temporary SHACL Vue handoff boundary.
 
 ## 0.2.0rc3 - 2026-08-24
 
-- Grant the trusted SHACL Vue proposal workflow pull-request write access for
-  its idempotent service-link comment and remove the redundant issues
-  permission.
+- Grant the trusted SHACL Vue proposal workflow pull-request write access for its idempotent service-link comment and remove the redundant issues permission.
 
 ## 0.2.0rc2 - 2026-08-24
 
-- Distribute the generic exact-head SHACL Vue handoff workflow and helper while
-  keeping concrete source-adapter acquisition and curation policy site-owned.
-- Protect annotation companions and the concrete curation workflow across
-  normal Copier updates, including an exact target-added workflow that a
-  downstream pre-applied during integration.
-- Replace obsolete prototype preservation fixtures with the compact current
-  decision cache and remove DataLad sidecar ownership.
-- Verify and export the pinned released runtime before importing site-owned
-  consumer tests, with no sibling engineering-worktree fallback.
+- Distribute the generic exact-head SHACL Vue handoff workflow and helper while keeping concrete source-adapter acquisition and curation policy site-owned.
+- Protect annotation companions and the concrete curation workflow across normal Copier updates, including an exact target-added workflow that a downstream pre-applied during integration.
+- Replace obsolete prototype preservation fixtures with the compact current decision cache and remove DataLad sidecar ownership.
+- Verify and export the pinned released runtime before importing site-owned consumer tests, with no sibling engineering-worktree fallback.
 
 ## 0.1.15 - 2026-08-18
 
-- Split metadata-adapter operation from ordinary content editing and add agent
-  guidance for version-aware provenance, durable human decision memory, and
-  static review pull requests.
+- Split metadata-adapter operation from ordinary content editing and add agent guidance for version-aware provenance, durable human decision memory, and static review pull requests.
 
 ## 0.1.14 - 2026-08-18
 
