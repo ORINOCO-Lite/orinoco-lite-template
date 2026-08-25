@@ -52,6 +52,8 @@ TARGET_ADDED_RENDERED_PATHS = tuple(
 )
 TARGET_ADDED_WORKFLOW = ".github/workflows/shacl-vue-proposal.yml"
 OLD_UPDATER_MARKER = "v0.1.0 updater requires reviewed bootstrap"
+TARGET_ENGINE_LOCK_MARKER = "# target release engine lock"
+CONSUMER_ENGINE_LOCK_MARKER = "# independently regenerated consumer engine lock"
 GIT_ENV = {
     "GIT_AUTHOR_NAME": "Orinoco Template Test",
     "GIT_AUTHOR_EMAIL": "template-test@example.invalid",
@@ -207,6 +209,15 @@ class UpdateCycleTests(unittest.TestCase):
             path.write_bytes(content)
             path.chmod(mode)
         updater.write_bytes(self.target_updater)
+        pixi_lock = self.template / "copier-template/pixi.lock"
+        pixi_lock.write_text(
+            pixi_lock.read_text(encoding="utf-8").replace(
+                "version: 7\n",
+                f"version: 7\n{TARGET_ENGINE_LOCK_MARKER}\n",
+                1,
+            ),
+            encoding="utf-8",
+        )
         for relative in BOOTSTRAP_SOURCE_PATHS:
             path = self.template / relative
             text = path.read_text(encoding="utf-8")
@@ -510,6 +521,81 @@ class UpdateCycleTests(unittest.TestCase):
                 "version": "0.1.1",
             },
             pixi_lock["packages"][0],
+        )
+
+    def test_engine_lock_rejection_is_reconciled_before_regeneration(self) -> None:
+        consumer = self.make_consumer("regenerated-engine-lock")
+        pixi_lock = consumer / "pixi.lock"
+        pixi_lock.write_text(
+            pixi_lock.read_text(encoding="utf-8").replace(
+                "version: 7\n",
+                f"version: 7\n{CONSUMER_ENGINE_LOCK_MARKER}\n",
+                1,
+            ),
+            encoding="utf-8",
+        )
+        commit_all(consumer, "chore: regenerate consumer engine lock")
+        environment = dict(
+            os.environ,
+            **GIT_ENV,
+            SOURCE_DATE_EPOCH="0",
+            ORINOCO_TEST_ENGINE_WHEEL=self.engine_wheel.as_posix(),
+            PATH=f"{self.fake_bin}{os.pathsep}{os.environ['PATH']}",
+        )
+
+        result = subprocess.run(
+            self.update_command(skip_pixi_lock=False),
+            cwd=consumer,
+            env=environment,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertEqual([], list(consumer.rglob("*.rej")))
+        self.assertNotIn(TARGET_ENGINE_LOCK_MARKER, pixi_lock.read_text())
+        self.assertNotIn(CONSUMER_ENGINE_LOCK_MARKER, pixi_lock.read_text())
+        ledger = json.loads(
+            (consumer / ".orinoco-lite/state/framework-update.json").read_text()
+        )
+        self.assertEqual([], ledger["conflicts"])
+        self.assertNotIn("pixi.lock", ledger["reconciled_target_equivalent"])
+
+    def test_non_engine_conflict_keeps_engine_lock_rejection_visible(self) -> None:
+        consumer = self.make_consumer("engine-and-template-conflicts")
+        pixi_lock = consumer / "pixi.lock"
+        pixi_lock.write_text(
+            pixi_lock.read_text(encoding="utf-8").replace(
+                "version: 7\n",
+                f"version: 7\n{CONSUMER_ENGINE_LOCK_MARKER}\n",
+                1,
+            ),
+            encoding="utf-8",
+        )
+        readme = consumer / "README.md"
+        lines = readme.read_text(encoding="utf-8").splitlines()
+        lines[0] = "# Orinoco Lite Site — downstream customization"
+        readme.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        commit_all(consumer, "test: create engine and template conflicts")
+
+        result = run(
+            self.update_command(skip_pixi_lock=False),
+            consumer,
+            check=False,
+        )
+
+        self.assertNotEqual(0, result.returncode)
+        self.assertTrue((consumer / "README.md.rej").is_file())
+        self.assertTrue((consumer / "pixi.lock.rej").is_file())
+        ledger = json.loads(
+            (consumer / ".orinoco-lite/state/framework-update.json").read_text()
+        )
+        self.assertEqual("conflicts", ledger["status"])
+        self.assertEqual(
+            ["README.md.rej", "pixi.lock.rej"],
+            ledger["conflicts"],
         )
 
     def test_target_equivalent_bootstrap_edits_are_reconciled_safely(self) -> None:
