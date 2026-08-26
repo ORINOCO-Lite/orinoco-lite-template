@@ -2,7 +2,10 @@
 
 ## Unreleased
 
+## 0.2.0rc8 - 2026-08-26
+
 - Retain each successful Pages deployment as a generated two-commit projection and website chain without adding generated files to the source branch.
+- Advance the default engine and runtime to the immutable `v0.2.0rc5` release, aligning the enrichment and rebased editor stack with Hugo Extended 0.161.1.
 
 ## 0.2.0rc7 - 2026-08-25
 
