@@ -63,7 +63,7 @@ site_base_url:
 engine_version:
   type: str
   help: Exact orinoco-lite Python distribution version
-  default: 0.2.0rc4
+  default: 0.2.0rc5
   validator: >-
     <% if not (engine_version | regex_search('^[0-9]+\.[0-9]+\.[0-9]+([a-z0-9.-]+)?$')) %>
     Use an exact release version such as 0.1.0.
@@ -72,7 +72,7 @@ engine_version:
 engine_url:
   type: str
   help: Immutable orinoco-lite wheel release URL
-  default: https://github.com/con/orinoco-lite-dev/releases/download/v0.2.0rc4/orinoco_lite-0.2.0rc4-py3-none-any.whl
+  default: https://github.com/con/orinoco-lite-dev/releases/download/v0.2.0rc5/orinoco_lite-0.2.0rc5-py3-none-any.whl
   validator: >-
     <% if '#' in engine_url %>
     Supply the wheel URL without a fragment; the template adds the reviewed SHA-256 fragment.
@@ -81,7 +81,7 @@ engine_url:
 engine_sha256:
   type: str
   help: SHA-256 digest of the immutable orinoco-lite wheel
-  default: "8801f7fcb6c305a8d1ba4bfe67f9418a70d105e9b4ec3cba5fb38087f8ff8c9a"
+  default: "61bd84702361179ecf63701d8ce0cd3cd97f382350274d4023a1737a552d032c"
   validator: >-
     <% if not (engine_sha256 | regex_search('^[0-9a-f]{64}$')) %>
     Supply exactly 64 lower-case hexadecimal characters.
@@ -90,17 +90,17 @@ engine_sha256:
 runtime_version:
   type: str
   help: Exact immutable Orinoco runtime release version
-  default: 0.2.0rc4
+  default: 0.2.0rc5
 
 runtime_url:
   type: str
   help: Immutable runtime archive URL
-  default: https://github.com/con/orinoco-lite-dev/releases/download/v0.2.0rc4/orinoco-runtime-0.2.0rc4.tar.gz
+  default: https://github.com/con/orinoco-lite-dev/releases/download/v0.2.0rc5/orinoco-runtime-0.2.0rc5.tar.gz
 
 runtime_sha256:
   type: str
   help: SHA-256 digest of the immutable runtime archive
-  default: "22e142a1d5587f2d036a4b216553f264cb41b94398d0f1f13f43b9ac0d8a1d63"
+  default: "f3a019c326fa2a46549682da4303ba63b645674f64c601b74014af356683c6dd"
   validator: >-
     <% if not (runtime_sha256 | regex_search('^[0-9a-f]{64}$')) %>
     Supply exactly 64 lower-case hexadecimal characters.
@@ -109,7 +109,7 @@ runtime_sha256:
 runtime_manifest_sha256:
   type: str
   help: SHA-256 digest of runtime-manifest.json inside the archive
-  default: "d9f7ff716b5b9e883d2a008b94a48270734dab197beb65b4c598245a3301241e"
+  default: "7897fcf3e5faebf5d7b6717d37013a6464c90d5eaea4c8bac0781cca1a095d2d"
   validator: >-
     <% if not (runtime_manifest_sha256 | regex_search('^[0-9a-f]{64}$')) %>
     Supply exactly 64 lower-case hexadecimal characters.
@@ -123,7 +123,7 @@ template_source:
 template_version:
   type: str
   help: Exact Copier template release
-  default: v0.2.0rc7
+  default: v0.2.0rc8
   validator: >-
     <% if not (template_version | regex_search('^v[0-9]+\.[0-9]+\.[0-9]+([a-z0-9.-]+)?$')) %>
     Use an exact release tag such as v0.1.0.
