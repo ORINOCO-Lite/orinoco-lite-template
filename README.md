@@ -7,7 +7,7 @@ It supplies a small consumer facade while keeping site content independent from 
 
 | Layer | Owns | Does not own |
 | --- | --- | --- |
-| [Orinoco Lite engine](https://github.com/con/orinoco-lite-dev) | CLI behavior, the Python wheel, runtime archive, validation and projection behavior, and reusable CI | Copier topology or any site's content |
+| [Orinoco Lite engine](https://github.com/ORINOCO-Lite/orinoco-lite-dev) | CLI behavior, the Python wheel, runtime archive, validation and projection behavior, and reusable CI | Copier topology or any site's content |
 | This template | Creation, file-ownership classes, pinned release coordinates, update tooling, and the generic consumer documentation facade | Engine internals or organization-specific records and policy |
 | Rendered consumer | Metadata records, editorial material, assets, presentation, source adapters, extensions, site tests, review, and deployment | Publication of engine or template releases |
 
@@ -23,14 +23,14 @@ flowchart LR
 
 The template refers upward through exact engine, runtime, and workflow pins.
 It projects downward into a normal consumer repository that can be reviewed, built, and deployed without this maintenance checkout.
-See the [checked consumer documentation](github-template/README.md) and the [populated source-adapter consumer](https://github.com/con/test-orinoco-downstream-website) for those lower-level views.
+See the [checked consumer documentation](github-template/README.md) and the [populated source-adapter consumer](https://github.com/ORINOCO-Lite/test-orinoco-downstream-website) for those lower-level views.
 
 ## Rights and intended use
 
 Original template, updater, workflow, and test code is [MIT licensed](LICENSE).
 Original documentation is CC BY 4.0.
 Generated sites inherit the MIT grant for their generic Orinoco Lite facade, but site owners must license their own content, media, and presentation separately.
-See [`LICENSES.md`](LICENSES.md) and the accepted engine human-review decision [HR-003](https://github.com/con/orinoco-lite-dev/blob/main/docs/human-review-decisions.md#hr-003--establish-authority-and-a-project-license-matrix).
+See [`LICENSES.md`](LICENSES.md) and the accepted engine human-review decision [HR-003](https://github.com/ORINOCO-Lite/orinoco-lite-dev/blob/main/docs/human-review-decisions.md#hr-003--establish-authority-and-a-project-license-matrix).
 
 ## Creating a consumer
 
@@ -42,10 +42,10 @@ Use `v0.1.12` or a later internally aligned release for the Copier-first command
 Copier-first creation is the preferred path when the site's identity and Pages project path are already known:
 
 ```console
-copier copy --vcs-ref vX.Y.Z gh:con/orinoco-lite-template new-site
+copier copy --vcs-ref vX.Y.Z gh:ORINOCO-Lite/orinoco-lite-template new-site
 ```
 
-Replace `vX.Y.Z` with an exact tag from the [immutable template releases](https://github.com/con/orinoco-lite-template/releases).
+Replace `vX.Y.Z` with an exact tag from the [immutable template releases](https://github.com/ORINOCO-Lite/orinoco-lite-template/releases).
 
 For a GitHub-first review, use the repository's **Use this template** action, leave **Include all branches** unchecked, then follow the rendered [GitHub-template bootstrap](github-template/docs/getting-started.md) before adding content.
 Both routes retain an exact recorded Copier release and frozen engine environment.

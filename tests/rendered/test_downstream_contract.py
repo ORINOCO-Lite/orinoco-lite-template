@@ -427,7 +427,7 @@ class DownstreamContractTests(unittest.TestCase):
             for job_name, job in document["jobs"].items():
                 with self.subTest(workflow=name, job=job_name):
                     self.assertIn(
-                        "github.repository != 'con/orinoco-lite-template'",
+                        "github.repository != 'ORINOCO-Lite/orinoco-lite-template'",
                         str(job.get("if", "")),
                     )
 
