@@ -367,11 +367,14 @@ class UpdateCycleTests(unittest.TestCase):
                 self.assertIn(initial_sha, text)
                 path.write_text(
                     text.replace(initial_sha, TARGET_WORKFLOW_SHA).replace(
-                        "workflow-repository: con/orinoco-lite-dev",
+                        "workflow-repository: ORINOCO-Lite/orinoco-lite-dev",
                         "workflow-repository: example/orinoco",
                     ).replace(
-                        "uses: con/orinoco-lite-dev/.github/workflows/",
+                        "uses: ORINOCO-Lite/orinoco-lite-dev/.github/workflows/",
                         "uses: example/orinoco/.github/workflows/",
+                    ).replace(
+                        "github.repository != 'con/orinoco-lite-template'",
+                        "github.repository != 'ORINOCO-Lite/orinoco-lite-template'",
                     ),
                     encoding="utf-8",
                 )

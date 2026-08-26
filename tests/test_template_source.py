@@ -130,9 +130,11 @@ class TemplateSourceTests(unittest.TestCase):
         answers = yaml.safe_load(
             (ROOT / "github-template" / ".copier-answers.yml").read_text()
         )
-        self.assertEqual("gh:con/orinoco-lite-template", answers["_src_path"])
-        self.assertEqual("v0.2.0rc8", answers["_commit"])
-        self.assertEqual("v0.2.0rc8", answers["template_version"])
+        self.assertEqual(
+            "gh:ORINOCO-Lite/orinoco-lite-template", answers["_src_path"]
+        )
+        self.assertEqual("v0.2.0rc9", answers["_commit"])
+        self.assertEqual("v0.2.0rc9", answers["template_version"])
 
     def test_rendered_configuration_loads_with_the_actual_engine(self) -> None:
         script = """
