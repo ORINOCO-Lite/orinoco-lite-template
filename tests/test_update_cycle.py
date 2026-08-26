@@ -30,7 +30,7 @@ TARGET_WORKFLOW_REF = (
     f"{TARGET_WORKFLOW_SHA}"
 )
 BOOTSTRAP_SOURCE_PATHS = (
-    "copier-template/.github/workflows/pages.yml",
+    "copier-template/.github/workflows/pages.yml.jinja",
     "copier-template/.github/workflows/update-orinoco.yml",
     "copier-template/.github/workflows/validate.yml.jinja",
 )
@@ -361,6 +361,20 @@ class UpdateCycleTests(unittest.TestCase):
                 "pixi-version: 0.73.0",
                 replacement,
             )
+            if relative == ".github/workflows/pages.yml":
+                initial_sha = "3" * 40
+                text = path.read_text(encoding="utf-8")
+                self.assertIn(initial_sha, text)
+                path.write_text(
+                    text.replace(initial_sha, TARGET_WORKFLOW_SHA).replace(
+                        "workflow-repository: con/orinoco-lite-dev",
+                        "workflow-repository: example/orinoco",
+                    ).replace(
+                        "uses: con/orinoco-lite-dev/.github/workflows/",
+                        "uses: example/orinoco/.github/workflows/",
+                    ),
+                    encoding="utf-8",
+                )
         commit_all(consumer, "chore: apply reviewed Pixi bootstrap")
 
     def update_command(self, *, skip_pixi_lock: bool = True) -> list[str]:

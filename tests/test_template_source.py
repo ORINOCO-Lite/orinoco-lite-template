@@ -244,7 +244,7 @@ assert workspace.path('source_adapters').resolve() == (root / 'source-adapters')
         pages = (
             ROOT / "github-template" / ".github" / "workflows" / "pages.yml"
         ).read_text(encoding="utf-8")
-        self.assertNotIn(
+        self.assertIn(
             "github.event_name == 'workflow_dispatch' ||",
             pages,
         )
@@ -253,7 +253,7 @@ assert workspace.path('source_adapters').resolve() == (root / 'source-adapters')
                 "github.ref == format('refs/heads/{0}', "
                 "github.event.repository.default_branch)"
             ),
-            2,
+            1,
         )
 
     def test_milestone_five_ownership_boundaries_are_explicit(self) -> None:

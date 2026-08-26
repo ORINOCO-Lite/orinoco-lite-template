@@ -431,12 +431,12 @@ class DownstreamContractTests(unittest.TestCase):
                         str(job.get("if", "")),
                     )
 
-    def test_pages_deploys_only_the_destination_default_branch(self) -> None:
+    def test_pages_deploys_and_records_the_destination_default_branch(self) -> None:
         workflow_text = (ROOT / ".github" / "workflows" / "pages.yml").read_text(
             encoding="utf-8"
         )
         self.assertIn("\n  workflow_dispatch:\n", workflow_text)
-        self.assertNotIn(
+        self.assertIn(
             "github.event_name == 'workflow_dispatch' ||",
             workflow_text,
         )
@@ -445,8 +445,20 @@ class DownstreamContractTests(unittest.TestCase):
                 "github.ref == format('refs/heads/{0}', "
                 "github.event.repository.default_branch)"
             ),
-            2,
+            1,
         )
+        lock = yaml.safe_load((ROOT / "orinoco.lock").read_text(encoding="utf-8"))
+        pages_ref = (
+            f"{lock['workflow']['repository']}/.github/workflows/"
+            f"orinoco-pages.yml@{lock['workflow']['sha']}"
+        )
+        self.assertIn(f"uses: {pages_ref}", workflow_text)
+        self.assertIn("contents: write", workflow_text)
+        self.assertIn("pages: write", workflow_text)
+        self.assertIn(
+            f"workflow-repository: {lock['workflow']['repository']}", workflow_text
+        )
+        self.assertIn(f"workflow-sha: {lock['workflow']['sha']}", workflow_text)
 
     def test_update_workflow_commit_has_required_agent_attribution(self) -> None:
         workflow_path = ROOT / ".github" / "workflows" / "update-orinoco.yml"
