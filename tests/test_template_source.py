@@ -133,8 +133,17 @@ class TemplateSourceTests(unittest.TestCase):
         self.assertEqual(
             "gh:ORINOCO-Lite/orinoco-lite-template", answers["_src_path"]
         )
-        self.assertEqual("v0.2.0rc9", answers["_commit"])
-        self.assertEqual("v0.2.0rc9", answers["template_version"])
+        self.assertEqual("v0.2.0rc10", answers["_commit"])
+        self.assertEqual("v0.2.0rc10", answers["template_version"])
+
+    def test_rendered_readme_preserves_markdown_structure(self) -> None:
+        readme = (ROOT / "github-template" / "README.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("```console\npixi run validate\n", readme)
+        self.assertIn("\npixi run update-check\n```", readme)
+        self.assertEqual(2, len(re.findall(r"^- .*Orinoco Lite", readme, re.M)))
+        self.assertGreaterEqual(len(re.findall(r"^- `", readme, re.M)), 9)
 
     def test_rendered_configuration_loads_with_the_actual_engine(self) -> None:
         script = """

@@ -8,7 +8,9 @@ Building, previewing, and updating it requires neither Git submodules nor an eng
 
 ## Framework and site boundaries
 
-- This repository owns its content, presentation, policy, tests, review, and deployment; if present, `site/README.md` is its site-owned guide for concrete editorial and operating procedures. - The [Orinoco Lite template](https://github.com/ORINOCO-Lite/orinoco-lite-template) owns the generic repository facade, file-ownership contract, and content-preserving updater. - The [Orinoco Lite engine](https://github.com/ORINOCO-Lite/orinoco-lite-dev) implements the commands, runtime verification, projection, and static build.
+- This repository owns its content, presentation, policy, tests, review, and deployment; if present, `site/README.md` is its site-owned guide for concrete editorial and operating procedures.
+- The [Orinoco Lite template](https://github.com/ORINOCO-Lite/orinoco-lite-template) owns the generic repository facade, file-ownership contract, and content-preserving updater.
+- The [Orinoco Lite engine](https://github.com/ORINOCO-Lite/orinoco-lite-dev) implements the commands, runtime verification, projection, and static build.
 
 `orinoco.lock` is the release authority.
 It records exact engine, runtime, template, and reusable-workflow coordinates; the frozen `pixi.lock` realizes that reviewed environment.
@@ -25,7 +27,18 @@ See engine human-review decision [HR-003](https://github.com/ORINOCO-Lite/orinoc
 
 ## Routine commands after adding a site profile
 
-```console pixi run validate pixi run projection-update pixi run projection-verify pixi run assets-hydrate pixi run assets-verify pixi run build pixi run serve pixi run test pixi run test-all pixi run update-check ```
+```console
+pixi run validate
+pixi run projection-update
+pixi run projection-verify
+pixi run assets-hydrate
+pixi run assets-verify
+pixi run build
+pixi run serve
+pixi run test
+pixi run test-all
+pixi run update-check
+```
 
 After editing metadata records, `validate` regenerates the ignored projection and checks it.
 `build` does the same before rendering, so the source commit shows the metadata change rather than a duplicate generated tree.
@@ -55,7 +68,19 @@ Do not use `assets-prepare-online` in that denied-network phase; it represents t
 
 ## Repository content
 
-- `metadata/records/` contains every human-facing YAML Thing used as projection input; `metadata/overlays/annotations/` contains its mirrored machine PAV companions when present. - `.orinoco-lite/` contains implementation support behind the checked commands. - `custom/editorial/`, `custom/assets/`, and `site/` contain site-owned presentation inputs. - `.agents/skills/manage-orinoco-content/` guides agents through focused editorial and asset changes. - `.agents/skills/operate-orinoco-metadata-adapters/` guides adapter runs, explicit human decisions, provenance, and review pull requests. - `source-adapters/` contains optional site-owned importers, enrichers, and scrapers; it is not a deployed runtime dependency. - `.github/workflows/shacl-vue-proposal.yml` is the generic trusted human-edit boundary; a concrete source-adapter curation workflow remains site-owned. - `extensions/` is the stable downstream customization surface. - `generated/` contains ignored projection output recreated by validation and builds.
+- `metadata/records/` contains every human-facing YAML Thing used as projection
+  input; `metadata/overlays/annotations/` contains its mirrored machine PAV
+  companions when present.
+- `.orinoco-lite/` contains implementation support behind the checked commands.
+- `custom/editorial/`, `custom/assets/`, and `site/` contain site-owned presentation inputs.
+- `.agents/skills/manage-orinoco-content/` guides agents through focused editorial and asset changes.
+- `.agents/skills/operate-orinoco-metadata-adapters/` guides adapter runs,
+  explicit human decisions, provenance, and review pull requests.
+- `source-adapters/` contains optional site-owned importers, enrichers, and scrapers; it is not a deployed runtime dependency.
+- `.github/workflows/shacl-vue-proposal.yml` is the generic trusted human-edit
+  boundary; a concrete source-adapter curation workflow remains site-owned.
+- `extensions/` is the stable downstream customization surface.
+- `generated/` contains ignored projection output recreated by validation and builds.
 
 A newly created repository is a content-neutral facade, not an empty but buildable website.
 Add a reviewed site profile as described in [creation and configuration](docs/getting-started.md) before running validation or build commands.
