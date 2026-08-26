@@ -30,7 +30,7 @@ TARGET_WORKFLOW_REF = (
     f"{TARGET_WORKFLOW_SHA}"
 )
 BOOTSTRAP_SOURCE_PATHS = (
-    "copier-template/.github/workflows/pages.yml",
+    "copier-template/.github/workflows/pages.yml.jinja",
     "copier-template/.github/workflows/update-orinoco.yml",
     "copier-template/.github/workflows/validate.yml.jinja",
 )

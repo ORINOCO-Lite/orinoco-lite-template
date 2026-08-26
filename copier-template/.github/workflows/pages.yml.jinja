@@ -25,7 +25,7 @@ jobs:
       contents: write
       pages: write
       id-token: write
-    uses: con/orinoco-lite-dev/.github/workflows/orinoco-pages.yml@3b43a4780b999670482729c2a8b277f6a8bf3f12
+    uses: [[ workflow_repository ]]/.github/workflows/orinoco-pages.yml@[[ workflow_sha ]]
     with:
       source-ref: >-
         ${{ github.event_name == 'workflow_dispatch' &&
