@@ -455,6 +455,10 @@ class DownstreamContractTests(unittest.TestCase):
         self.assertIn(f"uses: {pages_ref}", workflow_text)
         self.assertIn("contents: write", workflow_text)
         self.assertIn("pages: write", workflow_text)
+        self.assertIn(
+            f"workflow-repository: {lock['workflow']['repository']}", workflow_text
+        )
+        self.assertIn(f"workflow-sha: {lock['workflow']['sha']}", workflow_text)
 
     def test_update_workflow_commit_has_required_agent_attribution(self) -> None:
         workflow_path = ROOT / ".github" / "workflows" / "update-orinoco.yml"

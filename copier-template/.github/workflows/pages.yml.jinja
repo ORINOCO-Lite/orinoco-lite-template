@@ -31,3 +31,5 @@ jobs:
         ${{ github.event_name == 'workflow_dispatch' &&
         github.event.repository.default_branch || github.sha }}
       pixi-version: v0.73.0
+      workflow-repository: [[ workflow_repository ]]
+      workflow-sha: [[ workflow_sha ]]
