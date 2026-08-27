@@ -63,6 +63,21 @@ class DownstreamContractTests(unittest.TestCase):
         self.assertFalse((ROOT / "metadata").exists())
         self.assertFalse((ROOT / "metadata/records/.gitkeep").exists())
 
+    def test_fresh_facade_defers_to_engine_open_reference_defaults(self) -> None:
+        self.assertFalse((ROOT / "site/projection.yaml").exists())
+        guidance = (ROOT / "docs/getting-started.md").read_text(encoding="utf-8")
+        self.assertIn(
+            "Omitting the `references` section preserves well-formed references",
+            guidance,
+        )
+        self.assertIn(
+            "omitting `graph.missing_external_targets` drops only graph-view edges",
+            guidance,
+        )
+        self.assertIn("missing_targets: reject", guidance)
+        self.assertIn("missing_external_targets: reject", guidance)
+        self.assertIn("preserve that file byte-for-byte", guidance)
+
     def test_offline_acceptance_is_site_owned(self) -> None:
         verifier = load_verifier()
         ownership = verifier.load_yaml(ROOT / ".orinoco-lite/template-ownership.yml")
@@ -281,9 +296,10 @@ class DownstreamContractTests(unittest.TestCase):
             tasks["build-pages"]["cmd"],
         )
         self.assertEqual(["projection-update"], tasks["build-pages"]["depends-on"])
-        self.assertRegex(
+        self.assertEqual(
+            "orinoco build --destination build/pages "
+            "--base-url /orinoco-site/",
             tasks["build-browser-pages"]["cmd"],
-            r"--base-url http://127\.0\.0\.1:8766/[^/]+/$",
         )
         self.assertEqual(
             ["projection-update"], tasks["build-browser-pages"]["depends-on"]

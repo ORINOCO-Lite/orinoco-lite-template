@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.2.0rc12 - 2026-08-27
+
+- Build browser acceptance artifacts with a path-only project base so the dynamic test server supplies the actual loopback origin, while leaving site-specific graph-navigation repairs in protected consumer tests.
+- Document open references as the fresh-site default and prove framework updates preserve existing explicit strict reference and graph policies.
+- Advance the default engine and runtime to immutable `v0.2.0rc8` artifacts
+  and the matching reusable workflow without changing the adapted upstream
+  component pins.
+
 ## 0.2.0rc11 - 2026-08-27
 
 - Keep the deployed downstream `/edit/` route as the sole SHACL Vue editor,
