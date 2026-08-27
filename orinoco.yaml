@@ -4,6 +4,8 @@ site:
   name: "Orinoco Lite Site"
   description: "A site built with Orinoco Lite."
   base_url: "https://example.invalid/orinoco-site/"
+  repository: "example/orinoco-site"
+  curation_service: "https://orinoco-curation-review.pages.dev"
 
 paths:
   records: metadata/records
