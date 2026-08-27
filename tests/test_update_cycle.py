@@ -328,6 +328,17 @@ class UpdateCycleTests(unittest.TestCase):
         (records / "complete.yml").write_text(
             "pid: example:complete\ntitle: Site-owned content\n", encoding="utf-8"
         )
+        (consumer / "site" / "projection.yaml").write_text(
+            "version: 2\n"
+            "references:\n"
+            "  missing_targets: reject\n"
+            "graph:\n"
+            "  producer: site/projection-tools/graph.py\n"
+            "  node_classes: [example:Thing]\n"
+            "  relationship_fields: [about]\n"
+            "  missing_external_targets: reject\n",
+            encoding="utf-8",
+        )
         (extensions / "custom.css").write_text(
             ":root { --site-accent: #123456; }\n", encoding="utf-8"
         )
@@ -414,6 +425,7 @@ class UpdateCycleTests(unittest.TestCase):
         baseline = run(["git", "rev-parse", "HEAD"], consumer).stdout.strip()
         record = (consumer / "metadata" / "records" / "complete.yml").read_bytes()
         extension = (consumer / "extensions" / "custom.css").read_bytes()
+        projection = (consumer / "site" / "projection.yaml").read_bytes()
 
         result = run(self.update_command(), consumer, check=False)
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
@@ -447,6 +459,10 @@ class UpdateCycleTests(unittest.TestCase):
         self.assertEqual([], ledger["site_owned"]["changed"])
         self.assertEqual(record, (consumer / "metadata" / "records" / "complete.yml").read_bytes())
         self.assertEqual(extension, (consumer / "extensions" / "custom.css").read_bytes())
+        self.assertEqual(
+            projection,
+            (consumer / "site" / "projection.yaml").read_bytes(),
+        )
         self.assertGreater(ledger["site_owned"]["checked_files"], 0)
         self.assertNotIn("before", ledger["site_owned"])
         self.assertNotIn("after", ledger["site_owned"])

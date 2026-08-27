@@ -5,7 +5,7 @@ The template suite proves that:
 - a default Copier rendering equals the checked GitHub-template tree;
 - the publication branch tree equals the staged rendering tree object exactly and exposes no Copier source or nested wrapper directory;
 - an ordinary rendering has no `.gitmodules`, gitlinks, or hidden content;
-- site-owned files survive a real two-tag Copier update byte-for-byte;
+- site-owned files, including explicit strict reference and graph policies, survive a real two-tag Copier update byte-for-byte;
 - a divergent template-owned file produces an explicit conflict;
 - workflow action references are full immutable commit SHAs;
 - ownership patterns classify every checked consumer file;
@@ -16,6 +16,7 @@ The template suite proves that:
 The browser gate installs the locked Playwright client, then prepares Chromium headless-shell and WebKit before either suite begins.
 It uses Playwright's `--only-shell` mode so the unused full Chromium binary is not downloaded, while preserving the exact four-test matrix.
 Warm browser caches remain valid: the preparation command verifies each required browser and downloads only missing payloads.
+The generated browser artifact uses only its project-path base; the dynamically allocated static test server remains authoritative for the loopback host and port.
 
 Browser downloads have a ten-minute bound and finish before Chromium runs.
 After Chromium finishes, Linux WebKit host-library installation runs as its own phase with inherited live output and a five-minute bound; WebKit runs only after that succeeds.
