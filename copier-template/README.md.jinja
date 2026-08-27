@@ -82,6 +82,10 @@ Do not use `assets-prepare-online` in that denied-network phase; it represents t
 - The deployed static `/edit/` route is the sole SHACL Vue editor. It offers
   **Download bundle** and **Propose via GitHub**; the configured curation
   service supplies only the authenticated GitHub submission boundary.
+- The deployed static `/review/` route is the sole source-adapter decision
+  interface. Source-adapter workflows link there from the trusted
+  `site.base_url`; the configured curation service supplies only OAuth,
+  verified GitHub reads, confirmation, and authenticated transport.
 - `extensions/` is the stable downstream customization surface.
 - `generated/` contains ignored projection output recreated by validation and builds.
 

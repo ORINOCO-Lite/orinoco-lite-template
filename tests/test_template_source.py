@@ -134,8 +134,8 @@ class TemplateSourceTests(unittest.TestCase):
         self.assertEqual(
             "gh:ORINOCO-Lite/orinoco-lite-template", answers["_src_path"]
         )
-        self.assertEqual("v0.2.0rc12", answers["_commit"])
-        self.assertEqual("v0.2.0rc12", answers["template_version"])
+        self.assertEqual("v0.2.0rc13", answers["_commit"])
+        self.assertEqual("v0.2.0rc13", answers["template_version"])
 
     def test_rendered_readme_preserves_markdown_structure(self) -> None:
         readme = (ROOT / "github-template" / "README.md").read_text(
@@ -211,6 +211,11 @@ assert workspace.path('source_adapters').resolve() == (root / 'source-adapters')
             "https://orinoco-curation-review.pages.dev",
             configuration["site"]["curation_service"],
         )
+        ownership = (
+            ROOT / "copier-template" / "docs" / "ownership.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("site's own static `/review/` route", ownership)
+        self.assertIn("not another review page", ownership)
 
     def test_hosted_engine_smoke_does_not_require_a_sibling_checkout(self) -> None:
         source = inspect.getsource(

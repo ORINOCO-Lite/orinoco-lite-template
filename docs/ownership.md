@@ -21,11 +21,10 @@ Ownership follows the path contract, not apparent similarity.
 A supported customization belongs under `extensions/`; copying a framework file into a site-owned directory does not silently transfer ownership of that framework behavior.
 
 Source adapters and their site-owned tests use only `source-adapters/` and `.orinoco-lite/tests/source-adapters/`, respectively.
-Their concrete curation workflow is site-owned. The generic SHACL Vue handoff
-workflow and helper are template-owned and operate only on the fixed-path
-review bundle, exact Git coordinates, canonical records, and annotation
-companions. The downstream static site remains the only editor; the configured
-curation service is only the authenticated GitHub submission boundary.
+Their concrete curation workflow is site-owned.
+The generic SHACL Vue handoff workflow and helper are template-owned and operate only on the fixed-path review bundle, exact Git coordinates, canonical records, and annotation companions.
+The downstream static site remains the only editor; the configured curation service is only the authenticated GitHub submission boundary.
+Source-adapter workflows remain site-owned and link to the site's own static `/review/` route; the configured service provides OAuth and verified GitHub transport, not another review page.
 
 This layer never chooses a site's publication identity, content scope, collection policy, authorship, venue, content licensing, or production-cutover semantics.
 Those are consumer decisions.
