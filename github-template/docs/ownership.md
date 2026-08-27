@@ -22,11 +22,9 @@ After Pages deploys successfully, the workflow force-updates `latest-hugo-projec
 
 Source adapters use `source-adapters/`; their site-owned tests use `.orinoco-lite/tests/source-adapters/`.
 The concrete `.github/workflows/curation-review.yml` follows that site-owned adapter policy.
-The generic `.github/workflows/shacl-vue-proposal.yml` and its handoff helper
-are template-owned because they operate only on the fixed-path review bundle,
-shared canonical metadata, and exact Git coordinates. The site's static
-`/edit/` route remains the sole editor; the configured curation service is only
-an authenticated submission boundary.
+The generic `.github/workflows/shacl-vue-proposal.yml` and its handoff helper are template-owned because they operate only on the fixed-path review bundle, shared canonical metadata, and exact Git coordinates.
+The site's static `/edit/` route remains the sole editor; the configured curation service is only an authenticated submission boundary.
+Source-adapter workflows remain site-owned and link to the site's own static `/review/` route; the configured service provides OAuth and verified GitHub transport, not another review page.
 
 Both `metadata/records/` and mirrored `metadata/overlays/annotations/` companions are protected site-owned semantic metadata.
 A framework update may change support for joining them, but never their bytes.

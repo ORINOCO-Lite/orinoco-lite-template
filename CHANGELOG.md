@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.2.0rc13 - 2026-08-27
+
+- Keep source-adapter review in each deployed downstream's static `/review/` route while retaining `/edit/` as the separate SHACL editor.
+- Limit the configured central service to OAuth, verified GitHub reads, final confirmation, and authenticated posting rather than another review page.
+- Advance the default engine, runtime, and reusable workflow to the immutable `v0.2.0rc9` release without changing the adapted upstream component pins.
+
 ## 0.2.0rc12 - 2026-08-27
 
 - Build browser acceptance artifacts with a path-only project base so the dynamic test server supplies the actual loopback origin, while leaving site-specific graph-navigation repairs in protected consumer tests.
