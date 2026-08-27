@@ -2,11 +2,15 @@
 
 ## Unreleased
 
+## 0.2.0rc11 - 2026-08-27
+
 - Keep the deployed downstream `/edit/` route as the sole SHACL Vue editor,
   with **Download bundle** and **Propose via GitHub** driven by explicit
   repository and curation-service configuration.
 - Remove exact-head editor-input Actions artifacts and central-editor links
   while retaining the trusted fixed-path bundle materialization workflow.
+- Advance the default engine and runtime to immutable `v0.2.0rc7` artifacts
+  and the matching reusable workflow.
 
 ## 0.2.0rc8 - 2026-08-26
 
