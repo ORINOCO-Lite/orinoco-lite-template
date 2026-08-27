@@ -107,8 +107,6 @@ class DownstreamContractTests(unittest.TestCase):
                 "name": "Orinoco Lite Site",
                 "description": "A site built with Orinoco Lite.",
                 "base_url": "https://example.invalid/orinoco-site/",
-                "repository": "example/orinoco-site",
-                "curation_service": "https://orinoco-curation-review.pages.dev",
             },
             configuration["site"],
         )
@@ -322,7 +320,10 @@ class DownstreamContractTests(unittest.TestCase):
         with (
             patch.dict(
                 builder.os.environ,
-                {"ORINOCO_BASE_URL": "https://con.github.io/example"},
+                {
+                    "ORINOCO_BASE_URL": "https://con.github.io/example",
+                    "GITHUB_REPOSITORY": "con/example",
+                },
                 clear=False,
             ),
             patch.object(builder.subprocess, "run") as run,
@@ -336,6 +337,8 @@ class DownstreamContractTests(unittest.TestCase):
                 "build/pages",
                 "--base-url",
                 "https://con.github.io/example/",
+                "--github-repository",
+                "con/example",
             ],
             check=True,
         )
@@ -343,6 +346,43 @@ class DownstreamContractTests(unittest.TestCase):
         with patch.dict(builder.os.environ, {"ORINOCO_BASE_URL": ""}, clear=False):
             with self.assertRaisesRegex(SystemExit, r"absolute HTTP\(S\) URL"):
                 builder.main(["build/pages"])
+
+        with patch.dict(
+            builder.os.environ,
+            {
+                "ORINOCO_BASE_URL": "https://example.test/",
+                "GITHUB_REPOSITORY": "not-a-repository",
+            },
+            clear=False,
+        ):
+            with self.assertRaisesRegex(SystemExit, "OWNER/REPOSITORY"):
+                builder.main(["build/pages"])
+
+    def test_pages_builder_matches_the_engine_repository_boundary(self) -> None:
+        builder = load_tool("build_pages")
+        maximum = f"{'a' * 39}/{'b' * 100}"
+        with patch.dict(
+            builder.os.environ,
+            {"GITHUB_REPOSITORY": maximum},
+            clear=False,
+        ):
+            self.assertEqual(maximum, builder._github_repository())
+
+        invalid = (
+            f"{'a' * 40}/repository",
+            f"owner/{'b' * 101}",
+            "_owner/repository",
+            "owner/repo..sitory",
+        )
+        for repository in invalid:
+            with self.subTest(repository=repository):
+                with patch.dict(
+                    builder.os.environ,
+                    {"GITHUB_REPOSITORY": repository},
+                    clear=False,
+                ):
+                    with self.assertRaisesRegex(SystemExit, "OWNER/REPOSITORY"):
+                        builder._github_repository()
 
     def test_hugo_verifier_accepts_distribution_revisions_strictly(self) -> None:
         verifier = load_tool("verify_hugo")

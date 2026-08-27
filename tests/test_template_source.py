@@ -194,28 +194,49 @@ assert workspace.path('source_adapters').resolve() == (root / 'source-adapters')
         )
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
 
-    def test_static_editor_submission_coordinates_are_rendered(self) -> None:
+    def test_static_editor_submission_coordinates_are_build_derived(self) -> None:
         source = (ROOT / "copier-template" / "orinoco.yaml.jinja").read_text(
             encoding="utf-8"
         )
-        self.assertIn('repository: "[[ repository_slug ]]"', source)
-        self.assertIn(
-            'curation_service: "https://orinoco-curation-review.pages.dev"',
-            source,
-        )
+        self.assertNotIn("repository:", source)
+        self.assertNotIn("curation_service:", source)
+        copier = yaml.safe_load((ROOT / "copier.yml").read_text(encoding="utf-8"))
+        self.assertNotIn("repository_slug", copier)
         configuration = yaml.safe_load(
             (ROOT / "github-template" / "orinoco.yaml").read_text(encoding="utf-8")
         )
-        self.assertEqual("example/orinoco-site", configuration["site"]["repository"])
-        self.assertEqual(
-            "https://orinoco-curation-review.pages.dev",
-            configuration["site"]["curation_service"],
-        )
+        self.assertNotIn("repository", configuration["site"])
+        self.assertNotIn("curation_service", configuration["site"])
+        builder = (
+            ROOT
+            / "copier-template"
+            / ".orinoco-lite"
+            / "tools"
+            / "build_pages.py"
+        ).read_text(encoding="utf-8")
+        self.assertIn('os.environ.get("GITHUB_REPOSITORY"', builder)
+        self.assertIn('"--github-repository"', builder)
         ownership = (
             ROOT / "copier-template" / "docs" / "ownership.md"
         ).read_text(encoding="utf-8")
         self.assertIn("site's own static `/review/` route", ownership)
         self.assertIn("not another review page", ownership)
+
+    def test_custom_domain_and_curation_defaults_are_documented(self) -> None:
+        guidance = (
+            ROOT / "github-template" / "docs" / "custom-domain.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("dedicated custom domain is the normal", guidance)
+        self.assertIn("Browsers isolate origins, not URL paths", guidance)
+        self.assertIn("curator explicitly acknowledges", guidance)
+        self.assertIn("**Download bundle** always remains available", guidance)
+        self.assertIn("central Orinoco Lite service at", guidance)
+        self.assertIn("https://orinoco-curation-review.pages.dev", guidance)
+        self.assertIn("site.curation_service", guidance)
+        self.assertNotIn("site.repository", guidance)
+        self.assertIn("keep the verification TXT record", guidance)
+        self.assertIn("neither needs nor tracks a `CNAME` file", guidance)
+        self.assertIn("**Enforce HTTPS**", guidance)
 
     def test_hosted_engine_smoke_does_not_require_a_sibling_checkout(self) -> None:
         source = inspect.getsource(

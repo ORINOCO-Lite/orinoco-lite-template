@@ -9,6 +9,7 @@ The template suite proves that:
 - a divergent template-owned file produces an explicit conflict;
 - workflow action references are full immutable commit SHAs;
 - ownership patterns classify every checked consumer file;
+- Pages derives curation repository identity from the trusted runner rather than a repeated site setting, while the central service remains the configuration-free default;
 - the rendered Pixi facade generates ignored projection output before validation and builds;
 - the normal cold-clone gate hydrates declared assets before verifying them, while the denied-network proof warms once and then invokes only asset verification; and
 - the complete downstream gate includes exact Hugo Extended 0.161.1, deterministic repeat-build digest comparison, and Chromium/WebKit tests.

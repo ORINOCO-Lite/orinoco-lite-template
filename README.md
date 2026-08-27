@@ -50,6 +50,7 @@ Replace `vX.Y.Z` with an exact tag from the [immutable template releases](https:
 For a GitHub-first review, use the repository's **Use this template** action, leave **Include all branches** unchecked, then follow the rendered [GitHub-template bootstrap](github-template/docs/getting-started.md) before adding content.
 Both routes retain an exact recorded Copier release and frozen engine environment.
 They create a content-neutral repository facade; a reviewed site profile must supply records, projection policy, assets, and presentation before `validate` or `build` can succeed.
+For hosted editing, the rendered [custom-domain guide](github-template/docs/custom-domain.md) gives a dedicated domain the normal direct-submission flow and explains the explicit acknowledgment required on shared `github.io` origins.
 
 ## Repository topology
 

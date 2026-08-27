@@ -4,9 +4,12 @@
 
 ## 0.2.0rc13 - 2026-08-27
 
+- Derive curation repository identity from the trusted GitHub Pages build, default to the central service without downstream configuration, and retain one optional `site.curation_service` self-hosting override.
+- Give custom-domain sites the normal direct-submission flow while explaining the shared `github.io` origin boundary and requiring an in-memory curator acknowledgment there; keep **Download bundle** credential-free everywhere.
+- Guide site owners through GitHub domain verification, repository Pages and DNS configuration, HTTPS enforcement, and deployed-origin checks.
 - Keep source-adapter review in each deployed downstream's static `/review/` route while retaining `/edit/` as the separate SHACL editor.
-- Limit the configured central service to OAuth, verified GitHub reads, final confirmation, and authenticated posting rather than another review page.
-- Advance the default engine, runtime, and reusable workflow to the immutable `v0.2.0rc9` release without changing the adapted upstream component pins.
+- Limit the selected central or self-hosted service to OAuth, verified GitHub reads, and authenticated transport rather than another user-facing page.
+- Advance the default engine, runtime, and reusable workflow to the immutable `v0.2.0rc10` release without changing the adapted upstream component pins.
 
 ## 0.2.0rc12 - 2026-08-27
 
