@@ -22,8 +22,10 @@ A supported customization belongs under `extensions/`; copying a framework file 
 
 Source adapters and their site-owned tests use only `source-adapters/` and `.orinoco-lite/tests/source-adapters/`, respectively.
 Their concrete curation workflow is site-owned. The generic SHACL Vue handoff
-workflow and helper are template-owned and operate only on exact Git
-coordinates plus canonical records and annotation companions.
+workflow and helper are template-owned and operate only on the fixed-path
+review bundle, exact Git coordinates, canonical records, and annotation
+companions. The downstream static site remains the only editor; the configured
+curation service is only the authenticated GitHub submission boundary.
 
 This layer never chooses a site's publication identity, content scope, collection policy, authorship, venue, content licensing, or production-cutover semantics.
 Those are consumer decisions.

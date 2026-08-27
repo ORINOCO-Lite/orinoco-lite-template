@@ -194,6 +194,24 @@ assert workspace.path('source_adapters').resolve() == (root / 'source-adapters')
         )
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
 
+    def test_static_editor_submission_coordinates_are_rendered(self) -> None:
+        source = (ROOT / "copier-template" / "orinoco.yaml.jinja").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('repository: "[[ repository_slug ]]"', source)
+        self.assertIn(
+            'curation_service: "https://orinoco-curation-review.pages.dev"',
+            source,
+        )
+        configuration = yaml.safe_load(
+            (ROOT / "github-template" / "orinoco.yaml").read_text(encoding="utf-8")
+        )
+        self.assertEqual("example/orinoco-site", configuration["site"]["repository"])
+        self.assertEqual(
+            "https://orinoco-curation-review.pages.dev",
+            configuration["site"]["curation_service"],
+        )
+
     def test_hosted_engine_smoke_does_not_require_a_sibling_checkout(self) -> None:
         source = inspect.getsource(
             self.test_rendered_configuration_loads_with_the_actual_engine

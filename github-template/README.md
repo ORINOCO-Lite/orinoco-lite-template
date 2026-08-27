@@ -79,6 +79,9 @@ Do not use `assets-prepare-online` in that denied-network phase; it represents t
 - `source-adapters/` contains optional site-owned importers, enrichers, and scrapers; it is not a deployed runtime dependency.
 - `.github/workflows/shacl-vue-proposal.yml` is the generic trusted human-edit
   boundary; a concrete source-adapter curation workflow remains site-owned.
+- The deployed static `/edit/` route is the sole SHACL Vue editor. It offers
+  **Download bundle** and **Propose via GitHub**; the configured curation
+  service supplies only the authenticated GitHub submission boundary.
 - `extensions/` is the stable downstream customization surface.
 - `generated/` contains ignored projection output recreated by validation and builds.
 

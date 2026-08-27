@@ -50,7 +50,8 @@ Make the same identity changes in these locations:
 
 - the heading and description in `README.md`;
 - the workspace name and three browser-project-path values in `pixi.toml`; and
-- the `site` name, description, and canonical base URL in `orinoco.yaml`.
+- the `site` name, description, canonical base URL, and repository slug in
+  `orinoco.yaml`.
 
 ### 4. Refresh and review
 
@@ -96,12 +97,23 @@ pixi run serve
 
 ## Configure hosted human editing
 
-The template ships the generic trusted workflow that validates SHACL Vue handoffs and publishes an expiring editor-input artifact for an exact metadata commit.
-It uses the central review service by default.
-To use a compatible self-hosted deployment, set the repository Actions variable `CURATION_REVIEW_APP_ORIGIN` to its credential-free HTTPS origin, with no path, query, or fragment.
+The deployed downstream site's own `/edit/` route is the only SHACL Vue
+editor. It receives the repository and curation-service coordinates from the
+`site.repository` and `site.curation_service` values in `orinoco.yaml` and
+offers both **Download bundle** and **Propose via GitHub**.
 
-The central service keeps its workflows distinct: source-adapter decision reviews open under `/review/`, while the trusted SHACL Vue wrapper opens under `/edit/`.
-The downstream site's own `/edit/` route remains the credential-free SHACL Vue **Download bundle** workflow and does not gain GitHub semantics.
+The central service at the configured `site.curation_service` is a lightweight
+GitHub authentication and submission boundary. It may exchange credentials and
+create or update a pull request, but it does not host another editor or retain
+the site's presentation input. To use a compatible self-hosted service, replace
+that value with its credential-free HTTPS origin, with no path, query, or
+fragment.
+
+The template-owned workflow validates a fixed-path review bundle submitted by
+the service, materializes the edit with trusted default-branch code, and
+replaces only that exact handoff commit. It does not publish an editor-input
+Actions artifact. Source-adapter decision reviews remain a separate workflow
+under the central service's `/review/` route.
 
 Concrete source-adapter acquisition, candidate policy, and `.github/workflows/curation-review.yml` remain site-owned.
 Adding those pieces does not transfer `source-adapters/`, decision caches, records, or annotation companions to template ownership.
