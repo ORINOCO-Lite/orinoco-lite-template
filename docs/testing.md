@@ -11,7 +11,7 @@ The template suite proves that:
 - ownership patterns classify every checked consumer file;
 - the rendered Pixi facade generates ignored projection output before validation and builds;
 - the normal cold-clone gate hydrates declared assets before verifying them, while the denied-network proof warms once and then invokes only asset verification; and
-- the complete downstream gate includes exact Hugo Extended 0.154.5, deterministic repeat-build digest comparison, and Chromium/WebKit tests.
+- the complete downstream gate includes exact Hugo Extended 0.161.1, deterministic repeat-build digest comparison, and Chromium/WebKit tests.
 
 The browser gate installs the locked Playwright client, then prepares Chromium headless-shell and WebKit before either suite begins.
 It uses Playwright's `--only-shell` mode so the unused full Chromium binary is not downloaded, while preserving the exact four-test matrix.

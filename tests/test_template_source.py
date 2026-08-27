@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import inspect
+import json
 import os
 import re
 import shutil
@@ -133,8 +134,8 @@ class TemplateSourceTests(unittest.TestCase):
         self.assertEqual(
             "gh:ORINOCO-Lite/orinoco-lite-template", answers["_src_path"]
         )
-        self.assertEqual("v0.2.0rc10", answers["_commit"])
-        self.assertEqual("v0.2.0rc10", answers["template_version"])
+        self.assertEqual("v0.2.0rc11", answers["_commit"])
+        self.assertEqual("v0.2.0rc11", answers["template_version"])
 
     def test_rendered_readme_preserves_markdown_structure(self) -> None:
         readme = (ROOT / "github-template" / "README.md").read_text(
@@ -209,6 +210,69 @@ assert workspace.path('source_adapters').resolve() == (root / 'source-adapters')
         self.assertNotEqual({"0"}, set(lock["runtime"]["manifest_sha256"]))
         self.assertNotEqual({"0"}, set(lock["workflow"]["sha"]))
         self.assertTrue((ROOT / "github-template" / "pixi.lock").is_file())
+
+    def test_exact_hugo_pin_satisfies_the_runtime_manifest(self) -> None:
+        pixi = shutil.which("pixi")
+        self.assertIsNotNone(pixi, "Pixi is required for the runtime contract test")
+        rendered = ROOT / "github-template"
+        manifest = rendered / "pixi.toml"
+        environment = dict(os.environ, PIXI_FROZEN="true", PIXI_NO_CONFIG="true")
+        preflight = """
+from contextlib import redirect_stdout
+from io import StringIO
+import json
+from pathlib import Path
+import sys
+import tomllib
+from orinoco_lite.cli import main
+from orinoco_lite.site import _preflight_hugo
+from packaging.specifiers import Specifier
+from packaging.version import Version
+
+workspace = Path(sys.argv[1])
+manifest = Path(sys.argv[2])
+stdout = StringIO()
+with redirect_stdout(stdout):
+    assert main(["--root", str(workspace), "runtime", "verify", "--json"]) == 0
+runtime = json.loads(stdout.getvalue())
+declared = tomllib.loads(manifest.read_text(encoding="utf-8"))["dependencies"]["hugo"]
+specifier = Specifier(declared)
+assert specifier.operator == "==" and "*" not in specifier.version
+expected = Version(specifier.version)
+actual = _preflight_hugo(Path(runtime["root"]), cwd=workspace)
+assert actual == expected, (actual, expected, runtime["manifest_sha256"])
+print(json.dumps({"declared": declared, "resolved": str(actual)}))
+"""
+        with tempfile.TemporaryDirectory(prefix="orinoco-runtime-contract-") as name:
+            workspace = Path(name)
+            shutil.copy2(rendered / "orinoco.yaml", workspace / "orinoco.yaml")
+            shutil.copy2(rendered / "orinoco.lock", workspace / "orinoco.lock")
+            compatible = subprocess.run(
+                [
+                    str(pixi),
+                    "run",
+                    "--manifest-path",
+                    manifest.as_posix(),
+                    "python",
+                    "-c",
+                    preflight,
+                    workspace.as_posix(),
+                    manifest.as_posix(),
+                ],
+                cwd=ROOT,
+                env=environment,
+                text=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=False,
+            )
+        self.assertEqual(
+            0,
+            compatible.returncode,
+            compatible.stdout + compatible.stderr,
+        )
+        proof = json.loads(compatible.stdout)
+        self.assertEqual(f"=={proof['resolved']}", proof["declared"])
 
     def test_copier_first_defaults_match_the_checked_render_coordinates(self) -> None:
         answers = yaml.safe_load(

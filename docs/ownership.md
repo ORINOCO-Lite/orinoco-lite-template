@@ -28,4 +28,4 @@ coordinates plus canonical records and annotation companions.
 This layer never chooses a site's publication identity, content scope, collection policy, authorship, venue, content licensing, or production-cutover semantics.
 Those are consumer decisions.
 Licensing of the generic template and updater is instead determined by authorized Orinoco Lite rightsholders; a consumer cannot grant rights it does not hold.
-Engine behavior remains documented in the [engine repository](https://github.com/con/orinoco-lite-dev); the corresponding consumer view is the rendered [file-ownership guide](../github-template/docs/ownership.md).
+Engine behavior remains documented in the [engine repository](https://github.com/ORINOCO-Lite/orinoco-lite-dev); the corresponding consumer view is the rendered [file-ownership guide](../github-template/docs/ownership.md).

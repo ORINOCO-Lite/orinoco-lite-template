@@ -11,7 +11,7 @@ runtime_url: https://github.com/ORINOCO-Lite/orinoco-lite-dev/releases/download/
 runtime_sha256: "e343d15399f800a721ebf05921625aac2cc78ce2cdcebc45415c3a8e8845c2cd"
 runtime_manifest_sha256: "96bec50b154654f2e4288312130a7cabceb68b5d3dcc8fa67e34d216e20d7719"
 template_source: gh:ORINOCO-Lite/orinoco-lite-template
-template_version: v0.2.0rc10
+template_version: v0.2.0rc11
 workflow_repository: ORINOCO-Lite/orinoco-lite-dev
 workflow_sha: "6bd31daa17293fe7d52966bc1599f66b2ea3420b"
 workflow_ref: ORINOCO-Lite/orinoco-lite-dev/.github/workflows/orinoco-consumer-ci.yml@6bd31daa17293fe7d52966bc1599f66b2ea3420b

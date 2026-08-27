@@ -130,7 +130,7 @@ class DownstreamContractTests(unittest.TestCase):
 
     def test_complete_gate_includes_browser_and_deterministic_acceptance(self) -> None:
         pixi = tomllib.loads((ROOT / "pixi.toml").read_text(encoding="utf-8"))
-        self.assertEqual("==0.154.5", pixi["dependencies"]["hugo"])
+        self.assertEqual("==0.161.1", pixi["dependencies"]["hugo"])
         tasks = pixi["tasks"]
         self.assertEqual(
             "mkdir -p generated && orinoco projection update",
@@ -338,13 +338,13 @@ class DownstreamContractTests(unittest.TestCase):
                 redirect_stdout(stdout),
                 redirect_stderr(stderr),
             ):
-                status = verifier.main(["--version", "0.154.5", "--extended"])
+                status = verifier.main(["--version", "0.161.1", "--extended"])
             return status, stdout.getvalue(), stderr.getvalue()
 
         accepted = (
-            "hugo v0.154.5-conda-forge+extended linux/amd64 "
+            "hugo v0.161.1-conda-forge+extended linux/amd64 "
             "BuildDate=unknown VendorInfo=conda-forge",
-            "hugo v0.154.5+extended darwin/arm64 BuildDate=unknown VendorInfo=brew",
+            "hugo v0.161.1+extended darwin/arm64 BuildDate=unknown VendorInfo=brew",
         )
         for output in accepted:
             with self.subTest(output=output):
@@ -355,31 +355,31 @@ class DownstreamContractTests(unittest.TestCase):
         rejected = (
             (
                 "wrong version",
-                "hugo v0.154.4-conda-forge+extended linux/amd64",
+                "hugo v0.161.0-conda-forge+extended linux/amd64",
                 1,
-                "expected Hugo 0.154.5, found 0.154.4",
+                "expected Hugo 0.161.1, found 0.161.0",
             ),
             (
                 "standard edition",
-                "hugo v0.154.5-conda-forge linux/amd64",
+                "hugo v0.161.1-conda-forge linux/amd64",
                 1,
                 "Hugo Extended is required",
             ),
             (
                 "empty revision",
-                "hugo v0.154.5-+extended linux/amd64",
+                "hugo v0.161.1-+extended linux/amd64",
                 2,
                 "cannot parse Hugo version",
             ),
             (
                 "invalid revision",
-                "hugo v0.154.5-conda_forge+extended linux/amd64",
+                "hugo v0.161.1-conda_forge+extended linux/amd64",
                 2,
                 "cannot parse Hugo version",
             ),
             (
                 "dangling variant",
-                "hugo v0.154.5-conda-forge+extended+ linux/amd64",
+                "hugo v0.161.1-conda-forge+extended+ linux/amd64",
                 2,
                 "cannot parse Hugo version",
             ),
