@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Keep the deployed downstream `/edit/` route as the sole SHACL Vue editor,
+  with **Download bundle** and **Propose via GitHub** driven by explicit
+  repository and curation-service configuration.
+- Remove exact-head editor-input Actions artifacts and central-editor links
+  while retaining the trusted fixed-path bundle materialization workflow.
+
 ## 0.2.0rc8 - 2026-08-26
 
 - Retain each successful Pages deployment as a generated two-commit projection and website chain without adding generated files to the source branch.

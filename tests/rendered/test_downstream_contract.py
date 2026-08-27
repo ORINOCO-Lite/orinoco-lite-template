@@ -89,6 +89,16 @@ class DownstreamContractTests(unittest.TestCase):
         self.assertEqual(2, configuration["contract_version"])
         self.assertEqual(
             {
+                "name": "Orinoco Lite Site",
+                "description": "A site built with Orinoco Lite.",
+                "base_url": "https://example.invalid/orinoco-site/",
+                "repository": "example/orinoco-site",
+                "curation_service": "https://orinoco-curation-review.pages.dev",
+            },
+            configuration["site"],
+        )
+        self.assertEqual(
+            {
                 "records": "metadata/records",
                 "provenance": ".orinoco-lite/provenance",
                 "editorial": "custom/editorial",

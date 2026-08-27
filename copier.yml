@@ -48,7 +48,7 @@ site_description:
 
 repository_slug:
   type: str
-  help: GitHub owner/repository used for project Pages
+  help: GitHub owner/repository used for project Pages and curation proposals
   default: example/orinoco-site
   validator: >-
     <% if not (repository_slug | regex_search('^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$')) %>
