@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.2.0rc15 - 2026-08-28
+
+- Make the ordinary downstream `test-all` command infer its GitHub repository
+  from `origin`, so local browser acceptance exercises the same `/edit/` and
+  `/review/` configuration as the disposable candidate and Pages builds.
+
 ## 0.2.0rc14 - 2026-08-28
 
 - Establish the fresh downstream ownership split: reusable framework and

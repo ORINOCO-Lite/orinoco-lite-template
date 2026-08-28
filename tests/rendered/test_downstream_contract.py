@@ -328,8 +328,8 @@ class DownstreamContractTests(unittest.TestCase):
         )
         self.assertEqual(["projection-update"], tasks["build-pages"]["depends-on"])
         self.assertEqual(
-            "orinoco build --destination build/pages "
-            "--base-url /orinoco-site/",
+            "python .orinoco-lite/tools/build_browser_pages.py "
+            "build/pages /orinoco-site/",
             tasks["build-browser-pages"]["cmd"],
         )
         self.assertEqual(
@@ -347,6 +347,71 @@ class DownstreamContractTests(unittest.TestCase):
             ["template_owned"],
             verifier.classify(".orinoco-lite/tools/build_pages.py", classes),
         )
+        self.assertEqual(
+            ["template_owned"],
+            verifier.classify(
+                ".orinoco-lite/tools/build_browser_pages.py", classes
+            ),
+        )
+
+    def test_browser_builder_infers_the_local_github_origin(self) -> None:
+        builder = load_tool("build_browser_pages")
+        with (
+            patch.dict(builder.os.environ, {}, clear=True),
+            patch.object(
+                builder.subprocess,
+                "run",
+                side_effect=[
+                    SimpleNamespace(
+                        returncode=0,
+                        stdout="git@github.com:example/downstream.git\n",
+                    ),
+                    SimpleNamespace(returncode=0),
+                ],
+            ) as run,
+        ):
+            self.assertEqual(
+                0,
+                builder.main(["build/pages", "/downstream/"]),
+            )
+        self.assertEqual(
+            ["git", "remote", "get-url", "origin"],
+            run.call_args_list[0].args[0],
+        )
+        self.assertEqual(
+            [
+                "orinoco",
+                "build",
+                "--destination",
+                "build/pages",
+                "--base-url",
+                "/downstream/",
+                "--github-repository",
+                "example/downstream",
+            ],
+            run.call_args_list[1].args[0],
+        )
+        self.assertEqual(builder.ROOT, run.call_args_list[1].kwargs["cwd"])
+        self.assertTrue(run.call_args_list[1].kwargs["check"])
+
+        with patch.dict(
+            builder.os.environ,
+            {"GITHUB_REPOSITORY": "example/explicit"},
+            clear=True,
+        ):
+            self.assertEqual("example/explicit", builder._github_repository())
+
+        with patch.dict(builder.os.environ, {}, clear=True):
+            with patch.object(
+                builder.subprocess,
+                "run",
+                return_value=SimpleNamespace(
+                    returncode=0,
+                    stdout="https://example.invalid/not-github.git\n",
+                ),
+            ):
+                with self.assertRaisesRegex(SystemExit, "GitHub OWNER/REPOSITORY"):
+                    builder._github_repository()
 
     def test_pages_builder_expands_and_validates_the_environment_url(self) -> None:
         builder = load_tool("build_pages")
