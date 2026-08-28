@@ -82,6 +82,7 @@ Review at least:
 Commit all update outputs as one focused commit.
 The explicit GitHub update workflow performs the same transition, runs `test-all`, finalizes the ledger, and opens an ordinary review pull request.
 It runs only through `workflow_dispatch` and never merges the pull request.
+The workflow-created commit uses the automation identity supplied by the pinned pull-request action and does not claim a human or Codex co-author.
 
 Security updates use the `security` classification to communicate urgency; they retain the same review and merge boundary.
 

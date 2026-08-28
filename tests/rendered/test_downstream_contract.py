@@ -526,7 +526,7 @@ class DownstreamContractTests(unittest.TestCase):
         )
         self.assertIn(f"workflow-sha: {lock['workflow']['sha']}", workflow_text)
 
-    def test_update_workflow_commit_has_required_agent_attribution(self) -> None:
+    def test_update_workflow_commit_avoids_false_agent_attribution(self) -> None:
         workflow_path = ROOT / ".github" / "workflows" / "update-orinoco.yml"
         workflow_text = workflow_path.read_text(encoding="utf-8")
         workflow = yaml.safe_load(workflow_text)
@@ -534,12 +534,9 @@ class DownstreamContractTests(unittest.TestCase):
         self.assertNotIn("\n  schedule:\n", workflow_text)
         self.assertNotIn("cron:", workflow_text)
         pull_request = workflow["jobs"]["update"]["steps"][-1]
-        self.assertEqual(
-            "chore(deps): update Orinoco framework\n\n"
-            "Co-Authored-By: Codex CLI 0.143.0 / GPT 5.6-sol "
-            "<codex@openai.com>\n",
-            pull_request["with"]["commit-message"],
-        )
+        commit_message = pull_request["with"]["commit-message"]
+        self.assertEqual("chore(deps): update Orinoco framework", commit_message)
+        self.assertNotIn("Co-Authored-By:", commit_message)
         self.assertTrue(
             pull_request["with"]["body"].startswith(
                 "**AI-generated draft — not reviewed by John**\n"
