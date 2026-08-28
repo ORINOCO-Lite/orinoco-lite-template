@@ -48,7 +48,10 @@ It stops on a moving or unavailable tag, an incomplete pin, a template-owned con
 A newly introduced `.gitkeep` may be removed only when the protected directory already contains real data.
 
 Consumers older than template v0.1.3 require the narrow updater bootstrap documented by that target release.
-Moving existing protected tests and provenance into `.orinoco-lite/` is a one-time semantic layout migration, not an ordinary framework update: review and merge that dedicated migration first.
+Moving an existing site's records, provenance, editorial files, assets, source
+configuration, or decisions into `site-specific/` is a one-time semantic layout
+migration, not an ordinary framework update: review and merge that dedicated
+migration with the matching engine/template candidate.
 Afterward, the normal Pixi task invokes `.orinoco-lite/tools/update_orinoco.py` for subsequent updates.
 Do not bootstrap site-owned paths.
 Browser tests under `.orinoco-lite/tests/browser/` are protected in the same way.

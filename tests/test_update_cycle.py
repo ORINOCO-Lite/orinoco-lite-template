@@ -102,10 +102,7 @@ def replace_pixi_pin(path: Path, current: str, replacement: str) -> None:
 
 def protected_bytes(repository: Path) -> dict[str, bytes]:
     protected_roots = (
-        "metadata",
-        "custom",
-        "site",
-        "source-adapters",
+        "site-specific",
         "extensions",
     )
     return {
@@ -322,22 +319,11 @@ class UpdateCycleTests(unittest.TestCase):
         ]
         run(command, self.workspace)
         run(["git", "init", "-b", "main"], consumer)
-        records = consumer / "metadata" / "records"
+        records = consumer / "site-specific" / "metadata" / "records"
         extensions = consumer / "extensions"
         records.mkdir(parents=True)
         (records / "complete.yml").write_text(
             "pid: example:complete\ntitle: Site-owned content\n", encoding="utf-8"
-        )
-        (consumer / "site" / "projection.yaml").write_text(
-            "version: 2\n"
-            "references:\n"
-            "  missing_targets: reject\n"
-            "graph:\n"
-            "  producer: site/projection-tools/graph.py\n"
-            "  node_classes: [example:Thing]\n"
-            "  relationship_fields: [about]\n"
-            "  missing_external_targets: reject\n",
-            encoding="utf-8",
         )
         (extensions / "custom.css").write_text(
             ":root { --site-accent: #123456; }\n", encoding="utf-8"
@@ -423,9 +409,9 @@ class UpdateCycleTests(unittest.TestCase):
     def test_update_records_coordinates_preserves_site_and_reverts_cleanly(self) -> None:
         consumer = self.make_consumer("success")
         baseline = run(["git", "rev-parse", "HEAD"], consumer).stdout.strip()
-        record = (consumer / "metadata" / "records" / "complete.yml").read_bytes()
+        record = (consumer / "site-specific" / "metadata" / "records" / "complete.yml").read_bytes()
         extension = (consumer / "extensions" / "custom.css").read_bytes()
-        projection = (consumer / "site" / "projection.yaml").read_bytes()
+        projection = (consumer / "site-specific" / "projection.yaml").read_bytes()
 
         result = run(self.update_command(), consumer, check=False)
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
@@ -457,11 +443,11 @@ class UpdateCycleTests(unittest.TestCase):
         self.assertEqual("0.1.0", ledger["previous"]["runtime"]["version"])
         self.assertEqual("0.1.1", ledger["target"]["runtime"]["version"])
         self.assertEqual([], ledger["site_owned"]["changed"])
-        self.assertEqual(record, (consumer / "metadata" / "records" / "complete.yml").read_bytes())
+        self.assertEqual(record, (consumer / "site-specific" / "metadata" / "records" / "complete.yml").read_bytes())
         self.assertEqual(extension, (consumer / "extensions" / "custom.css").read_bytes())
         self.assertEqual(
             projection,
-            (consumer / "site" / "projection.yaml").read_bytes(),
+            (consumer / "site-specific" / "projection.yaml").read_bytes(),
         )
         self.assertGreater(ledger["site_owned"]["checked_files"], 0)
         self.assertNotIn("before", ledger["site_owned"])
@@ -810,15 +796,19 @@ class UpdateCycleTests(unittest.TestCase):
     def test_target_placeholders_are_removed_only_from_populated_paths(self) -> None:
         consumer = self.make_consumer("placeholder-reconciliation")
         populated = {
-            "source-adapters/.gitkeep": "source-adapters/zotero/config.toml",
-            "site/config/.gitkeep": "site/config/site.yaml",
+            "site-specific/sources/.gitkeep": (
+                "site-specific/sources/zotero/source.yaml"
+            ),
+            "site-specific/content/pages/.gitkeep": (
+                "site-specific/content/pages/about.md"
+            ),
         }
         for placeholder, real_file in populated.items():
             (consumer / placeholder).unlink()
             destination = consumer / real_file
             destination.parent.mkdir(parents=True, exist_ok=True)
             destination.write_text(f"evidence: {real_file}\n", encoding="utf-8")
-        empty_placeholder = consumer / "custom/assets/.gitkeep"
+        empty_placeholder = consumer / "site-specific/static/files/.gitkeep"
         self.assertTrue(empty_placeholder.is_file())
         commit_all(consumer, "feat: populate imported site paths")
         before = protected_bytes(consumer)
@@ -837,7 +827,7 @@ class UpdateCycleTests(unittest.TestCase):
 
     def test_preexisting_protected_rejection_fails_before_mutation(self) -> None:
         consumer = self.make_consumer("preexisting-rejection")
-        rejection = consumer / "metadata/records/manual.rej"
+        rejection = consumer / "site-specific/metadata/records/manual.rej"
         rejection.write_text("review required\n", encoding="utf-8")
         run(["git", "add", "--force", rejection.as_posix()], consumer)
         commit_all(consumer, "test: preserve unresolved content rejection")
@@ -874,7 +864,7 @@ class UpdateCycleTests(unittest.TestCase):
     def test_intentional_template_conflict_fails_visibly(self) -> None:
         consumer = self.make_consumer("conflict")
         readme = consumer / "README.md"
-        original_content = (consumer / "metadata" / "records" / "complete.yml").read_bytes()
+        original_content = (consumer / "site-specific" / "metadata" / "records" / "complete.yml").read_bytes()
         lines = readme.read_text(encoding="utf-8").splitlines()
         lines[0] = "# Orinoco Lite Site — downstream customization"
         readme.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -892,7 +882,7 @@ class UpdateCycleTests(unittest.TestCase):
         self.assertTrue(ledger["conflicts"])
         self.assertEqual(
             original_content,
-            (consumer / "metadata" / "records" / "complete.yml").read_bytes(),
+            (consumer / "site-specific" / "metadata" / "records" / "complete.yml").read_bytes(),
         )
 
 

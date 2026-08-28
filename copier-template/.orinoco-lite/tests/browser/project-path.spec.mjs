@@ -1,11 +1,12 @@
 import { expect, test } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { startStaticServer } from './static-server.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.resolve(HERE, '../..');
+const ROOT = path.resolve(HERE, '../../..');
 const pagesRoot = path.resolve(
   ROOT,
   process.env.ORINOCO_PAGES_ROOT ?? 'build/pages',
@@ -44,4 +45,39 @@ test('root-relative assets remain under the project path', async ({ page }) => {
   for (const resource of localResources) {
     expect(resource.startsWith(fixture.mount), resource).toBeTruthy();
   }
+});
+
+test('bare review route links to open curation pull requests', async ({ page }) => {
+  const configuration = JSON.parse(
+    await readFile(path.join(pagesRoot, 'review', 'config.json'), 'utf8'),
+  );
+  const expected = new URL(
+    `/${configuration.repository}/pulls`,
+    'https://github.com',
+  );
+  expected.searchParams.set('q', 'is:pr is:open label:curation-review');
+
+  const response = await page.goto(
+    new URL(`${fixture.mount}review/`, fixture.origin).href,
+  );
+  expect(response?.status()).toBe(200);
+  await expect(page.getByRole('link', {
+    name: 'View open curation pull requests on GitHub',
+  })).toHaveAttribute('href', expected.href);
+});
+
+test('structured taxonomy presentation keeps filters and list variants', async ({ page }) => {
+  let response = await page.goto(
+    new URL(`${fixture.mount}publications/`, fixture.origin).href,
+  );
+  expect(response?.status()).toBe(200);
+  await expect(page.locator('[data-orinoco-taxonomy]')).toBeVisible();
+  await expect(page.locator('#orinoco-search')).toBeVisible();
+  await expect(page.locator('[data-orinoco-count]')).toContainText(/results?$/);
+
+  response = await page.goto(
+    new URL(`${fixture.mount}instruments/`, fixture.origin).href,
+  );
+  expect(response?.status()).toBe(200);
+  await expect(page.locator('.orinoco-grid')).toBeVisible();
 });

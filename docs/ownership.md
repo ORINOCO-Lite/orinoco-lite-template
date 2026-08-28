@@ -5,8 +5,8 @@ The checked render contains the same contract at `github-template/.orinoco-lite/
 
 | Class | Update behavior | Representative paths |
 | --- | --- | --- |
-| `template_owned` | Copier three-way update; overlapping downstream edits stop as conflicts | generic workflows, command facade, updater, ownership verifier, generic adapters, generic contract documentation |
-| `initialized_site_owned` | Created once and excluded from later Copier overwrites | `orinoco.yaml`, metadata, the concrete curation workflow, `custom/`, site presentation, and source adapters |
+| `template_owned` | Copier three-way update; overlapping downstream edits stop as conflicts | generic workflows, command facade, updater, ownership verifier, `.orinoco-lite/site/`, `.orinoco-lite/source-adapters/`, and generic contract documentation |
+| `initialized_site_owned` | Created once and excluded from later Copier overwrites | `orinoco.yaml`, `site-specific/`, and the concrete curation workflow |
 | `engine_lock` | Structured replacement by the pinned updater | `orinoco.lock` and the frozen `pixi.lock` |
 | `extensions` | Stable site-owned customization hook | `extensions/` |
 | `consumer_tests` | Created once, then owned and extended by the site | browser, source-adapter, and offline behavior tests |
@@ -20,7 +20,10 @@ A semantic migration may cross that boundary only when the operator supplies an 
 Ownership follows the path contract, not apparent similarity.
 A supported customization belongs under `extensions/`; copying a framework file into a site-owned directory does not silently transfer ownership of that framework behavior.
 
-Source adapters and their site-owned tests use only `source-adapters/` and `.orinoco-lite/tests/source-adapters/`, respectively.
+Generic source-adapter executables use `.orinoco-lite/source-adapters/`.
+Their site-owned manifests, captured content, evidence, policy, and durable
+decisions use `site-specific/sources/` and `site-specific/curation-records/`;
+site-owned adapter tests use `.orinoco-lite/tests/source-adapters/`.
 Their concrete curation workflow is site-owned.
 The generic SHACL Vue handoff workflow and helper are template-owned and operate only on the fixed-path review bundle, exact Git coordinates, canonical records, and annotation companions.
 The downstream static site remains the only editor; the central curation service, or one optional self-hosted override, is only the authenticated GitHub submission boundary.
