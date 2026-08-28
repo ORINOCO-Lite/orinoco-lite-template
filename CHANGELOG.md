@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.2.0rc16 - 2026-08-28
+
+- Let source-curation branches use their exact-head validation dispatch so
+  record proposals run the full suite once while decision-only updates run
+  only the joined-graph check.
+
 ## 0.2.0rc15 - 2026-08-28
 
 - Make the ordinary downstream `test-all` command infer its GitHub repository

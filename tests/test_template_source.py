@@ -263,8 +263,8 @@ class TemplateSourceTests(unittest.TestCase):
         self.assertEqual(
             "gh:ORINOCO-Lite/orinoco-lite-template", answers["_src_path"]
         )
-        self.assertEqual("v0.2.0rc15", answers["_commit"])
-        self.assertEqual("v0.2.0rc15", answers["template_version"])
+        self.assertEqual("v0.2.0rc16", answers["_commit"])
+        self.assertEqual("v0.2.0rc16", answers["template_version"])
 
     def test_rendered_readme_preserves_markdown_structure(self) -> None:
         readme = (ROOT / "github-template" / "README.md").read_text(
@@ -530,6 +530,11 @@ print(json.dumps({"declared": declared, "resolved": str(actual)}))
             with self.subTest(job=name):
                 self.assertEqual("test-all", jobs[name]["with"]["command"])
                 self.assertIn("github.event_name == 'pull_request'", jobs[name]["if"])
+                self.assertIn(
+                    "!startsWith(github.event.pull_request.head.ref, "
+                    "'automation/curation/')",
+                    jobs[name]["if"],
+                )
                 self.assertIn("github.event_name == 'push'", jobs[name]["if"])
                 self.assertIn("inputs.validation == 'full'", jobs[name]["if"])
         joined = jobs["linux-joined"]
