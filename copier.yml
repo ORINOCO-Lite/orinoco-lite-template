@@ -15,16 +15,10 @@ _exclude:
 _skip_if_exists:
   - orinoco.yaml
   - orinoco.lock
-  - .orinoco-lite/provenance/**
   - .orinoco-lite/tests/__init__.py
   - .orinoco-lite/tests/browser/**
   - .github/workflows/curation-review.yml
-  - metadata/records/**
-  - metadata/overlays/annotations/**
-  - custom/editorial/**
-  - custom/assets/**
-  - site/**
-  - source-adapters/**
+  - site-specific/**
   - extensions/**
 
 project_name:
@@ -54,7 +48,7 @@ site_base_url:
 engine_version:
   type: str
   help: Exact orinoco-lite Python distribution version
-  default: 0.2.0rc10
+  default: 0.2.0rc12
   validator: >-
     <% if not (engine_version | regex_search('^[0-9]+\.[0-9]+\.[0-9]+([a-z0-9.-]+)?$')) %>
     Use an exact release version such as 0.1.0.
@@ -63,7 +57,7 @@ engine_version:
 engine_url:
   type: str
   help: Immutable orinoco-lite wheel release URL
-  default: https://github.com/ORINOCO-Lite/orinoco-lite-dev/releases/download/v0.2.0rc10/orinoco_lite-0.2.0rc10-py3-none-any.whl
+  default: https://github.com/ORINOCO-Lite/orinoco-lite-dev/releases/download/v0.2.0rc12/orinoco_lite-0.2.0rc12-py3-none-any.whl
   validator: >-
     <% if '#' in engine_url %>
     Supply the wheel URL without a fragment; the template adds the reviewed SHA-256 fragment.
@@ -72,7 +66,7 @@ engine_url:
 engine_sha256:
   type: str
   help: SHA-256 digest of the immutable orinoco-lite wheel
-  default: "04c40f95a8e7227d84838887b66596912aeac1bf5fe2f046755b618b2c7baf9b"
+  default: "ec39fe7993721881359edd19815b454a52a6d75765a028f4a43e7914ed88de0e"
   validator: >-
     <% if not (engine_sha256 | regex_search('^[0-9a-f]{64}$')) %>
     Supply exactly 64 lower-case hexadecimal characters.
@@ -81,17 +75,17 @@ engine_sha256:
 runtime_version:
   type: str
   help: Exact immutable Orinoco runtime release version
-  default: 0.2.0rc10
+  default: 0.2.0rc12
 
 runtime_url:
   type: str
   help: Immutable runtime archive URL
-  default: https://github.com/ORINOCO-Lite/orinoco-lite-dev/releases/download/v0.2.0rc10/orinoco-runtime-0.2.0rc10.tar.gz
+  default: https://github.com/ORINOCO-Lite/orinoco-lite-dev/releases/download/v0.2.0rc12/orinoco-runtime-0.2.0rc12.tar.gz
 
 runtime_sha256:
   type: str
   help: SHA-256 digest of the immutable runtime archive
-  default: "ad0723f302ccb74e9043a96c4ed2fb6fc6d58969e21095a3f9c97da709388e2e"
+  default: "c3116382819ed10632b917ae8737242ef27ced2b45f55166efd9ad76b12356d2"
   validator: >-
     <% if not (runtime_sha256 | regex_search('^[0-9a-f]{64}$')) %>
     Supply exactly 64 lower-case hexadecimal characters.
@@ -100,7 +94,7 @@ runtime_sha256:
 runtime_manifest_sha256:
   type: str
   help: SHA-256 digest of runtime-manifest.json inside the archive
-  default: "efe9bd8ff0e6816e81031abc13f8d2e78c7850f1d396b8f8e5074ad7d83b97ad"
+  default: "9dfd61f8588cd2b604dc0f178799ae99eaf0002d9946d850ba070f9d31598b3c"
   validator: >-
     <% if not (runtime_manifest_sha256 | regex_search('^[0-9a-f]{64}$')) %>
     Supply exactly 64 lower-case hexadecimal characters.
@@ -114,7 +108,7 @@ template_source:
 template_version:
   type: str
   help: Exact Copier template release
-  default: v0.2.0rc13
+  default: v0.2.0rc14
   validator: >-
     <% if not (template_version | regex_search('^v[0-9]+\.[0-9]+\.[0-9]+([a-z0-9.-]+)?$')) %>
     Use an exact release tag such as v0.1.0.
@@ -128,7 +122,7 @@ workflow_repository:
 workflow_sha:
   type: str
   help: Full reviewed commit SHA associated with the release workflows
-  default: "0cba471d72c8df6822b7f13a8a5ff9155c01522b"
+  default: "6d268efac4ad6283103e9ff38f93780cbff9eb24"
   validator: >-
     <% if not (workflow_sha | regex_search('^[0-9a-f]{40}$')) %>
     Supply exactly 40 lower-case hexadecimal characters.
@@ -137,7 +131,7 @@ workflow_sha:
 workflow_ref:
   type: str
   help: Full immutable reusable-workflow reference, including path and commit SHA
-  default: ORINOCO-Lite/orinoco-lite-dev/.github/workflows/orinoco-consumer-ci.yml@0cba471d72c8df6822b7f13a8a5ff9155c01522b
+  default: ORINOCO-Lite/orinoco-lite-dev/.github/workflows/orinoco-consumer-ci.yml@6d268efac4ad6283103e9ff38f93780cbff9eb24
   validator: >-
     <% if not (workflow_ref | regex_search('^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/\.github/workflows/[A-Za-z0-9_.-]+\.ya?ml@[0-9a-f]{40}$')) %>
     Use owner/repository/.github/workflows/name.yml@ followed by a full commit SHA.

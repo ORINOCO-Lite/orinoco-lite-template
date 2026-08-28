@@ -8,8 +8,8 @@ It supplies a small consumer facade while keeping site content independent from 
 | Layer | Owns | Does not own |
 | --- | --- | --- |
 | [Orinoco Lite engine](https://github.com/ORINOCO-Lite/orinoco-lite-dev) | CLI behavior, the Python wheel, runtime archive, validation and projection behavior, and reusable CI | Copier topology or any site's content |
-| This template | Creation, file-ownership classes, pinned release coordinates, update tooling, and the generic consumer documentation facade | Engine internals or organization-specific records and policy |
-| Rendered consumer | Metadata records, editorial material, assets, presentation, source adapters, extensions, site tests, review, and deployment | Publication of engine or template releases |
+| This template | Creation, file-ownership classes, pinned release coordinates, update tooling, the generic static-site framework, and generic source-adapter executables | Engine internals or organization-specific records, source evidence, presentation data, and policy |
+| Rendered consumer | Site-specific metadata, editorial material, assets, structured presentation data, source manifests/evidence/policy, extensions, site tests, review, and deployment | Publication of engine or template releases |
 
 ```mermaid
 flowchart LR
@@ -49,7 +49,9 @@ Replace `vX.Y.Z` with an exact tag from the [immutable template releases](https:
 
 For a GitHub-first review, use the repository's **Use this template** action, leave **Include all branches** unchecked, then follow the rendered [GitHub-template bootstrap](github-template/docs/getting-started.md) before adding content.
 Both routes retain an exact recorded Copier release and frozen engine environment.
-They create a content-neutral repository facade; a reviewed site profile must supply records, projection policy, assets, and presentation before `validate` or `build` can succeed.
+They create a generic framework and neutral structured site profile without
+inventing metadata. A reviewed site must add its own records and adjust the
+site-owned structured data before `validate` or `build` can succeed.
 For hosted editing, the rendered [custom-domain guide](github-template/docs/custom-domain.md) gives a dedicated domain the normal direct-submission flow and explains the explicit acknowledgment required on shared `github.io` origins.
 
 ## Repository topology

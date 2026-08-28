@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import tomllib
 import unittest
 from pathlib import Path
 
@@ -29,6 +30,29 @@ def load_renderer():
 
 
 class TemplateSourceTests(unittest.TestCase):
+    def test_maintenance_skill_uses_the_downstream_ownership_contract(self) -> None:
+        relative = Path(".agents/skills/maintain-orinoco-site/SKILL.md")
+        source = ROOT / "copier-template" / relative
+        rendered = ROOT / "github-template" / relative
+        text = source.read_text(encoding="utf-8")
+        frontmatter = yaml.safe_load(text.split("---", 2)[1])
+
+        self.assertEqual("maintain-orinoco-site", frontmatter["name"])
+        self.assertIn("preserving site-owned data", frontmatter["description"])
+        for required in (
+            ".orinoco-lite/template-ownership.yml",
+            ".copier-answers.yml",
+            "orinoco.lock",
+            "pixi run update-check",
+            "pixi run update-orinoco -- ...",
+            "pixi run test-all",
+            "$manage-orinoco-content",
+            "$operate-orinoco-metadata-adapters",
+        ):
+            with self.subTest(required=required):
+                self.assertIn(required, text)
+        self.assertEqual(source.read_bytes(), rendered.read_bytes())
+
     def test_downstream_skills_separate_content_from_adapter_curation(self) -> None:
         skills = ROOT / "copier-template" / ".agents" / "skills"
         content = (skills / "manage-orinoco-content" / "SKILL.md").read_text(
@@ -90,28 +114,133 @@ class TemplateSourceTests(unittest.TestCase):
         )
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
 
-    def test_default_tree_is_content_neutral_and_submodule_free(self) -> None:
+    def test_default_tree_has_generic_framework_and_no_site_content(self) -> None:
         destination = ROOT / "github-template"
         self.assertFalse((destination / ".gitmodules").exists())
-        for root in (
-            ".orinoco-lite/provenance",
-            "custom/editorial",
-            "custom/assets",
-            "site/config",
-            "site/layouts",
-            "site/static",
-            "source-adapters",
-            "extensions",
-        ):
-            files = [
-                path
-                for path in (destination / root).rglob("*")
-                if path.is_file() and path.name != ".gitkeep"
-            ]
-            self.assertEqual([], files, root)
+        self.assertTrue((destination / ".orinoco-lite/site/themes/congo").is_dir())
+        self.assertTrue((destination / ".orinoco-lite/source-adapters").is_dir())
+        self.assertTrue((destination / "site-specific/site.yaml").is_file())
+        self.assertTrue((destination / "site-specific/projection.yaml").is_file())
+        self.assertTrue(
+            (destination / "site-specific/static/manifest.yaml").is_file()
+        )
+        for obsolete in ("metadata", "custom", "site", "source-adapters"):
+            self.assertFalse((destination / obsolete).exists(), obsolete)
+        self.assertFalse((destination / "site-specific/metadata/records").exists())
+        self.assertFalse((destination / "site-specific/metadata/records/.gitkeep").exists())
 
-        self.assertFalse((destination / "metadata").exists())
-        self.assertFalse((destination / "metadata/records/.gitkeep").exists())
+        site = yaml.safe_load(
+            (destination / "site-specific/site.yaml").read_text(encoding="utf-8")
+        )
+        self.assertEqual(
+            {
+                "version",
+                "record_prefix",
+                "identity",
+                "language",
+                "author",
+                "theme",
+                "navigation",
+                "people",
+                "projects",
+                "webmanifest",
+            },
+            set(site),
+        )
+        self.assertEqual("people", site["navigation"]["main"][1]["page_ref"])
+        content_templates = destination / ".orinoco-lite/site/content-templates"
+        self.assertTrue((content_templates / "people.md.j2").is_file())
+        self.assertFalse((content_templates / "people-groups.md.j2").exists())
+
+    def test_vendored_framework_retains_licenses_and_excludes_pro_assets(self) -> None:
+        destination = ROOT / "github-template"
+        congo = destination / ".orinoco-lite/site/themes/congo"
+        self.assertTrue((congo / "LICENSE").is_file())
+        self.assertFalse((congo / "assets/icons/line.svg").exists())
+        sharing = (congo / "data/sharing.json").read_text(encoding="utf-8")
+        self.assertNotIn('"line"', sharing)
+        notices_path = destination / ".orinoco-lite/THIRD_PARTY_NOTICES.md"
+        notices = notices_path.read_text(encoding="utf-8")
+        self.assertIn("site/themes/congo/LICENSE", notices)
+        self.assertIn("Font Awesome Pro `line.svg`", notices)
+        ownership = yaml.safe_load(
+            (destination / ".orinoco-lite/template-ownership.yml").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertIn(
+            ".orinoco-lite/site/**",
+            ownership["classes"]["template_owned"]["paths"],
+        )
+        self.assertIn(
+            "LICENSE*",
+            ownership["classes"]["site_policy"]["paths"],
+        )
+        source_notices = (ROOT / "LICENSES.md").read_text(encoding="utf-8")
+        self.assertIn(
+            "copier-template/.orinoco-lite/site/themes/congo/LICENSE",
+            source_notices,
+        )
+        self.assertIn("Font Awesome Pro", source_notices)
+
+    def test_structured_list_and_term_presentation_is_implemented(self) -> None:
+        framework = ROOT / "github-template/.orinoco-lite/site"
+        taxonomy = (framework / "layouts/taxonomy.html").read_text(
+            encoding="utf-8"
+        )
+        term = (framework / "layouts/term.html").read_text(encoding="utf-8")
+        self.assertEqual(
+            taxonomy,
+            (framework / "layouts/_default/orinoco-taxonomy.html").read_text(
+                encoding="utf-8"
+            ),
+        )
+        self.assertEqual(
+            term,
+            (framework / "layouts/_default/orinoco-term.html").read_text(
+                encoding="utf-8"
+            ),
+        )
+        self.assertIn(".Params.list_variant", taxonomy)
+        self.assertIn(".Params.filter_fields", taxonomy)
+        self.assertIn(".Params.search_fields", taxonomy)
+        self.assertIn("taxonomy-list-grid.html", taxonomy)
+        self.assertIn("taxonomy-list-vertical.html", taxonomy)
+        self.assertIn(".depiction_type", term)
+        self.assertIn(".person_display", term)
+        self.assertIn(".show_relations", term)
+        self.assertIn("limitGraphRootNodeId", term)
+        self.assertIn(
+            "layout: orinoco-term",
+            (framework / "projection-templates/page.md.j2").read_text(
+                encoding="utf-8"
+            ),
+        )
+        self.assertTrue((framework / "static/orinoco-list.js").is_file())
+        self.assertTrue((framework / "static/orinoco-list.css").is_file())
+
+    def test_source_adapter_canary_is_offline_and_part_of_full_validation(self) -> None:
+        destination = ROOT / "github-template"
+        canary = (
+            destination
+            / ".orinoco-lite/source-adapters/tests/test_metadata_review_canary.py"
+        )
+        self.assertTrue(canary.is_file())
+        text = canary.read_text(encoding="utf-8")
+        self.assertNotIn("urlopen", text)
+        self.assertNotIn("requests", text)
+        pixi = tomllib.loads((destination / "pixi.toml").read_text(encoding="utf-8"))
+        self.assertIn(
+            "source-adapter-canary",
+            pixi["tasks"]["test-all"]["depends-on"],
+        )
+        adapter_pixi = tomllib.loads(
+            (
+                destination
+                / ".orinoco-lite/source-adapters/metadata/pixi.toml"
+            ).read_text(encoding="utf-8")
+        )
+        self.assertNotIn("test", adapter_pixi["tasks"])
 
         browser_files = [
             path
@@ -134,8 +263,8 @@ class TemplateSourceTests(unittest.TestCase):
         self.assertEqual(
             "gh:ORINOCO-Lite/orinoco-lite-template", answers["_src_path"]
         )
-        self.assertEqual("v0.2.0rc13", answers["_commit"])
-        self.assertEqual("v0.2.0rc13", answers["template_version"])
+        self.assertEqual("v0.2.0rc14", answers["_commit"])
+        self.assertEqual("v0.2.0rc14", answers["template_version"])
 
     def test_rendered_readme_preserves_markdown_structure(self) -> None:
         readme = (ROOT / "github-template" / "README.md").read_text(
@@ -152,37 +281,31 @@ from pathlib import Path
 from orinoco_lite.config import load_config_path
 root = Path(__import__('sys').argv[1])
 workspace = load_config_path(root / 'orinoco.yaml')
-assert workspace.path('records').resolve() == (root / 'metadata' / 'records').resolve()
-assert workspace.path('source_adapters').resolve() == (root / 'source-adapters').resolve()
+assert workspace.path('records').resolve() == (root / 'site-specific' / 'metadata' / 'records').resolve()
+assert workspace.path('framework').resolve() == (root / '.orinoco-lite' / 'site').resolve()
+assert workspace.path('source_adapters').resolve() == (root / '.orinoco-lite' / 'source-adapters').resolve()
 """
         environment = dict(os.environ, PIXI_FROZEN="true", PIXI_NO_CONFIG="true")
         configured_source = environment.get("ORINOCO_ENGINE_SOURCE")
+        pixi = shutil.which("pixi")
+        self.assertIsNotNone(
+            pixi,
+            "Pixi is required for the engine configuration smoke test",
+        )
         if configured_source:
             engine_source = Path(configured_source).resolve()
             self.assertTrue(engine_source.is_dir(), engine_source)
             environment["PYTHONPATH"] = engine_source.as_posix()
-            command = [
-                sys.executable,
-                "-c",
-                script,
-                (ROOT / "github-template").as_posix(),
-            ]
-        else:
-            pixi = shutil.which("pixi")
-            self.assertIsNotNone(
-                pixi,
-                "Pixi is required for the released-engine smoke test",
-            )
-            command = [
-                str(pixi),
-                "run",
-                "--manifest-path",
-                (ROOT / "github-template" / "pixi.toml").as_posix(),
-                "python",
-                "-c",
-                script,
-                (ROOT / "github-template").as_posix(),
-            ]
+        command = [
+            str(pixi),
+            "run",
+            "--manifest-path",
+            (ROOT / "github-template" / "pixi.toml").as_posix(),
+            "python",
+            "-c",
+            script,
+            (ROOT / "github-template").as_posix(),
+        ]
         result = subprocess.run(
             command,
             cwd=ROOT,
@@ -261,6 +384,7 @@ assert workspace.path('source_adapters').resolve() == (root / 'source-adapters')
         rendered = ROOT / "github-template"
         manifest = rendered / "pixi.toml"
         environment = dict(os.environ, PIXI_FROZEN="true", PIXI_NO_CONFIG="true")
+        environment.pop("PYTHONPATH", None)
         preflight = """
 from contextlib import redirect_stdout
 from io import StringIO
@@ -289,7 +413,16 @@ print(json.dumps({"declared": declared, "resolved": str(actual)}))
 """
         with tempfile.TemporaryDirectory(prefix="orinoco-runtime-contract-") as name:
             workspace = Path(name)
-            shutil.copy2(rendered / "orinoco.yaml", workspace / "orinoco.yaml")
+            configuration = yaml.safe_load(
+                (rendered / "orinoco.yaml").read_text(encoding="utf-8")
+            )
+            # This test proves only the currently released runtime's Hugo pin.
+            # Candidate-only path keys have their own configuration smoke test.
+            configuration["paths"].pop("framework", None)
+            (workspace / "orinoco.yaml").write_text(
+                yaml.safe_dump(configuration, sort_keys=False),
+                encoding="utf-8",
+            )
             shutil.copy2(rendered / "orinoco.lock", workspace / "orinoco.lock")
             compatible = subprocess.run(
                 [
@@ -375,6 +508,40 @@ print(json.dumps({"declared": declared, "resolved": str(actual)}))
             1,
         )
 
+    def test_manual_validation_selects_full_or_joined_scope(self) -> None:
+        workflow = (
+            ROOT / "github-template" / ".github" / "workflows" / "validate.yml"
+        ).read_text(encoding="utf-8")
+        document = yaml.load(workflow, Loader=yaml.BaseLoader)
+        validation = document["on"]["workflow_dispatch"]["inputs"]["validation"]
+        self.assertEqual(
+            {
+                "description": "Validation scope",
+                "required": "true",
+                "default": "full",
+                "type": "choice",
+                "options": ["full", "joined"],
+            },
+            validation,
+        )
+
+        jobs = document["jobs"]
+        for name in ("macos", "linux"):
+            with self.subTest(job=name):
+                self.assertEqual("test-all", jobs[name]["with"]["command"])
+                self.assertIn("github.event_name == 'pull_request'", jobs[name]["if"])
+                self.assertIn("github.event_name == 'push'", jobs[name]["if"])
+                self.assertIn("inputs.validation == 'full'", jobs[name]["if"])
+        joined = jobs["linux-joined"]
+        self.assertEqual("Validate joined graph (Linux x86-64)", joined["name"])
+        self.assertEqual("validate", joined["with"]["command"])
+        self.assertEqual("ubuntu-24.04", joined["with"]["runner"])
+        self.assertIn("inputs.validation == 'joined'", joined["if"])
+        self.assertNotIn("pull_request", joined["if"])
+        self.assertNotIn("artifact-name", joined["with"])
+        self.assertNotIn("concurrency:", workflow)
+        self.assertNotIn("cancel-in-progress", workflow)
+
     def test_milestone_five_ownership_boundaries_are_explicit(self) -> None:
         from importlib.util import module_from_spec, spec_from_file_location
 
@@ -390,7 +557,7 @@ print(json.dumps({"declared": declared, "resolved": str(actual)}))
         self.assertEqual(
             ["initialized_site_owned"],
             contract.classify(
-                "metadata/overlays/annotations/XYZProject/example.yaml",
+                "site-specific/metadata/overlays/annotations/XYZProject/example.yaml",
                 classes,
             ),
         )

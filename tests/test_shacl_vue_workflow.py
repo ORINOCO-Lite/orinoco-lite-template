@@ -97,9 +97,9 @@ class ShaclVueWorkflowTests(unittest.TestCase):
         self.assertIn('GIT_COMMITTER_NAME="github-actions[bot]"', commit)
         self.assertIn('--source-commit "$SOURCE_COMMIT"', commit)
         self.assertIn("verify-commit", commit)
-        self.assertIn("git -C source add -A -- metadata", commit)
+        self.assertIn("git -C source add -A -- site-specific/metadata", commit)
         self.assertNotIn(
-            "metadata/records metadata/overlays/annotations",
+            "site-specific/metadata/records site-specific/metadata/overlays/annotations",
             commit,
         )
 
@@ -143,8 +143,8 @@ class ShaclVueWorkflowTests(unittest.TestCase):
         combined = self.text + HELPER.read_text(encoding="utf-8")
         self.assertNotIn("dump-research-info", combined)
         self.assertNotIn("source-adapters/zotero", combined)
-        self.assertIn("source-adapters", combined)
-        self.assertIn("curation-decisions.yaml", combined)
+        self.assertIn("site-specific", combined)
+        self.assertIn("curation-records", combined)
 
     def test_profile_never_executes_head_or_adds_adapter_decision_behavior(
         self,

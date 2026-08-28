@@ -51,8 +51,8 @@ class SourceAdapterUpdatePreservationTests(unittest.TestCase):
     def test_normal_update_preserves_site_curation_bytes(self) -> None:
         consumer = self.update_fixture.make_consumer("source-adapter-policy")
         artifacts = {
-            "source-adapters/zotero/policy/curation-decisions.yaml": DECISION_BYTES,
-            "metadata/overlays/annotations/XYZPublication/example.yaml": ANNOTATION_BYTES,
+            "site-specific/curation-records/zotero.yaml": DECISION_BYTES,
+            "site-specific/metadata/overlays/annotations/XYZPublication/example.yaml": ANNOTATION_BYTES,
             ".github/workflows/curation-review.yml": CURATION_WORKFLOW_BYTES,
         }
         for relative, content in artifacts.items():

@@ -50,21 +50,28 @@ class DownstreamContractTests(unittest.TestCase):
 
     def test_site_owned_paths_are_present(self) -> None:
         for path in (
-            ".orinoco-lite/provenance",
-            "custom/editorial",
-            "custom/assets",
-            "site",
-            "source-adapters",
+            "site-specific/provenance",
+            "site-specific/content/pages",
+            "site-specific/static",
+            "site-specific/sources",
+            "site-specific/curation-records",
             "extensions",
         ):
             with self.subTest(path=path):
                 self.assertTrue((ROOT / path).is_dir())
 
-        self.assertFalse((ROOT / "metadata").exists())
-        self.assertFalse((ROOT / "metadata/records/.gitkeep").exists())
+        self.assertTrue((ROOT / ".orinoco-lite/site").is_dir())
+        self.assertTrue((ROOT / ".orinoco-lite/source-adapters").is_dir())
+        for obsolete in ("metadata", "custom", "site", "source-adapters"):
+            self.assertFalse((ROOT / obsolete).exists(), obsolete)
+        self.assertFalse((ROOT / "site-specific/metadata/records/.gitkeep").exists())
 
-    def test_fresh_facade_defers_to_engine_open_reference_defaults(self) -> None:
-        self.assertFalse((ROOT / "site/projection.yaml").exists())
+    def test_fresh_projection_uses_open_reference_defaults(self) -> None:
+        projection = yaml.safe_load(
+            (ROOT / "site-specific/projection.yaml").read_text(encoding="utf-8")
+        )
+        self.assertEqual("preserve", projection["references"]["missing_targets"])
+        self.assertEqual("drop", projection["graph"]["missing_external_targets"])
         guidance = (ROOT / "docs/getting-started.md").read_text(encoding="utf-8")
         self.assertIn(
             "Omitting the `references` section preserves well-formed references",
@@ -90,11 +97,17 @@ class DownstreamContractTests(unittest.TestCase):
         )
         self.assertEqual(
             ["initialized_site_owned"],
-            verifier.classify(".orinoco-lite/provenance/external.json", classes),
+            verifier.classify("site-specific/provenance/external.json", classes),
+        )
+        self.assertEqual(
+            ["template_owned"],
+            verifier.classify(
+                ".orinoco-lite/source-adapters/zotero/metadata_adapter.py", classes
+            ),
         )
         self.assertEqual(
             ["initialized_site_owned"],
-            verifier.classify("source-adapters/zotero/config.toml", classes),
+            verifier.classify("site-specific/sources/zotero/source.yaml", classes),
         )
 
     def test_engine_configuration_uses_the_supported_path_contract(self) -> None:
@@ -112,12 +125,13 @@ class DownstreamContractTests(unittest.TestCase):
         )
         self.assertEqual(
             {
-                "records": "metadata/records",
-                "provenance": ".orinoco-lite/provenance",
-                "editorial": "custom/editorial",
-                "assets": "custom/assets",
-                "site": "site",
-                "source_adapters": "source-adapters",
+                "records": "site-specific/metadata/records",
+                "provenance": "site-specific/provenance",
+                "editorial": "site-specific/content/pages",
+                "assets": "site-specific/static",
+                "site": "site-specific",
+                "framework": ".orinoco-lite/site",
+                "source_adapters": ".orinoco-lite/source-adapters",
                 "generated": "generated",
                 "extensions": "extensions",
                 "build": "build",
@@ -179,6 +193,7 @@ class DownstreamContractTests(unittest.TestCase):
         )
         self.assertIn("projection-verify", tasks["test-all"]["depends-on"])
         self.assertIn("assets-prepare-online", tasks["test-all"]["depends-on"])
+        self.assertIn("source-adapter-canary", tasks["test-all"]["depends-on"])
         self.assertNotIn("assets-verify", tasks["test-all"]["depends-on"])
         self.assertIn("test-browser", tasks["test-all"]["depends-on"])
         self.assertIn("verify-build", tasks["test-all"]["depends-on"])
@@ -186,6 +201,11 @@ class DownstreamContractTests(unittest.TestCase):
         self.assertEqual(
             "python .orinoco-lite/tools/run_consumer_tests.py",
             tasks["test-consumer"],
+        )
+        self.assertEqual(
+            "python -m unittest discover -s .orinoco-lite/source-adapters/tests "
+            "-p 'test_*.py' -v",
+            tasks["source-adapter-canary"],
         )
         self.assertEqual(["build"], tasks["verify-local-preview"]["depends-on"])
         self.assertEqual(
@@ -274,6 +294,19 @@ class DownstreamContractTests(unittest.TestCase):
             )
         )
         self.assertEqual("1.62.1", package["devDependencies"]["@playwright/test"])
+
+    def test_bare_review_route_links_to_filtered_curation_prs(self) -> None:
+        browser = (
+            ROOT / ".orinoco-lite/tests/browser/project-path.spec.mjs"
+        ).read_text(encoding="utf-8")
+        self.assertIn("`${fixture.mount}review/`", browser)
+        self.assertIn("review', 'config.json'", browser)
+        self.assertIn(
+            "View open curation pull requests on GitHub",
+            browser,
+        )
+        self.assertIn("is:pr is:open label:curation-review", browser)
+        self.assertIn("path.resolve(HERE, '../../..')", browser)
 
     def test_local_build_is_host_neutral_and_pages_paths_stay_explicit(self) -> None:
         pixi = tomllib.loads((ROOT / "pixi.toml").read_text(encoding="utf-8"))

@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+## 0.2.0rc14 - 2026-08-28
+
+- Establish the fresh downstream ownership split: reusable framework and
+  source-adapter executables live under `.orinoco-lite/`, site records and
+  policy live under `site-specific/`, and durable presentation overrides live
+  under `extensions/`.
+- Render structured site identity, navigation, people, projects, manifest,
+  section indexes, lists, and term pages from `site-specific/site.yaml` while
+  retaining the bundled framework's dependency notices.
+- Add the offline retained-source adapter canary, downstream-aware candidate
+  roots, and generic Zotero review support without shipping site evidence or
+  curation decisions in the template.
+- Add focused `/review/` browser acceptance and selectable full or joined
+  manual validation while preserving full pull-request and default-branch
+  validation.
+- Document the one-time site-specific layout migration and Copier update
+  boundaries for existing downstreams.
+- Advance the default engine, runtime, and reusable workflows to the immutable
+  `v0.2.0rc12` release without changing the adapted upstream component pins.
+
 ## 0.2.0rc13 - 2026-08-27
 
 - Derive curation repository identity from the trusted GitHub Pages build, default to the central service without downstream configuration, and retain one optional `site.curation_service` self-hosting override.
