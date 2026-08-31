@@ -17,8 +17,8 @@ BUNDLE_FORMAT = "orinoco-shacl-review-bundle"
 BUNDLE_VERSION = 2
 MAX_BUNDLE_BYTES = 10 * 1024 * 1024
 MAX_BUNDLE_RECORDS = 50
-RECORD_ROOT = PurePosixPath("metadata/records")
-ANNOTATION_ROOT = PurePosixPath("metadata/overlays/annotations")
+RECORD_ROOT = PurePosixPath("site-specific/metadata/records")
+ANNOTATION_ROOT = PurePosixPath("site-specific/metadata/overlays/annotations")
 SHA40 = re.compile(r"[0-9a-f]{40}")
 
 
@@ -115,9 +115,15 @@ def _metadata_path(value: str) -> str | None:
         or any(part in {"", ".", ".."} or part.startswith(".") for part in path.parts)
     ):
         return None
-    if path.parts[:2] == RECORD_ROOT.parts and len(path.parts) >= 3:
+    if (
+        path.parts[: len(RECORD_ROOT.parts)] == RECORD_ROOT.parts
+        and len(path.parts) > len(RECORD_ROOT.parts)
+    ):
         return value
-    if path.parts[:3] == ANNOTATION_ROOT.parts and len(path.parts) >= 4:
+    if (
+        path.parts[: len(ANNOTATION_ROOT.parts)] == ANNOTATION_ROOT.parts
+        and len(path.parts) > len(ANNOTATION_ROOT.parts)
+    ):
         return value
     return None
 
@@ -128,11 +134,11 @@ def _decision_cache_path(value: str) -> str | None:
         any(character in value for character in "\\\r\n\0")
         or path.is_absolute()
         or path.as_posix() != value
-        or len(path.parts) != 4
-        or path.parts[0] != "source-adapters"
-        or path.parts[2:] != ("policy", "curation-decisions.yaml")
-        or path.parts[1] in {"", ".", ".."}
-        or path.parts[1].startswith(".")
+        or len(path.parts) != 5
+        or path.parts[:2] != ("extensions", "adapters")
+        or path.parts[3:] != ("policy", "curation-decisions.yaml")
+        or path.parts[2] in {"", ".", ".."}
+        or path.parts[2].startswith(".")
     ):
         return None
     return value

@@ -1,0 +1,20 @@
+version: 1
+record_prefix: "xyzrins:"
+identity:
+  title: "Orinoco Lite Site"
+  description: "A site built with Orinoco Lite."
+  base_url: "https://example.invalid/orinoco-site/"
+navigation:
+  - name: Projects
+    page_ref: projects
+    weight: 10
+  - name: People
+    page_ref: persons
+    weight: 20
+  - name: Publications
+    page_ref: publications
+    weight: 30
+presentation:
+  color_scheme: fire
+  default_appearance: light
+  header_layout: hybrid

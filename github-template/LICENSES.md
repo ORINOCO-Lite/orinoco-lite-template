@@ -1,7 +1,7 @@
 # Consumer license boundary
 
-The generic Orinoco Lite facade—its software, configuration, workflows, tests,
-and update tooling—is licensed under the repository's
+The generic Orinoco Lite website—its software, configuration, workflows, and
+tests—is licensed under the repository's
 [MIT License](LICENSE). Original generic documentation is licensed under
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 

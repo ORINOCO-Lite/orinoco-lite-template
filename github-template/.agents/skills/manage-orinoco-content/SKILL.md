@@ -1,43 +1,23 @@
 ---
 name: manage-orinoco-content
-description: Edit and review an Orinoco Lite downstream's human-authored editorial content and declared assets. Use when changing files under custom/editorial or custom/assets, updating asset declarations, reviewing focused editorial or asset diffs, or preparing an ordinary site content pull request. Do not use for metadata source adapters or human curation decisions.
+description: Edit and review declarative Orinoco Lite downstream content, assets, identity, presentation choices, or supported overrides under site-specific/. Do not use for metadata adapter execution or curation decisions.
 ---
 
 # Manage Orinoco content
 
-Work only in the downstream's user-facing source layer.
-Keep generated output, tool state, and migration evidence out of content commits.
+Keep all website-specific declarative inputs under `site-specific/`:
 
-## Editorial workflow
+- edit reviewed semantic records under `site-specific/metadata/`;
+- edit Markdown under `site-specific/content/`;
+- put assets and static inputs under their named directories;
+- change identity, navigation, and supported presentation choices in
+  `site-specific/site.yaml`; and
+- use `site-specific/overrides/` only when the generic template cannot express
+  a required declarative website choice.
 
-1. Read `site/presentation.yaml` to understand where editorial files are used.
-2. Edit Markdown under `custom/editorial/`; preserve existing front matter and navigation intent.
-3. Do not edit `generated/`.
-Run `pixi run validate` to regenerate it locally.
-4. Run `pixi run build` and inspect the affected page before committing.
-5. Keep the commit focused on source files; ignored projection output is not review evidence.
+Run `pixi run validate`, `pixi run build`, and the relevant browser test. Never
+edit generated output or copy template framework files into `site-specific/`.
 
-## Asset workflow
-
-1. Put site-managed payloads under `custom/assets/files/`.
-2. Update `custom/assets/manifest.yaml` when an asset is part of the declared build contract.
-3. For committed payloads, use ordinary Git.
-Do not initialize git-annex, add annex pointer rules, or introduce a large-file backend.
-4. For payloads fetched from an external source, record only the immutable URL, byte size, and SHA-256 needed to verify that external fact.
-Do not duplicate Git blob or commit identity in a separate inventory.
-5. Run `pixi run assets-verify`, `pixi run validate`, and `pixi run build`.
-
-## Boundaries
-
-- Treat `metadata/records/`, `custom/`, `site/`, `source-adapters/`, and `extensions/` as user-facing source.
-- Treat `.orinoco-lite/` as implementation support.
-Change it only for an explicit framework-maintenance task.
-- Never commit `generated/`, `.orinoco-lite/state/`, caches, build output, or a second digest inventory of the same commit.
-- Prefer a small source diff plus rendered review over provenance narration in the downstream tree.
-
-## Metadata-adapter handoff
-
-Use `$operate-orinoco-metadata-adapters` for files under `source-adapters/`,
-candidate metadata, provenance, matching policy, decision memory, or adapter pull
-requests. That workflow distinguishes disposable matching caches from durable
-human curation state and requires explicit review decisions.
+Use `$operate-orinoco-metadata-adapters` for executables, captured evidence,
+candidate metadata, matching policy, and curation decisions under
+`extensions/`.

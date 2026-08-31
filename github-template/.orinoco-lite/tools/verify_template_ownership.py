@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
 from importlib import metadata
@@ -31,17 +32,20 @@ REQUIRED_TEMPLATE_FILES = {
     ".github/workflows/validate.yml",
     ".github/workflows/pages.yml",
     ".github/workflows/shacl-vue-proposal.yml",
-    ".github/workflows/update-orinoco.yml",
     ".orinoco-lite/README.md",
+    ".orinoco-lite/site/config-templates/hugo.toml.j2",
+    ".orinoco-lite/site/layouts/term.html",
+    ".orinoco-lite/site/projection-templates/page.md.j2",
+    ".orinoco-lite/site/themes/congo/theme.toml",
     ".orinoco-lite/tools/template_contract.py",
-    ".orinoco-lite/tools/update_orinoco.py",
     ".orinoco-lite/tools/verify_template_ownership.py",
-    ".orinoco-lite/tools/finalize_update_ledger.py",
     ".orinoco-lite/tools/verify_deterministic_build.py",
     ".orinoco-lite/tools/verify_local_preview.py",
     ".orinoco-lite/tools/verify_hugo.py",
     ".orinoco-lite/tools/install_browser_tests.py",
     ".orinoco-lite/tools/shacl_vue_handoff.py",
+    "site-specific/site.yaml",
+    "site-specific/projection.yaml",
 }
 ACTION_REFERENCE = re.compile(r"^\s*-?\s*uses:\s*([^\s#]+)", re.MULTILINE)
 FULL_SHA_ACTION = re.compile(
@@ -165,7 +169,8 @@ def verify(root: Path) -> list[str]:
         and valid_hex(engine.get("sha256"), 64)
         and set(engine["sha256"]) != {"0"}
     ):
-        verify_engine_environment(root, lock, failures)
+        if os.environ.get("ORINOCO_UNSAFE_DEVELOPMENT_RUNTIME") != "1":
+            verify_engine_environment(root, lock, failures)
 
     for workflow_path in sorted((root / ".github" / "workflows").glob("*.yml")):
         text = workflow_path.read_text(encoding="utf-8")

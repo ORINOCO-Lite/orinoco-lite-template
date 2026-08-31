@@ -1,0 +1,9 @@
+attributes:
+  - predicate: skos:prefLabel
+    schema_type: dlthings:AttributeSpecification
+    value: "Orinoco Lite Site"
+description: "A site built with Orinoco Lite."
+display_label: "Orinoco Lite Site"
+pid: xyzrins:.
+schema_type: xyzri:XYZProject
+title: "Orinoco Lite Site"

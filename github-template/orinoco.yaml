@@ -6,12 +6,11 @@ site:
   base_url: "https://example.invalid/orinoco-site/"
 
 paths:
-  records: metadata/records
+  records: site-specific/metadata/records
   provenance: .orinoco-lite/provenance
-  editorial: custom/editorial
-  assets: custom/assets
-  site: site
-  source_adapters: source-adapters
+  editorial: site-specific/content
+  site: site-specific
+  framework: .orinoco-lite/site
   generated: generated
   extensions: extensions
   build: build

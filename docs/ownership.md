@@ -1,33 +1,15 @@
-# Template ownership contract
+# Template source ownership
 
-`copier-template/.orinoco-lite/template-ownership.yml` is the machine-readable authority.
-The checked render contains the same contract at `github-template/.orinoco-lite/template-ownership.yml`.
+The Copier source owns the complete generic downstream repository and website.
+Its checked rendering is `github-template/`.
 
-| Class | Update behavior | Representative paths |
-| --- | --- | --- |
-| `template_owned` | Copier three-way update; overlapping downstream edits stop as conflicts | generic workflows, command facade, updater, ownership verifier, generic adapters, generic contract documentation |
-| `initialized_site_owned` | Created once and excluded from later Copier overwrites | `orinoco.yaml`, metadata, the concrete curation workflow, `custom/`, site presentation, and source adapters |
-| `engine_lock` | Structured replacement by the pinned updater | `orinoco.lock` and the frozen `pixi.lock` |
-| `extensions` | Stable site-owned customization hook | `extensions/` |
-| `consumer_tests` | Created once, then owned and extended by the site | browser, source-adapter, and offline behavior tests |
-| `site_policy` | Always decided by the site | licensing, citation, contribution, and conduct files |
-| `generated` | Ignored runtime output | projection under `generated/` |
+The rendered ownership contract distinguishes:
 
-The updater compares protected site-owned bytes before and after Copier runs.
-An undeclared change fails closed.
-A semantic migration may cross that boundary only when the operator supplies an explicit migration ID and exact allowed paths; the resulting ledger remains in `human-review` status.
+- template-owned website, workflow, tool, test, and documentation files;
+- declarative `site-specific/` inputs and supported overrides;
+- executable metadata adapters under `extensions/`;
+- exact release locks; and
+- ignored generated output.
 
-Ownership follows the path contract, not apparent similarity.
-A supported customization belongs under `extensions/`; copying a framework file into a site-owned directory does not silently transfer ownership of that framework behavior.
-
-Source adapters and their site-owned tests use only `source-adapters/` and `.orinoco-lite/tests/source-adapters/`, respectively.
-Their concrete curation workflow is site-owned.
-The generic SHACL Vue handoff workflow and helper are template-owned and operate only on the fixed-path review bundle, exact Git coordinates, canonical records, and annotation companions.
-The downstream static site remains the only editor; the central curation service, or one optional self-hosted override, is only the authenticated GitHub submission boundary.
-The Pages build derives repository identity from GitHub's trusted runner rather than an editor-specific site setting.
-Source-adapter workflows remain site-owned and link to the site's own static `/review/` route; the selected service provides OAuth and verified GitHub transport, not another review page.
-
-This layer never chooses a site's publication identity, content scope, collection policy, authorship, venue, content licensing, or production-cutover semantics.
-Those are consumer decisions.
-Licensing of the generic template and updater is instead determined by authorized Orinoco Lite rightsholders; a consumer cannot grant rights it does not hold.
-Engine behavior remains documented in the [engine repository](https://github.com/ORINOCO-Lite/orinoco-lite-dev); the corresponding consumer view is the rendered [file-ownership guide](../github-template/docs/ownership.md).
+This is the versioned template contract for new downstreams. Migration,
+updater behavior, and earlier downstream structures are outside its scope.

@@ -1,6 +1,6 @@
 # Orinoco Lite template license policy
 
-Original template, updater, workflow, test, and other software code is licensed
+Original template, workflow, test, and other software code is licensed
 under the repository's [MIT License](LICENSE).
 
 Original documentation is licensed under
