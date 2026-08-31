@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.2.0rc18 - 2026-08-31
+
+- Advance the default engine, runtime, and reusable workflow to the immutable
+  `v0.2.0rc15` release, which serializes reactive editor proposals before the
+  popup transport boundary.
+
 ## 0.2.0rc17 - 2026-08-31
 
 - Advance the default engine, runtime, and reusable workflow to the immutable
