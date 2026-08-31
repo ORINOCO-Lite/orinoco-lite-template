@@ -34,7 +34,7 @@ class ShaclVueWorkflowTests(unittest.TestCase):
             {
                 "actions": "write",
                 "contents": "write",
-                "pull-requests": "read",
+                "pull-requests": "write",
             },
             self.job["permissions"],
         )
@@ -78,6 +78,19 @@ class ShaclVueWorkflowTests(unittest.TestCase):
         boundary = self.steps["Enforce the authenticated exact-head handoff boundary"]
         self.assertEqual("steps.inspect.outputs.phase == 'handoff'", authority["if"])
         self.assertEqual("steps.inspect.outputs.phase == 'handoff'", boundary["if"])
+
+    def test_trusted_workflow_posts_one_concise_bot_status(self) -> None:
+        announce = self.steps["Announce metadata materialization"]
+        self.assertEqual("steps.inspect.outputs.phase == 'handoff'", announce["if"])
+        script = announce["run"]
+        self.assertIn(
+            "Metadata update from SHACL Vue.\\n\\nPlease wait for the workflow "
+            "to create the corresponding edit to the metadata records.",
+            script,
+        )
+        self.assertIn('"github-actions[bot]"', script)
+        self.assertIn('comment.get("body") == os.environ["COMMENT_BODY"]', script)
+        self.assertIn('--field body="$COMMENT_BODY"', script)
 
     def test_trusted_python_applies_validates_and_materializes_same_parent(
         self,
