@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.2.0rc17 - 2026-08-31
+
+- Advance the default engine, runtime, and reusable workflow to the immutable
+  `v0.2.0rc13` release.
+- Document the SHACL editor's warning-only shared-`github.io` presentation and
+  credential-free bundle alternative without an acknowledgment gate.
+
 ## 0.2.0rc16 - 2026-08-28
 
 - Let source-curation branches use their exact-head validation dispatch so

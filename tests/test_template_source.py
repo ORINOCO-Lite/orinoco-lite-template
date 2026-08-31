@@ -263,8 +263,8 @@ class TemplateSourceTests(unittest.TestCase):
         self.assertEqual(
             "gh:ORINOCO-Lite/orinoco-lite-template", answers["_src_path"]
         )
-        self.assertEqual("v0.2.0rc16", answers["_commit"])
-        self.assertEqual("v0.2.0rc16", answers["template_version"])
+        self.assertEqual("v0.2.0rc17", answers["_commit"])
+        self.assertEqual("v0.2.0rc17", answers["template_version"])
 
     def test_rendered_readme_preserves_markdown_structure(self) -> None:
         readme = (ROOT / "github-template" / "README.md").read_text(
@@ -351,7 +351,8 @@ assert workspace.path('source_adapters').resolve() == (root / '.orinoco-lite' / 
         ).read_text(encoding="utf-8")
         self.assertIn("dedicated custom domain is the normal", guidance)
         self.assertIn("Browsers isolate origins, not URL paths", guidance)
-        self.assertIn("curator explicitly acknowledges", guidance)
+        self.assertIn("shows a clear warning", guidance)
+        self.assertIn("does not require a checkbox or acknowledgment", guidance)
         self.assertIn("**Download bundle** always remains available", guidance)
         self.assertIn("central Orinoco Lite service at", guidance)
         self.assertIn("https://orinoco-curation-review.pages.dev", guidance)
