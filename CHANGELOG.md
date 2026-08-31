@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.2.0rc19 - 2026-08-31
+
+- Make the SHACL Vue editor action the single authorizing click for a GitHub
+  proposal and report handoff status with a concise GitHub Actions bot comment.
+- Preserve unchanged RDF list ordering during canonical YAML materialization.
+- Advance the default engine, runtime, and reusable workflow to the immutable
+  `v0.2.0rc17` release.
+
 ## 0.2.0rc18 - 2026-08-31
 
 - Advance the default engine, runtime, and reusable workflow to the immutable
