@@ -263,8 +263,8 @@ class TemplateSourceTests(unittest.TestCase):
         self.assertEqual(
             "gh:ORINOCO-Lite/orinoco-lite-template", answers["_src_path"]
         )
-        self.assertEqual("v0.2.0rc18", answers["_commit"])
-        self.assertEqual("v0.2.0rc18", answers["template_version"])
+        self.assertEqual("v0.2.0rc19", answers["_commit"])
+        self.assertEqual("v0.2.0rc19", answers["template_version"])
 
     def test_rendered_readme_preserves_markdown_structure(self) -> None:
         readme = (ROOT / "github-template" / "README.md").read_text(
