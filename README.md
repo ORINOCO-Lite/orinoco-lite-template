@@ -52,7 +52,7 @@ Both routes retain an exact recorded Copier release and frozen engine environmen
 They create a generic framework and neutral structured site profile without
 inventing metadata. A reviewed site must add its own records and adjust the
 site-owned structured data before `validate` or `build` can succeed.
-For hosted editing, the rendered [custom-domain guide](github-template/docs/custom-domain.md) gives a dedicated domain the normal direct-submission flow and explains the explicit acknowledgment required on shared `github.io` origins.
+For hosted editing, the rendered [custom-domain guide](github-template/docs/custom-domain.md) gives a dedicated domain the normal direct-submission flow and explains the warning shown on shared `github.io` origins.
 
 ## Repository topology
 
