@@ -91,6 +91,8 @@ def template_version_commit(repository: Path, rendered: Path) -> str:
     version = answers.get("_commit") if isinstance(answers, dict) else None
     if not isinstance(version, str):
         raise PublicationError("rendered answers do not select a template version")
+    if FULL_COMMIT.fullmatch(version):
+        return git(repository, "rev-parse", f"{version}^{{commit}}")
     tag = f"refs/tags/{version}"
     if optional_git(repository, "show-ref", "--verify", tag) is None:
         raise PublicationError(f"rendered template version is not tagged: {version}")
