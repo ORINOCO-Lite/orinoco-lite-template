@@ -1,118 +1,20 @@
 version: 1
 record_prefix: "xyzrins:"
-
 identity:
   title: "Orinoco Lite Site"
   description: "A site built with Orinoco Lite."
-  copyright: ""
-
-language:
-  code: en
-  name: English
-  direction: ltr
-  weight: 1
-  date_format: "2 January 2006"
-
-author:
-  name: "Orinoco Lite Site"
-  headline: "A site built with Orinoco Lite."
-  links: []
-
-theme:
-  color_scheme: congo
-  default_appearance: light
-  auto_switch_appearance: true
-  header:
-    layout: hybrid
-    logo: ""
-    logo_dark: ""
-    show_title: true
-  homepage:
-    layout: custom
-    show_recent: false
-  article:
-    show_date: false
-    show_date_updated: false
-    show_author: false
-    show_breadcrumbs: true
-    show_heading_anchors: true
-    show_pagination: true
-    show_reading_time: false
-    show_table_of_contents: false
-    show_taxonomies: false
-
+  base_url: "https://example.invalid/orinoco-site/"
 navigation:
-  main:
-    - name: Projects
-      page_ref: projects
-      weight: 10
-      icon: list
-      show_name: true
-    - name: People
-      page_ref: people
-      weight: 20
-      icon: comment
-      show_name: true
-  footer: []
-  sections:
-    publications:
-      title: Publications
-      route: /publications/
-      aliases: []
-      introduction: ""
-      list_variant: vertical
-      filter: true
-      filter_fields: [kind, year]
-      search_fields: [title, kind, year, author]
-      term:
-        person_display: Authors
-        show_relations: expandable
-    instruments:
-      title: Outputs
-      route: /instruments/
-      aliases: []
-      introduction: ""
-      list_variant: grid
-      term:
-        depiction_type: logo
-        person_display: Contributors
-        show_relations: expandable
-
-people:
-  title: People
-  route: /people/
-  aliases: []
-  introduction: ""
-  groups: []
-  index:
-    title: People
-    route: /persons/
-    aliases: []
-    introduction: ""
-    list_variant: grid
-    term:
-      depiction_type: portrait
-      person_display: Collaborators
-      show_relations: expandable
-
-projects:
-  title: Projects
-  route: /projects/
-  aliases: []
-  introduction: ""
-  list_variant: grid
-  term:
-    depiction_type: logo
-    person_display: People
-    show_relations: expandable
-  categories: []
-
-webmanifest:
-  name: "Orinoco Lite Site"
-  short_name: "Orinoco Lite Site"
-  description: "A site built with Orinoco Lite."
-  start_url: "."
-  display: standalone
-  background_color: "#ffffff"
-  theme_color: "#ffffff"
-  icons: []
+  - name: Projects
+    page_ref: /projects/
+    weight: 10
+  - name: People
+    page_ref: /persons/
+    weight: 20
+  - name: Publications
+    page_ref: /publications/
+    weight: 30
+presentation:
+  color_scheme: fire
+  default_appearance: light
+  header_layout: hybrid
