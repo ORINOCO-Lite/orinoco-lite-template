@@ -21,11 +21,6 @@ _skip_if_exists:
   - site-specific/**
   - extensions/**
 
-project_name:
-  type: str
-  help: Human-readable project name
-  default: Orinoco Lite Site
-
 project_slug:
   type: str
   help: Repository and Pages project-path slug
@@ -34,16 +29,6 @@ project_slug:
     <% if not (project_slug | regex_search('^[a-z0-9][a-z0-9._-]*$')) %>
     Use lower-case letters, digits, dots, underscores, and hyphens only.
     <% endif %>
-
-site_description:
-  type: str
-  help: Short public description; this is presentation text, not a license claim
-  default: A site built with Orinoco Lite.
-
-site_base_url:
-  type: str
-  help: Canonical public base URL, including the project path and trailing slash
-  default: https://example.invalid/orinoco-site/
 
 engine_version:
   type: str

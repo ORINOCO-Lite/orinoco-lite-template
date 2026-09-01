@@ -1,92 +1,197 @@
 #!/usr/bin/env python3
-"""Publish or verify the exact rendered tree on a dedicated Git branch."""
+"""Publish an ephemeral Copier rendering on a dedicated Git branch."""
 
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
+import os
+from pathlib import Path
+import re
 import subprocess
 import sys
-from pathlib import Path
+import tempfile
+from typing import Iterator
+
+import yaml
+
+import render_github_template as rendering
+
+
+FULL_COMMIT = re.compile(r"^[0-9a-f]{40}$")
+ZERO_COMMIT = "0" * 40
 
 
 class PublicationError(RuntimeError):
-    """Raised when the publication branch is not an exact rendered tree."""
+    """Report an unsafe or inexact publication."""
 
 
-def git(repository: Path, *arguments: str, capture: bool = True) -> str:
+def git(
+    repository: Path,
+    *arguments: str,
+    environment: dict[str, str] | None = None,
+    input_text: str | None = None,
+) -> str:
+    result = subprocess.run(
+        ["git", *arguments],
+        cwd=repository,
+        env=environment,
+        input=input_text,
+        check=False,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    if result.returncode:
+        detail = (result.stderr or result.stdout).strip()
+        raise PublicationError(
+            f"git {' '.join(arguments)} failed with status {result.returncode}"
+            + (f": {detail}" if detail else "")
+        )
+    return result.stdout.strip()
+
+
+def optional_git(repository: Path, *arguments: str) -> str | None:
     result = subprocess.run(
         ["git", *arguments],
         cwd=repository,
         check=False,
         text=True,
-        stdout=subprocess.PIPE if capture else None,
-        stderr=subprocess.PIPE if capture else None,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
     )
-    if result.returncode:
-        detail = result.stderr.strip() if result.stderr else ""
-        raise PublicationError(
-            f"git {' '.join(arguments)} failed with status {result.returncode}"
-            + (f": {detail}" if detail else "")
-        )
-    return result.stdout.strip() if result.stdout else ""
+    return result.stdout.strip() if result.returncode == 0 else None
 
 
 def require_clean(repository: Path) -> None:
-    status = git(repository, "status", "--porcelain", "--untracked-files=normal")
-    if status:
+    if git(repository, "status", "--porcelain", "--untracked-files=normal"):
+        raise PublicationError("publishing requires a clean source worktree")
+
+
+def resolve_exact_source(repository: Path, source_ref: str) -> str:
+    """Accept an immutable tag or a full commit, never a moving branch name."""
+
+    if FULL_COMMIT.fullmatch(source_ref):
+        commit = git(repository, "rev-parse", f"{source_ref}^{{commit}}")
+        if commit != source_ref:
+            raise PublicationError(f"source commit is not canonical: {source_ref}")
+        return commit
+    tag = f"refs/tags/{source_ref}"
+    if optional_git(repository, "show-ref", "--verify", tag) is None:
         raise PublicationError(
-            "publishing requires a clean source worktree; commit the reviewed "
-            "Copier source and rendered tree first"
+            "source ref must be an existing tag or full 40-character commit"
         )
+    return git(repository, "rev-parse", f"{tag}^{{commit}}")
 
 
-def expected_tree(repository: Path, source_ref: str, prefix: str) -> str:
-    return git(repository, "rev-parse", f"{source_ref}:{prefix}")
+def template_version_commit(repository: Path, rendered: Path) -> str:
+    answers = yaml.safe_load(
+        (rendered / ".copier-answers.yml").read_text(encoding="utf-8")
+    )
+    version = answers.get("_commit") if isinstance(answers, dict) else None
+    if not isinstance(version, str):
+        raise PublicationError("rendered answers do not select a template version")
+    tag = f"refs/tags/{version}"
+    if optional_git(repository, "show-ref", "--verify", tag) is None:
+        raise PublicationError(f"rendered template version is not tagged: {version}")
+    return git(repository, "rev-parse", f"{tag}^{{commit}}")
+
+
+def forbidden_rendered_paths(rendered: Path) -> list[str]:
+    forbidden = []
+    for path in sorted(rendered.rglob("*")):
+        if not path.is_file():
+            continue
+        relative = path.relative_to(rendered).as_posix()
+        if (
+            relative == ".gitmodules"
+            or relative == "copier.yml"
+            or relative.startswith("copier-template/")
+            or relative.startswith("github-template/")
+        ):
+            forbidden.append(relative)
+    return forbidden
+
+
+def tree_from_directory(repository: Path, rendered: Path) -> str:
+    """Write a Git tree without adding generated files to the source branch."""
+
+    forbidden = forbidden_rendered_paths(rendered)
+    if forbidden:
+        raise PublicationError(
+            "render exposes template source topology: " + ", ".join(forbidden)
+        )
+    with tempfile.TemporaryDirectory(prefix="orinoco-publication-index-") as temporary:
+        index = Path(temporary) / "index"
+        environment = dict(
+            os.environ,
+            GIT_INDEX_FILE=index.as_posix(),
+            GIT_WORK_TREE=rendered.resolve().as_posix(),
+        )
+        git(repository, "read-tree", "--empty", environment=environment)
+        git(repository, "add", "--all", "--force", environment=environment)
+        return git(repository, "write-tree", environment=environment)
+
+
+@contextmanager
+def render_source(repository: Path, source_ref: str) -> Iterator[Path]:
+    with tempfile.TemporaryDirectory(prefix="orinoco-publication-render-") as temporary:
+        destination = Path(temporary) / "consumer"
+        try:
+            rendering.render(
+                repository,
+                destination,
+                source_ref=source_ref,
+                verify_lock=True,
+            )
+        except rendering.RenderError as error:
+            raise PublicationError(str(error)) from error
+        yield destination
 
 
 def published_tree(repository: Path, branch: str) -> str:
     return git(repository, "rev-parse", f"refs/heads/{branch}^{{tree}}")
 
 
-def verify(repository: Path, source_ref: str, prefix: str, branch: str) -> None:
-    expected = expected_tree(repository, source_ref, prefix)
+def verify(repository: Path, source_ref: str, branch: str) -> str:
+    source_commit = resolve_exact_source(repository, source_ref)
+    with render_source(repository, source_ref) as rendered:
+        if template_version_commit(repository, rendered) != source_commit:
+            raise PublicationError(
+                "rendered template version does not resolve to the source commit"
+            )
+        expected = tree_from_directory(repository, rendered)
     actual = published_tree(repository, branch)
     if actual != expected:
         raise PublicationError(
-            f"{branch} tree {actual} differs from {source_ref}:{prefix} tree {expected}"
+            f"{branch} tree {actual} differs from the {source_ref} rendering {expected}"
         )
-    paths = git(repository, "ls-tree", "-r", "--name-only", branch).splitlines()
-    forbidden = [
-        path
-        for path in paths
-        if path == ".gitmodules"
-        or path == "copier.yml"
-        or path.startswith("copier-template/")
-        or path.startswith(f"{prefix}/")
-    ]
-    if forbidden:
-        raise PublicationError(
-            "publication branch exposes source topology: " + ", ".join(forbidden)
-        )
+    return actual
 
 
-def publish(repository: Path, source_ref: str, prefix: str, branch: str) -> None:
+def publish(repository: Path, source_ref: str, branch: str) -> str:
     require_clean(repository)
-    if branch == source_ref:
-        raise PublicationError("source and publication branches must be distinct")
-    # `git subtree split` preserves the source commits' authorship and messages
-    # while rewriting their tree roots to the rendered prefix. Re-running it is
-    # stable and advances the publication history from the same reviewed source.
-    git(
-        repository,
-        "subtree",
-        "split",
-        f"--prefix={prefix}",
-        f"--branch={branch}",
-        source_ref,
-        capture=False,
+    source_commit = resolve_exact_source(repository, source_ref)
+    branch_ref = f"refs/heads/{branch}"
+    with render_source(repository, source_ref) as rendered:
+        if template_version_commit(repository, rendered) != source_commit:
+            raise PublicationError(
+                "rendered template version does not resolve to the source commit"
+            )
+        tree = tree_from_directory(repository, rendered)
+    parent = optional_git(repository, "rev-parse", branch_ref)
+    if parent is not None and published_tree(repository, branch) == tree:
+        return parent
+    arguments = ["commit-tree", tree]
+    if parent is not None:
+        arguments.extend(["-p", parent])
+    message = (
+        f"chore(publication): render {source_ref}\n\n"
+        f"Source-Commit: {source_commit}\n"
     )
-    verify(repository, source_ref, prefix, branch)
+    commit = git(repository, *arguments, input_text=message)
+    git(repository, "update-ref", branch_ref, commit, parent or ZERO_COMMIT)
+    return commit
 
 
 def parser() -> argparse.ArgumentParser:
@@ -95,8 +200,7 @@ def parser() -> argparse.ArgumentParser:
     mode.add_argument("--publish", action="store_true")
     mode.add_argument("--check", action="store_true")
     result.add_argument("--repository", type=Path, default=Path.cwd())
-    result.add_argument("--source-ref", default="main")
-    result.add_argument("--prefix", default="github-template")
+    result.add_argument("--source-ref", required=True)
     result.add_argument("--branch", default="github-template")
     return result
 
@@ -106,17 +210,15 @@ def main(argv: list[str] | None = None) -> int:
     repository = args.repository.resolve()
     try:
         if args.publish:
-            publish(repository, args.source_ref, args.prefix, args.branch)
+            commit = publish(repository, args.source_ref, args.branch)
+            tree = published_tree(repository, args.branch)
+            print(f"published {args.source_ref} as {args.branch} ({commit}, tree {tree})")
         else:
-            verify(repository, args.source_ref, args.prefix, args.branch)
-    except PublicationError as error:
+            tree = verify(repository, args.source_ref, args.branch)
+            print(f"{args.branch} exactly renders {args.source_ref} (tree {tree})")
+    except (OSError, PublicationError, yaml.YAMLError) as error:
         print(f"GitHub-template publication failed: {error}", file=sys.stderr)
         return 2
-    tree = published_tree(repository, args.branch)
-    print(
-        f"{args.branch} exactly publishes {args.source_ref}:{args.prefix} "
-        f"(tree {tree})"
-    )
     return 0
 
 
