@@ -1,132 +1,90 @@
 #!/usr/bin/env python3
-"""Render or verify the checked GitHub-template tree from the Copier source."""
+"""Render the Copier source into an untracked destination."""
 
 from __future__ import annotations
 
 import argparse
-import filecmp
 import shutil
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
 
 import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DESTINATION = ROOT / "github-template"
-ANSWERS = ROOT / ".github-template-answers.yml"
-SOURCE_LOCK = ROOT / "copier-template" / "pixi.lock"
-COPIER_CONFIGURATION = ROOT / "copier.yml"
-RELEASE_COORDINATES = (
-    "engine_version",
-    "engine_url",
-    "engine_sha256",
-    "runtime_version",
-    "runtime_url",
-    "runtime_sha256",
-    "runtime_manifest_sha256",
-    "template_source",
-    "template_version",
-    "workflow_repository",
-    "workflow_sha",
-    "workflow_ref",
-)
-IGNORED_RUNTIME_ROOTS = {
-    ".orinoco",
-    ".pixi",
-    "build",
-    "generated",
-    "node_modules",
-    "playwright-report",
-    "test-results",
-}
-IGNORED_RUNTIME_PATHS = {Path(".orinoco-lite/state")}
-IGNORED_NAMES = {".DS_Store", "__pycache__"}
+DEFAULT_DESTINATION = ROOT / "build" / "github-template"
 
 
-def verify_coordinate_defaults() -> None:
-    """Require Copier-first creation and the checked render to share pins."""
+class RenderError(RuntimeError):
+    """Report an unsafe or stale template rendering."""
 
-    answers = yaml.safe_load(ANSWERS.read_text(encoding="utf-8"))
-    configuration = yaml.safe_load(
-        COPIER_CONFIGURATION.read_text(encoding="utf-8")
-    )
-    mismatches = []
-    for coordinate in RELEASE_COORDINATES:
-        prompt = configuration.get(coordinate)
-        default = prompt.get("default") if isinstance(prompt, dict) else None
-        if default != answers.get(coordinate):
-            mismatches.append(coordinate)
-    if mismatches:
-        raise RuntimeError(
-            "Copier release-coordinate defaults differ from "
-            ".github-template-answers.yml: " + ", ".join(mismatches)
+
+def executable(name: str) -> str:
+    value = shutil.which(name)
+    if value is None:
+        raise RenderError(f"{name} is unavailable; run this command through Pixi")
+    return value
+
+
+def run(arguments: list[str], *, cwd: Path) -> None:
+    result = subprocess.run(arguments, cwd=cwd, check=False)
+    if result.returncode:
+        raise RenderError(
+            f"{' '.join(arguments)} failed with status {result.returncode}"
         )
 
 
-def copier_executable() -> str:
-    executable = shutil.which("copier")
-    if executable is None:
-        raise RuntimeError("Copier is unavailable; run through `pixi run render`")
-    return executable
+def safe_destination(repository: Path, destination: Path) -> Path:
+    repository = repository.resolve()
+    if destination.is_symlink():
+        raise RenderError(f"render destination cannot be a symlink: {destination}")
+    destination = destination.resolve(strict=False)
+    if destination == repository or destination in repository.parents:
+        raise RenderError("render destination must not contain the source repository")
+    if repository in destination.parents:
+        build_root = (repository / "build").resolve(strict=False)
+        if destination != build_root and build_root not in destination.parents:
+            raise RenderError(
+                "render destinations inside the source repository must be under build/"
+            )
+    return destination
 
 
-def pixi_executable() -> str:
-    executable = shutil.which("pixi")
-    if executable is None:
-        raise RuntimeError("Pixi is unavailable; rendering must create pixi.lock")
-    return executable
+def normalize_answers(destination: Path) -> dict[str, object]:
+    """Make Copier bookkeeping stable without a second defaults file."""
 
-
-def render(destination: Path) -> bool:
-    verify_coordinate_defaults()
-    command = [
-        copier_executable(),
-        "copy",
-        "--quiet",
-        "--defaults",
-        "--overwrite",
-        "--vcs-ref",
-        "HEAD",
-        "--data-file",
-        ANSWERS.as_posix(),
-        ROOT.as_posix(),
-        destination.as_posix(),
-    ]
-    result = subprocess.run(command, cwd=ROOT, check=False)
-    if result.returncode:
-        raise RuntimeError(f"Copier render failed with status {result.returncode}")
-
-    defaults = yaml.safe_load(ANSWERS.read_text(encoding="utf-8"))
-    rendered_answers_path = destination / ".copier-answers.yml"
-    rendered_answers = yaml.safe_load(rendered_answers_path.read_text(encoding="utf-8"))
-    # Copier orders these bookkeeping keys according to the VCS checkout. A
-    # shallow CI clone can therefore produce a different byte order than a
-    # full local clone even when the values are identical. Normalize both
-    # keys so the checked publication tree is reproducible everywhere.
-    rendered_answers.pop("_src_path", None)
-    rendered_answers.pop("_commit", None)
-    rendered_answers = {
-        "_src_path": defaults["template_source"],
-        **rendered_answers,
-        "_commit": defaults["template_version"],
-    }
-    rendered_answers_path.write_text(
-        yaml.safe_dump(rendered_answers, sort_keys=False, allow_unicode=True),
+    path = destination / ".copier-answers.yml"
+    try:
+        answers = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, yaml.YAMLError) as error:
+        raise RenderError(f"Copier did not produce valid answers: {path}") from error
+    if not isinstance(answers, dict):
+        raise RenderError(f"Copier answers are not a mapping: {path}")
+    source = answers.get("template_source")
+    version = answers.get("template_version")
+    if not isinstance(source, str) or not isinstance(version, str):
+        raise RenderError("rendered answers lack template_source or template_version")
+    answers.pop("_src_path", None)
+    answers.pop("_commit", None)
+    answers = {"_src_path": source, **answers, "_commit": version}
+    path.write_text(
+        yaml.safe_dump(answers, sort_keys=False, allow_unicode=True),
         encoding="utf-8",
     )
-    copied_lock = destination / "pixi.lock"
-    if not copied_lock.is_file():
-        raise RuntimeError(
-            "copier-template/pixi.lock is required so Copier-first consumers "
-            "receive the reviewed frozen environment"
-        )
-    lock_before = copied_lock.read_bytes()
-    lock = subprocess.run(
+    return answers
+
+
+def verify_frozen_lock(destination: Path) -> None:
+    """Require the source lock to already match the rendered manifest."""
+
+    lock = destination / "pixi.lock"
+    if not lock.is_file():
+        raise RenderError("copier-template/pixi.lock was not rendered")
+    before = lock.read_bytes()
+    run(
         [
-            pixi_executable(),
+            executable("pixi"),
             "lock",
             "--no-config",
             "--no-install",
@@ -134,100 +92,85 @@ def render(destination: Path) -> bool:
             (destination / "pixi.toml").as_posix(),
         ],
         cwd=destination,
-        check=False,
     )
-    if lock.returncode:
-        raise RuntimeError(f"Pixi lock generation failed with status {lock.returncode}")
-    return lock_before != copied_lock.read_bytes()
-
-
-def ignored_runtime_path(relative: Path) -> bool:
-    if not relative.parts:
-        return False
-    if relative.parts[0] in IGNORED_RUNTIME_ROOTS:
-        return True
-    if relative.name in IGNORED_NAMES:
-        return True
-    if relative.suffix in {".pyc", ".pyo", ".rej"}:
-        return True
-    return any(
-        relative == ignored or ignored in relative.parents
-        for ignored in IGNORED_RUNTIME_PATHS
-    )
-
-
-def differences(
-    left: Path,
-    right: Path,
-    relative: Path = Path(),
-) -> list[str]:
-    comparison = filecmp.dircmp(left, right)
-    result = [
-        f"only rendered: {path}"
-        for path in comparison.left_only
-        if not ignored_runtime_path(relative / path)
-    ]
-    result.extend(
-        f"only checked: {path}"
-        for path in comparison.right_only
-        if not ignored_runtime_path(relative / path)
-    )
-    result.extend(
-        f"different: {path}"
-        for path in comparison.diff_files
-        if not ignored_runtime_path(relative / path)
-    )
-    for name, child in comparison.subdirs.items():
-        child_relative = relative / name
-        if ignored_runtime_path(child_relative):
-            continue
-        result.extend(
-            f"{name}/{item}"
-            for item in differences(child.left, child.right, child_relative)
+    if lock.read_bytes() != before:
+        raise RenderError(
+            "copier-template/pixi.lock is stale; refresh and review the source lock"
         )
-    return sorted(result)
+
+
+def render(
+    repository: Path,
+    destination: Path,
+    *,
+    source_ref: str | None = None,
+    data_file: Path | None = None,
+    replace: bool = False,
+    verify_lock: bool = True,
+) -> dict[str, object]:
+    """Render current source bytes or one selected Git ref."""
+
+    repository = repository.resolve()
+    destination = safe_destination(repository, destination)
+    if destination.exists():
+        if not destination.is_dir():
+            raise RenderError(f"render destination is not a directory: {destination}")
+        if not replace:
+            raise RenderError(f"render destination already exists: {destination}")
+        shutil.rmtree(destination)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    command = [
+        executable("copier"),
+        "copy",
+        "--quiet",
+        "--defaults",
+        "--overwrite",
+    ]
+    # Copier otherwise selects the latest template tag for a local Git source.
+    # Development renders must exercise the current checkout, including its
+    # deliberate uncommitted changes; publication passes an immutable tag or
+    # commit explicitly.
+    command.extend(["--vcs-ref", source_ref or "HEAD"])
+    if data_file is not None:
+        command.extend(["--data-file", data_file.resolve().as_posix()])
+    command.extend([repository.as_posix(), destination.as_posix()])
+    run(command, cwd=repository)
+    answers = normalize_answers(destination)
+    if verify_lock:
+        verify_frozen_lock(destination)
+    return answers
+
+
+def parser() -> argparse.ArgumentParser:
+    result = argparse.ArgumentParser(description=__doc__)
+    result.add_argument("--repository", type=Path, default=ROOT)
+    result.add_argument("--destination", type=Path, default=DEFAULT_DESTINATION)
+    result.add_argument("--source-ref")
+    result.add_argument("--data-file", type=Path)
+    result.add_argument("--replace", action="store_true")
+    result.add_argument(
+        "--skip-lock-check",
+        action="store_true",
+        help="render without resolving the downstream Pixi lock",
+    )
+    return result
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--check", action="store_true")
-    args = parser.parse_args(argv)
-    with tempfile.TemporaryDirectory(prefix="orinoco-template-render-") as temporary:
-        candidate = Path(temporary) / "github-template"
-        source_lock_was_stale = render(candidate)
-        if args.check:
-            if source_lock_was_stale:
-                print(
-                    "copier-template/pixi.lock differs from the lock generated "
-                    "for .github-template-answers.yml; run `pixi run render`",
-                    file=sys.stderr,
-                )
-                return 1
-            if not DESTINATION.is_dir():
-                print("github-template/ has not been rendered", file=sys.stderr)
-                return 1
-            changed = differences(candidate, DESTINATION)
-            if changed:
-                print("github-template/ differs from the Copier rendering:", file=sys.stderr)
-                for path in changed:
-                    print(f"- {path}", file=sys.stderr)
-                return 1
-            print("GitHub-template rendering is current")
-            return 0
-
-        if source_lock_was_stale:
-            shutil.copy2(candidate / "pixi.lock", SOURCE_LOCK)
-            shutil.rmtree(candidate)
-            source_lock_was_stale = render(candidate)
-            if source_lock_was_stale:
-                raise RuntimeError(
-                    "generated Copier source lock is not stable across rendering"
-                )
-
-        if DESTINATION.exists():
-            shutil.rmtree(DESTINATION)
-        shutil.copytree(candidate, DESTINATION)
-    print(f"rendered {DESTINATION.relative_to(ROOT)}")
+    args = parser().parse_args(argv)
+    try:
+        render(
+            args.repository,
+            args.destination,
+            source_ref=args.source_ref,
+            data_file=args.data_file,
+            replace=args.replace,
+            verify_lock=not args.skip_lock_check,
+        )
+    except RenderError as error:
+        print(f"template render failed: {error}", file=sys.stderr)
+        return 2
+    print(f"rendered template into {args.destination.resolve()}")
     return 0
 
 
