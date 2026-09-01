@@ -51,8 +51,8 @@ def safe_destination(repository: Path, destination: Path) -> Path:
     return destination
 
 
-def normalize_answers(destination: Path) -> dict[str, object]:
-    """Make Copier bookkeeping stable without a second defaults file."""
+def normalize_answers(destination: Path, source_commit: str) -> dict[str, object]:
+    """Record the exact Git source selected for this rendered template."""
 
     path = destination / ".copier-answers.yml"
     try:
@@ -61,18 +61,30 @@ def normalize_answers(destination: Path) -> dict[str, object]:
         raise RenderError(f"Copier did not produce valid answers: {path}") from error
     if not isinstance(answers, dict):
         raise RenderError(f"Copier answers are not a mapping: {path}")
-    source = answers.get("template_source")
-    version = answers.get("template_version")
-    if not isinstance(source, str) or not isinstance(version, str):
-        raise RenderError("rendered answers lack template_source or template_version")
-    answers.pop("_src_path", None)
-    answers.pop("_commit", None)
-    answers = {"_src_path": source, **answers, "_commit": version}
+    if not isinstance(answers.get("_src_path"), str):
+        raise RenderError("rendered answers lack Copier template source metadata")
+    answers["_commit"] = source_commit
     path.write_text(
         yaml.safe_dump(answers, sort_keys=False, allow_unicode=True),
         encoding="utf-8",
     )
     return answers
+
+
+def source_commit(repository: Path, source_ref: str | None) -> str:
+    """Resolve the Git commit represented by the selected Copier source ref."""
+
+    result = subprocess.run(
+        ["git", "rev-parse", "--verify", f"{source_ref or 'HEAD'}^{{commit}}"],
+        cwd=repository,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    commit = result.stdout.strip()
+    if result.returncode or len(commit) != 40:
+        raise RenderError("could not resolve the rendered template Git commit")
+    return commit
 
 
 def verify_frozen_lock(destination: Path) -> None:
@@ -135,7 +147,7 @@ def render(
         command.extend(["--data-file", data_file.resolve().as_posix()])
     command.extend([repository.as_posix(), destination.as_posix()])
     run(command, cwd=repository)
-    answers = normalize_answers(destination)
+    answers = normalize_answers(destination, source_commit(repository, source_ref))
     if verify_lock:
         verify_frozen_lock(destination)
     return answers
