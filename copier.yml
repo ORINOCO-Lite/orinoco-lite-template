@@ -30,10 +30,26 @@ project_slug:
     Use lower-case letters, digits, dots, underscores, and hyphens only.
     <% endif %>
 
+project_name:
+  type: str
+  help: Human-readable site title
+  default: Orinoco Lite Site
+
+site_description:
+  type: str
+  help: Short public description; this is presentation text, not a license claim
+  default: A site built with Orinoco Lite.
+
+site_base_url:
+  type: str
+  help: Canonical public base URL, including any project path and trailing slash
+  default: https://example.invalid/[[ project_slug ]]/
+
 engine_version:
   type: str
   help: Exact orinoco-lite Python distribution version
   default: 0.2.0rc17
+  when: false
   validator: >-
     <% if not (engine_version | regex_search('^[0-9]+\.[0-9]+\.[0-9]+([a-z0-9.-]+)?$')) %>
     Use an exact release version such as 0.1.0.
@@ -43,6 +59,7 @@ engine_url:
   type: str
   help: Immutable orinoco-lite wheel release URL
   default: https://github.com/ORINOCO-Lite/orinoco-lite-dev/releases/download/v0.2.0rc17/orinoco_lite-0.2.0rc17-py3-none-any.whl
+  when: false
   validator: >-
     <% if '#' in engine_url %>
     Supply the wheel URL without a fragment; the template adds the reviewed SHA-256 fragment.
@@ -52,6 +69,7 @@ engine_sha256:
   type: str
   help: SHA-256 digest of the immutable orinoco-lite wheel
   default: "1a33d75a59201769347ffbeba8eaec1f8077731fc4714e2ef2093bca44d968dd"
+  when: false
   validator: >-
     <% if not (engine_sha256 | regex_search('^[0-9a-f]{64}$')) %>
     Supply exactly 64 lower-case hexadecimal characters.
@@ -61,16 +79,19 @@ runtime_version:
   type: str
   help: Exact immutable Orinoco runtime release version
   default: 0.2.0rc17
+  when: false
 
 runtime_url:
   type: str
   help: Immutable runtime archive URL
   default: https://github.com/ORINOCO-Lite/orinoco-lite-dev/releases/download/v0.2.0rc17/orinoco-runtime-0.2.0rc17.tar.gz
+  when: false
 
 runtime_sha256:
   type: str
   help: SHA-256 digest of the immutable runtime archive
   default: "f74819b98fe878162416d11429bb52858eb98f1239922392430727b97d28ad54"
+  when: false
   validator: >-
     <% if not (runtime_sha256 | regex_search('^[0-9a-f]{64}$')) %>
     Supply exactly 64 lower-case hexadecimal characters.
@@ -80,6 +101,7 @@ runtime_manifest_sha256:
   type: str
   help: SHA-256 digest of runtime-manifest.json inside the archive
   default: "849a0e8b28b7b5f273514416b98f3d1d0d6a9f8802c5e6626bd8410a93746561"
+  when: false
   validator: >-
     <% if not (runtime_manifest_sha256 | regex_search('^[0-9a-f]{64}$')) %>
     Supply exactly 64 lower-case hexadecimal characters.
@@ -89,11 +111,13 @@ template_source:
   type: str
   help: Versioned Copier template source
   default: gh:ORINOCO-Lite/orinoco-lite-template
+  when: false
 
 template_version:
   type: str
   help: Exact Copier template release
   default: v0.2.0rc19
+  when: false
   validator: >-
     <% if not (template_version | regex_search('^v[0-9]+\.[0-9]+\.[0-9]+([a-z0-9.-]+)?$')) %>
     Use an exact release tag such as v0.1.0.
@@ -103,11 +127,13 @@ workflow_repository:
   type: str
   help: Repository that publishes the reviewed Orinoco release
   default: ORINOCO-Lite/orinoco-lite-dev
+  when: false
 
 workflow_sha:
   type: str
   help: Full reviewed commit SHA associated with the release workflows
   default: "d5ce90cb6219717acffdd10809eadecc5834a4dc"
+  when: false
   validator: >-
     <% if not (workflow_sha | regex_search('^[0-9a-f]{40}$')) %>
     Supply exactly 40 lower-case hexadecimal characters.
@@ -117,6 +143,7 @@ workflow_ref:
   type: str
   help: Full immutable reusable-workflow reference, including path and commit SHA
   default: ORINOCO-Lite/orinoco-lite-dev/.github/workflows/orinoco-consumer-ci.yml@d5ce90cb6219717acffdd10809eadecc5834a4dc
+  when: false
   validator: >-
     <% if not (workflow_ref | regex_search('^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/\.github/workflows/[A-Za-z0-9_.-]+\.ya?ml@[0-9a-f]{40}$')) %>
     Use owner/repository/.github/workflows/name.yml@ followed by a full commit SHA.
