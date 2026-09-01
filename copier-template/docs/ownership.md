@@ -1,9 +1,11 @@
 # File ownership
 
 The template owns the downstream scaffold, generic workflows and tools,
-documentation, and a small adaptation under `.orinoco-lite/presentation/`.
-The engine runtime resolves the upstream website and theme; they are not part
-of this repository.
+documentation, a small adaptation under `.orinoco-lite/presentation/`, and the
+bounded licensed asset overlay under
+`.orinoco-lite/materialized-presentation/`. The engine runtime resolves the
+complete upstream website, projection templates, and theme rather than copying
+them into this repository.
 
 The downstream owns all declarative inputs under `site-specific/`, executable
 metadata adapters under `extensions/`, create-once acceptance tests, release

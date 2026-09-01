@@ -15,6 +15,11 @@ use declarative inputs and the supported small overrides under
 `site-specific/overrides/`, not copy the upstream presentation into this
 repository.
 
+The template's required materialized presentation assets are ordinary files
+under `.orinoco-lite/materialized-presentation/upstream/`. Site-specific assets
+belong under `site-specific/`; downstream tasks never hydrate either tree with
+Git Annex.
+
 Metadata acquisition and curation programs may live under `extensions/` and
 run through explicit adapter tasks. They must write proposals or reviewed
 metadata inputs; the website build never imports or executes them.

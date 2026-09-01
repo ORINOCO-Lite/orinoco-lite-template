@@ -2,8 +2,9 @@
 
 This repository publishes a thin Copier scaffold for Orinoco Lite downstreams.
 It supplies repository structure, workflows, helper tools, exact release
-coordinates, and a small Orinoco presentation adapter. It does not distribute
-the reusable website.
+coordinates, a small Orinoco presentation adapter, and a bounded licensed
+overlay for required presentation assets. It does not distribute the reusable
+website.
 
 The verified engine runtime is the single authority for the exact German
 [`www-from-model`](https://hub.psychoinformatics.de/www/www-from-model)
@@ -12,6 +13,8 @@ those sources and composes them with:
 
 ```text
 .orinoco-lite/presentation/  small template-owned adaptation
+.orinoco-lite/materialized-presentation/upstream/
+                             required ordinary-file asset overlay
 site-specific/               declarative downstream inputs and overrides
 extensions/                  optional metadata acquisition and curation code
 ```
@@ -31,6 +34,6 @@ test fixture. See [testing](docs/testing.md),
 
 ## License
 
-Original scaffold software is MIT licensed and original documentation is
-CC BY 4.0. The runtime-resolved website and theme retain their own rights and
-notices; this repository does not relicense them. See [LICENSES.md](LICENSES.md).
+Original scaffold software and the bounded materialized presentation overlay
+are MIT licensed; original documentation is CC BY 4.0. Applicable dependency
+notices are preserved. See [LICENSES.md](LICENSES.md).

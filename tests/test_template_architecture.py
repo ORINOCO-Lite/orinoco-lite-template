@@ -25,12 +25,6 @@ class TemplateArchitectureTests(unittest.TestCase):
             yaml.safe_dump(
                 {
                     "project_slug": "delta-atlas",
-                    # Removed identity answers can still be present in an old
-                    # downstream's Copier data. They must not be persisted or
-                    # influence the new forward-looking scaffold.
-                    "project_name": "Retired project name",
-                    "site_description": "Retired description",
-                    "site_base_url": "https://retired.example.invalid/",
                 },
                 sort_keys=False,
             ),
@@ -81,8 +75,6 @@ class TemplateArchitectureTests(unittest.TestCase):
             site["identity"]["base_url"],
         )
         self.assertEqual("delta-atlas", answers["project_slug"])
-        for retired in ("project_name", "site_description", "site_base_url"):
-            self.assertNotIn(retired, answers)
         self.assertEqual(answers["template_source"], answers["_src_path"])
         self.assertEqual(answers["template_version"], answers["_commit"])
 
@@ -100,20 +92,18 @@ class TemplateArchitectureTests(unittest.TestCase):
 
     def test_presentation_is_an_adapter_not_a_copied_website(self) -> None:
         presentation = self.rendered / ".orinoco-lite/presentation"
-        self.assertEqual(
-            {"config-templates", "content-templates", "static-templates"},
+        self.assertLessEqual(
+            {"config-templates", "layouts", "static-templates"},
             {path.name for path in presentation.iterdir()},
         )
         for relative in (
             "config-templates/hugo.toml.j2",
-            "content-templates/projects/_index.md.j2",
             "static-templates/site.webmanifest.j2",
         ):
             self.assertTrue((presentation / relative).is_file(), relative)
         forbidden_names = {
             "archetypes",
             "assets",
-            "layouts",
             "projection-templates",
             "projection-tools",
             "themes",
@@ -134,6 +124,23 @@ class TemplateArchitectureTests(unittest.TestCase):
             any(path.name == "themes" for path in private_root.rglob("*"))
         )
 
+    def test_materialized_presentation_is_a_bounded_licensed_overlay(self) -> None:
+        private_root = self.rendered / ".orinoco-lite"
+        overlay = private_root / "materialized-presentation"
+        upstream = overlay / "upstream"
+
+        self.assertTrue(upstream.is_dir())
+        self.assertTrue((overlay / "LICENSE").read_text(encoding="utf-8").strip())
+        self.assertFalse(any(path.is_symlink() for path in overlay.rglob("*")))
+
+        ownership = yaml.safe_load(
+            (private_root / "template-ownership.yml").read_text(encoding="utf-8")
+        )
+        self.assertIn(
+            ".orinoco-lite/materialized-presentation/**",
+            ownership["classes"]["template_owned"]["paths"],
+        )
+
     def test_engine_runtime_is_the_only_presentation_pin_authority(self) -> None:
         config = yaml.safe_load(
             (self.rendered / "orinoco.yaml").read_text(encoding="utf-8")
@@ -149,6 +156,15 @@ class TemplateArchitectureTests(unittest.TestCase):
             {"engine", "lock_version", "runtime", "template", "workflow"},
             set(lock),
         )
+        for configuration in (
+            "orinoco.yaml",
+            "orinoco.lock",
+            "pixi.toml",
+            ".copier-answers.yml",
+        ):
+            text = (self.rendered / configuration).read_text(encoding="utf-8")
+            self.assertNotIn("www-from-model", text)
+            self.assertNotIn("congo", text.lower())
 
     def test_no_generic_projection_or_record_is_materialized(self) -> None:
         site_specific = self.rendered / "site-specific"

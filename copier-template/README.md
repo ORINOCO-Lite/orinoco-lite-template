@@ -3,7 +3,8 @@
 This is an Orinoco Lite metadata-driven website. Set its public identity in
 `site-specific/site.yaml`. The engine resolves its pinned upstream presentation
 and composes it with this scaffold's small `.orinoco-lite/presentation/`
-adapter and the repository's declarative `site-specific/` inputs.
+adapter, its bounded `.orinoco-lite/materialized-presentation/upstream/` asset
+overlay, and the repository's declarative `site-specific/` inputs.
 
 ```console
 pixi run validate

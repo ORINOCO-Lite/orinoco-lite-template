@@ -1,3 +1,5 @@
+footer = []
+
 {% for item in site.navigation | default([]) -%}
 [[main]]
   name = {{ item.name | json_string }}

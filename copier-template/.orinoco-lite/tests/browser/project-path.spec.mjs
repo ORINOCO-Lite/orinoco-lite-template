@@ -66,18 +66,44 @@ test('bare review route links to open curation pull requests', async ({ page }) 
   })).toHaveAttribute('href', expected.href);
 });
 
-test('structured taxonomy presentation keeps filters and list variants', async ({ page }) => {
+test('upstream taxonomy presentation keeps filters and list variants', async ({ page }) => {
   let response = await page.goto(
     new URL(`${fixture.mount}publications/`, fixture.origin).href,
   );
   expect(response?.status()).toBe(200);
-  await expect(page.locator('[data-orinoco-taxonomy]')).toBeVisible();
-  await expect(page.locator('#orinoco-search')).toBeVisible();
-  await expect(page.locator('[data-orinoco-count]')).toContainText(/results?$/);
+  await expect(page.locator('.list-layout')).toBeVisible();
+  await expect(page.locator('#search')).toBeVisible();
+  await expect(page.locator('#publications-count')).toHaveText(/^\d+$/);
 
   response = await page.goto(
-    new URL(`${fixture.mount}instruments/`, fixture.origin).href,
+    new URL(`${fixture.mount}projects/`, fixture.origin).href,
   );
   expect(response?.status()).toBe(200);
-  await expect(page.locator('.orinoco-grid')).toBeVisible();
+  await expect(page.locator('.items-grid')).toBeVisible();
+});
+
+test('site identity and record editing stay downstream-owned', async ({ page }) => {
+  let response = await page.goto(new URL(fixture.mount, fixture.origin).href);
+  expect(response?.status()).toBe(200);
+  await expect(page.locator('body')).not.toContainText('Psychoinformatics');
+  await expect(page.locator('body')).not.toContainText('knowledge pool');
+  await expect(page.locator('a[href*="psychoinformatics.de"]')).toHaveCount(0);
+
+  response = await page.goto(
+    new URL(`${fixture.mount}projects/`, fixture.origin).href,
+  );
+  expect(response?.status()).toBe(200);
+  const recordHref = await page.locator('.items-grid a[href]').first()
+    .getAttribute('href');
+  expect(recordHref).not.toBeNull();
+  response = await page.goto(new URL(recordHref, page.url()).href);
+  expect(response?.status()).toBe(200);
+  const editor = page.getByRole('link', { name: 'Edit this record' });
+  await expect(editor).toHaveCount(1);
+  const href = new URL(await editor.getAttribute('href'), page.url());
+  expect(href.origin).toBe(fixture.origin);
+  expect(href.pathname).toBe(`${fixture.mount}edit/`);
+  expect(href.searchParams.get('sh:NodeShape')).toBe('dlthings:Thing');
+  expect(href.searchParams.get('pid')).toBeTruthy();
+  expect(href.searchParams.get('edit')).toBe('true');
 });

@@ -10,7 +10,9 @@ classes:
       - pixi.toml
       - .agents/**
       - .orinoco-lite/README.md
+      - .orinoco-lite/THIRD_PARTY_NOTICES.md
       - .orinoco-lite/template-ownership.yml
+      - .orinoco-lite/materialized-presentation/**
       - .orinoco-lite/presentation/**
       - .orinoco-lite/tools/**
       - .github/workflows/pages.yml

@@ -5,6 +5,8 @@
 - Replace copied website sources and stored consumer output with a thin
   presentation adapter, disposable behavioral renders, and exact-tag
   publication of the derived GitHub-template branch.
+- Add the licensed materialized-presentation boundary for required ordinary
+  upstream assets without adding an asset manifest or presentation pin.
 
 ## 0.2.0rc19 - 2026-08-31
 

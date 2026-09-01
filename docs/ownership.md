@@ -1,14 +1,16 @@
 # Template source ownership
 
 The Copier source owns the downstream scaffold, a small Orinoco presentation
-adapter, generic workflows and tools, documentation, and exact release
-coordinates. It does not own the reusable website. The engine runtime resolves
-the exact upstream presentation and theme. Consumer acceptance tests are
-created once and remain site-owned.
+adapter, a bounded licensed materialized-presentation overlay, generic
+workflows and tools, documentation, and exact release coordinates. It does not
+own the reusable website. The engine runtime resolves the exact upstream
+presentation and theme. Consumer acceptance tests are created once and remain
+site-owned.
 
 The rendered ownership contract distinguishes:
 
-- template-owned scaffold, adapter, workflow, tool, and documentation files;
+- template-owned scaffold, adapter, materialized asset, workflow, tool, and
+  documentation files;
 - create-once, site-owned acceptance tests;
 - declarative `site-specific/` inputs and supported overrides;
 - executable metadata adapters under `extensions/`;

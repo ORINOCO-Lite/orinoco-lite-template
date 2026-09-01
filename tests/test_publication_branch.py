@@ -86,6 +86,13 @@ class PublicationBranchTests(unittest.TestCase):
             (rendered / "orinoco.yaml").write_text(
                 "contract_version: 1\n", encoding="utf-8"
             )
+            overlay = rendered / ".orinoco-lite/materialized-presentation"
+            (overlay / "upstream").mkdir(parents=True)
+            (overlay / "LICENSE").write_text(
+                "MIT fixture license\n",
+                encoding="utf-8",
+            )
+            (overlay / "upstream/.gitkeep").touch()
             yield repository, rendered
 
     def test_publication_is_an_exact_ephemeral_render_from_a_tag(self) -> None:
@@ -126,8 +133,26 @@ class PublicationBranchTests(unittest.TestCase):
                 repository,
             ).splitlines()
             self.assertEqual(
-                [".copier-answers.yml", "README.md", "orinoco.yaml"],
+                [
+                    ".copier-answers.yml",
+                    ".orinoco-lite/materialized-presentation/LICENSE",
+                    ".orinoco-lite/materialized-presentation/upstream/.gitkeep",
+                    "README.md",
+                    "orinoco.yaml",
+                ],
                 paths,
+            )
+            self.assertEqual(
+                "MIT fixture license",
+                run(
+                    [
+                        "git",
+                        "show",
+                        "github-template:.orinoco-lite/"
+                        "materialized-presentation/LICENSE",
+                    ],
+                    repository,
+                ),
             )
             self.assertNotIn("copier.yml", paths)
             self.assertFalse((repository / "github-template").exists())

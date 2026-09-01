@@ -17,6 +17,10 @@ tree directly to the branch, and verifies the branch tree against a second
 render of the same ref. It does not add generated files to the source branch or
 push any ref.
 
+That render carries the template's licensed
+`.orinoco-lite/materialized-presentation/` overlay exactly as reviewed. Branch
+publication neither hydrates assets nor derives another presentation pin.
+
 The resulting branch must expose only the consumer repository root. Copier
 configuration, template source topology, and nested publication directories
 are rejected.

@@ -8,8 +8,9 @@ pixi run check
 
 They create a fresh disposable consumer with compact custom inputs and verify
 substitution, ownership boundaries, the thin presentation adapter, release
-locks, publication-tree derivation, and helper behavior. No generated consumer
-tree is stored or compared as a snapshot.
+locks, the licensed materialized-presentation boundary, publication-tree
+derivation, and helper behavior. No generated consumer tree is stored or
+compared as a snapshot.
 
 The engineering repository supplies the authoritative combined proof. Its
 quick candidate validates, projects, builds, and runs Chromium against a fresh
