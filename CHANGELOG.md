@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Add the optional `pr_previews` Copier question and its single `netlify`
+  provider. Selecting it renders a pull-request-only `netlify.toml` that
+  installs Pixi and runs the repository's ordinary root-relative build, without
+  touching the canonical GitHub Pages deployment, adding preview-specific
+  tooling, or pinning a second toolchain coordinate.
+
 ## 0.2.0rc24 - 2026-09-02
 
 - Make `.orinoco-lite/` wholly framework-owned and stop distributing generic
