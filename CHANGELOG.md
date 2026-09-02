@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.2.0rc24 - 2026-09-02
+
+- Make `.orinoco-lite/` wholly framework-owned and stop distributing generic
+  tests or browser-test infrastructure to downstream sites.
+- Advance the engine, runtime, and reusable workflow to `v0.2.0rc20`.
+
 ## 0.2.0rc23 - 2026-09-02
 
 - Advance the engine, runtime, and reusable workflow to `v0.2.0rc19`, which
