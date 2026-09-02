@@ -1,6 +1,6 @@
-_src_path: /private/tmp/orinoco-lite-post-pr92-adoption/orinoco-lite-template-source
+_src_path: /private/tmp/orinoco-template-rc23.tHEQsd/source
 project_slug: orinoco-site
 project_name: Orinoco Lite Site
 site_description: A site built with Orinoco Lite.
 site_base_url: https://example.invalid/orinoco-site/
-_commit: 6280097a266ede002c9b22d8f51d3362df87216f
+_commit: 883b8fbae7e38fc25f2e4aad429741f45bae6479
