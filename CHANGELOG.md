@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.2.0rc23 - 2026-09-02
+
+- Advance the engine, runtime, and reusable workflow to `v0.2.0rc19`, which
+  aligns the Orinoco presentation integration with the current upstream
+  website and query revisions.
+
 - Replace copied website sources and stored consumer output with a thin
   presentation adapter, disposable behavioral renders, and exact-tag
   publication of the derived GitHub-template branch.
