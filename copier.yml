@@ -15,8 +15,6 @@ _exclude:
 _skip_if_exists:
   - orinoco.yaml
   - orinoco.lock
-  - .orinoco-lite/tests/__init__.py
-  - .orinoco-lite/tests/browser/**
   - .github/workflows/curation-review.yml
   - site-specific/**
   - extensions/**
