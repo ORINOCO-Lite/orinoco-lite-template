@@ -33,3 +33,24 @@ jobs:
           pixi-version: v0.73.0
       - name: Check source, render, ownership, and publication proofs
         run: pixi run check
+
+  sample-site:
+    name: Sample site build (Linux x86-64)
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out the Copier source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install the locked source environment
+        uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          cache: true
+          frozen: true
+          pixi-version: v0.73.0
+      - name: Render the sample site and verify its build
+        run: pixi run build-sample-site
+      - name: Upload the built sample site
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: sample-site-${{ github.sha }}
+          path: build/sample-site/build/site
+          retention-days: 14

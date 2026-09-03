@@ -1,0 +1,10 @@
+pid: xyzrins:publications/sample-publication
+schema_type: xyzri:XYZPublication
+title: Sample Publication
+display_label: Sample Publication
+kind: bibo:Document
+attributed_to:
+  - object: xyzrins:persons/sample-person
+    roles:
+      - marcrel:aut
+    schema_type: dlthings:Attribution

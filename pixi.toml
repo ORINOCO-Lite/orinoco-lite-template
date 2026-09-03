@@ -13,4 +13,6 @@ render = "python tools/render_github_template.py --replace"
 publish-github-template-branch = "python tools/publish_github_template_branch.py --publish"
 check-github-template-branch = "python tools/publish_github_template_branch.py --check"
 test = "python -m unittest discover -s tests -p 'test_*.py'"
+render-sample-site = "python tools/render_github_template.py --replace --destination build/sample-site --data-file tests/sample-site/answers.yml"
+build-sample-site = { depends-on = ["render-sample-site"], cmd = "rm -f build/sample-site/site-specific/metadata/records/.gitkeep && cp tests/sample-site/records/*.yaml build/sample-site/site-specific/metadata/records/ && cp tests/sample-site/content/*.md build/sample-site/site-specific/content/ && pixi run --frozen --manifest-path build/sample-site/pixi.toml verify-build" }
 check = { depends-on = ["test"] }

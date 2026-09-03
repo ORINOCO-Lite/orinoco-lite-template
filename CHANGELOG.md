@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Add `pixi run build-sample-site` and a source-CI job that render a sample
+  consumer, build it through the rendered `verify-build`, and upload the built
+  site as a workflow artifact.
+
 ## 0.2.0rc24 - 2026-09-02
 
 - Make `.orinoco-lite/` wholly framework-owned and stop distributing generic

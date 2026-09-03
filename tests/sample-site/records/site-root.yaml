@@ -1,0 +1,5 @@
+pid: xyzrins:.
+schema_type: xyzri:XYZProject
+title: Orinoco Lite Sample Site
+display_label: Orinoco Lite Sample Site
+description: The site record that the rendered sample projection uses as its homepage.

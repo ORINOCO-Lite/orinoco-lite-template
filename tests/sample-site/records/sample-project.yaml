@@ -1,0 +1,12 @@
+pid: xyzrins:projects/sample-project
+schema_type: xyzri:XYZProject
+title: Sample Project
+display_label: Sample Project
+description: A neutral project that exercises generic record presentation.
+part_of:
+  - xyzrins:.
+associated_with:
+  - object: xyzrins:persons/sample-person
+    roles:
+      - marcrel:led
+    schema_type: dlthings:Association
