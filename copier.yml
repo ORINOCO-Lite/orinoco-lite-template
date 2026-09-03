@@ -43,6 +43,14 @@ site_base_url:
   help: Canonical public base URL, including any project path and trailing slash
   default: https://example.invalid/[[ project_slug ]]/
 
+pr_previews:
+  type: str
+  help: Pull-request preview deployments for this site
+  default: none
+  choices:
+    No pull-request previews: none
+    Netlify deploy previews: netlify
+
 engine_version:
   type: str
   help: Exact orinoco-lite Python distribution version

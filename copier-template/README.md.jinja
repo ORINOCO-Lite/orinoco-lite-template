@@ -26,6 +26,10 @@ The source boundary is:
 
 See [getting started](docs/getting-started.md),
 [ownership](docs/ownership.md), and [custom-domain setup](docs/custom-domain.md).
+<%- if pr_previews == 'netlify' %>
+Pull requests also get a disposable Netlify rendering; see
+[pull-request previews](docs/pr-previews.md).
+<%- endif %>
 
 The engine runtime is the single authority for the upstream website and theme
 pins. The downstream selects its engine, runtime, template, and workflow
