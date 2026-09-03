@@ -1,0 +1,4 @@
+project_slug: sample-site
+project_name: Orinoco Lite Sample Site
+site_description: A disposable sample rendering that proves the template builds.
+site_base_url: https://example.invalid/sample-site/

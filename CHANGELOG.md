@@ -7,6 +7,9 @@
   installs Pixi and runs the repository's ordinary root-relative build, without
   touching the canonical GitHub Pages deployment, adding preview-specific
   tooling, or pinning a second toolchain coordinate.
+- Add `pixi run build-sample-site` and a source-CI job that render a sample
+  consumer, build it through the rendered `verify-build`, and upload the built
+  site as a workflow artifact.
 
 ## 0.2.0rc24 - 2026-09-02
 

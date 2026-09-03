@@ -1,0 +1,7 @@
+pid: xyzrins:persons/sample-person
+schema_type: xyzri:XYZPerson
+given_name: Sample
+family_name: Person
+formatted_name: Sample Person
+display_label: Sample Person
+description: A neutral person that exercises generic relationship presentation.
