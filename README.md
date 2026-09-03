@@ -43,7 +43,7 @@ installing them.
 ### 1. Create the repository
 
 ```console
-uvx --from datalad datalad create --no-annex my-site
+uvx datalad create --no-annex my-site
 cd my-site
 ```
 
@@ -54,7 +54,7 @@ DataLad is optional and is used here only to record instantiation provenance;
 ### 2. Instantiate the scaffold
 
 ```console
-uvx --from copier==9.10.3 copier copy --trust \
+uvx copier copy --trust \
   --vcs-ref v0.2.0rc24 gh:ORINOCO-Lite/orinoco-lite-template .
 ```
 
@@ -69,12 +69,12 @@ dataset.
 Copier asks for four site-identity answers; every release coordinate is
 supplied by the template and written to `orinoco.lock`:
 
-| Answer | Meaning |
-| --- | --- |
-| `project_slug` | repository and Pages project-path slug |
-| `project_name` | human-readable site title |
-| `site_description` | short public description |
-| `site_base_url` | canonical public base URL, with project path and trailing slash |
+| Answer             | Meaning                                                         |
+| ------------------ | --------------------------------------------------------------- |
+| `project_slug`     | repository and Pages project-path slug                          |
+| `project_name`     | human-readable site title                                       |
+| `site_description` | short public description                                        |
+| `site_base_url`    | canonical public base URL, with project path and trailing slash |
 
 Answers can also be supplied non-interactively with repeated
 `--data key=value` options plus `--defaults`, or from a file with
@@ -123,6 +123,21 @@ build:
 recognized paths are `records`, `editorial`, `site`, `generated`,
 `extensions`, and `build`; public site identity belongs in
 `site-specific/site.yaml`.
+
+#### Example inputs
+
+Published `site-specific/` trees to read before writing your own:
+
+| Example | Contents |
+| ------- | -------- |
+| [`con-site-specific`](https://github.com/ORINOCO-Lite/con-site-specific) | The Center for Open Neuroscience site: ~220 Things records with annotation overlays, five editorial pages, navigation, and a custom Congo colour scheme. |
+
+An example is a `site-specific/` tree, not a whole downstream, so it can be
+copied in or embedded as a submodule or subtree at `site-specific/`.
+Embedding keeps the inputs reviewable on their own and lets several
+downstreams share one metadata collection. Each example tracks its own
+history, so check its README for the template version it currently follows;
+older trees may still use conventions the rules above have moved on from.
 
 ### 4. Build and preview
 
