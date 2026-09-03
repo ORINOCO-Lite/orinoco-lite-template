@@ -47,7 +47,12 @@ jobs:
           frozen: true
           pixi-version: v0.73.0
       - name: Render the sample site and verify its build
-        run: pixi run build-sample-site
+        # `orinoco build` defaults its trusted repository coordinate to
+        # GITHUB_REPOSITORY. Unset it so the sample carries no curation identity
+        # and the job builds exactly what a contributor builds locally.
+        run: |
+          unset GITHUB_REPOSITORY
+          pixi run build-sample-site
       - name: Upload the built sample site
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
