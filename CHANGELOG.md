@@ -2,87 +2,56 @@
 
 ## Unreleased
 
-- Add the optional `pr_previews` Copier question and its single `netlify`
-  provider. Selecting it renders a pull-request-only `netlify.toml` that
-  installs Pixi and runs the repository's ordinary root-relative build, without
-  touching the canonical GitHub Pages deployment, adding preview-specific
-  tooling, or pinning a second toolchain coordinate.
-- Add `pixi run build-sample-site` and a source-CI job that render a sample
-  consumer, build it through the rendered `verify-build`, and upload the built
-  site as a workflow artifact.
-- Retire the GitHub repository-template distribution; Copier is the sole
-  supported creation and update path.
+- Select Orinoco Lite `v0.3.0rc3` as one package containing the code and resources required by downstream tasks, with one version and wheel digest.
+- Remove the separate release coordinates and verification task from rendered downstreams; package, template, and workflow selections remain independent.
+- Add the optional `pr_previews` Copier question and its single `netlify` provider.
+Selecting it renders a pull-request-only `netlify.toml` that installs Pixi and runs the repository's ordinary root-relative build, without touching the canonical GitHub Pages deployment, adding preview-specific tooling, or pinning a second toolchain coordinate.
+- Add `pixi run build-sample-site` and a source-CI job that render a sample consumer, build it through the rendered `verify-build`, and upload the built site as a workflow artifact.
+- Retire the GitHub repository-template distribution; Copier is the sole supported creation and update path.
 
 ## 0.2.0rc24 - 2026-09-02
 
-- Make `.orinoco-lite/` wholly framework-owned and stop distributing generic
-  tests or browser-test infrastructure to downstream sites.
+- Make `.orinoco-lite/` wholly framework-owned and stop distributing generic tests or browser-test infrastructure to downstream sites.
 - Advance the engine, runtime, and reusable workflow to `v0.2.0rc20`.
 
 ## 0.2.0rc23 - 2026-09-02
 
-- Advance the engine, runtime, and reusable workflow to `v0.2.0rc19`, which
-  aligns the Orinoco presentation integration with the current upstream
-  website and query revisions.
+- Advance the engine, runtime, and reusable workflow to `v0.2.0rc19`, which aligns the Orinoco presentation integration with the current upstream website and query revisions.
 
-- Replace copied website sources and stored consumer output with a thin
-  presentation adapter, disposable behavioral renders, and exact-tag
-  publication of the derived GitHub-template branch.
-- Add the licensed materialized-presentation boundary for required ordinary
-  upstream assets without adding an asset manifest or presentation pin.
+- Replace copied website sources and stored consumer output with a thin presentation adapter, disposable behavioral renders, and exact-tag publication of the derived GitHub-template branch.
+- Add the licensed materialized-presentation boundary for required ordinary upstream assets without adding an asset manifest or presentation pin.
 
 ## 0.2.0rc19 - 2026-08-31
 
-- Make the SHACL Vue editor action the single authorizing click for a GitHub
-  proposal and report handoff status with a concise GitHub Actions bot comment.
+- Make the SHACL Vue editor action the single authorizing click for a GitHub proposal and report handoff status with a concise GitHub Actions bot comment.
 - Preserve unchanged RDF list ordering during canonical YAML materialization.
-- Advance the default engine, runtime, and reusable workflow to the immutable
-  `v0.2.0rc17` release.
+- Advance the default engine, runtime, and reusable workflow to the immutable `v0.2.0rc17` release.
 
 ## 0.2.0rc18 - 2026-08-31
 
-- Advance the default engine, runtime, and reusable workflow to the immutable
-  `v0.2.0rc15` release, which serializes reactive editor proposals before the
-  popup transport boundary.
+- Advance the default engine, runtime, and reusable workflow to the immutable `v0.2.0rc15` release, which serializes reactive editor proposals before the popup transport boundary.
 
 ## 0.2.0rc17 - 2026-08-31
 
-- Advance the default engine, runtime, and reusable workflow to the immutable
-  `v0.2.0rc13` release.
-- Document the SHACL editor's warning-only shared-`github.io` presentation and
-  credential-free bundle alternative without an acknowledgment gate.
+- Advance the default engine, runtime, and reusable workflow to the immutable `v0.2.0rc13` release.
+- Document the SHACL editor's warning-only shared-`github.io` presentation and credential-free bundle alternative without an acknowledgment gate.
 
 ## 0.2.0rc16 - 2026-08-28
 
-- Let source-curation branches use their exact-head validation dispatch so
-  record proposals run the full suite once while decision-only updates run
-  only the joined-graph check.
+- Let source-curation branches use their exact-head validation dispatch so record proposals run the full suite once while decision-only updates run only the joined-graph check.
 
 ## 0.2.0rc15 - 2026-08-28
 
-- Make the ordinary downstream `test-all` command infer its GitHub repository
-  from `origin`, so local browser acceptance exercises the same `/edit/` and
-  `/review/` configuration as the disposable candidate and Pages builds.
+- Make the ordinary downstream `test-all` command infer its GitHub repository from `origin`, so local browser acceptance exercises the same `/edit/` and `/review/` configuration as the disposable candidate and Pages builds.
 
 ## 0.2.0rc14 - 2026-08-28
 
-- Establish the fresh downstream ownership split: reusable framework and
-  source-adapter executables live under `.orinoco-lite/`, site records and
-  policy live under `site-specific/`, and durable presentation overrides live
-  under `extensions/`.
-- Render structured site identity, navigation, people, projects, manifest,
-  section indexes, lists, and term pages from `site-specific/site.yaml` while
-  retaining the bundled framework's dependency notices.
-- Add the offline retained-source adapter canary, downstream-aware candidate
-  roots, and generic Zotero review support without shipping site evidence or
-  curation decisions in the template.
-- Add focused `/review/` browser acceptance and selectable full or joined
-  manual validation while preserving full pull-request and default-branch
-  validation.
-- Document the one-time site-specific layout migration and Copier update
-  boundaries for existing downstreams.
-- Advance the default engine, runtime, and reusable workflows to the immutable
-  `v0.2.0rc12` release without changing the adapted upstream component pins.
+- Establish the fresh downstream ownership split: reusable framework and source-adapter executables live under `.orinoco-lite/`, site records and policy live under `site-specific/`, and durable presentation overrides live under `extensions/`.
+- Render structured site identity, navigation, people, projects, manifest, section indexes, lists, and term pages from `site-specific/site.yaml` while retaining the bundled framework's dependency notices.
+- Add the offline retained-source adapter canary, downstream-aware candidate roots, and generic Zotero review support without shipping site evidence or curation decisions in the template.
+- Add focused `/review/` browser acceptance and selectable full or joined manual validation while preserving full pull-request and default-branch validation.
+- Document the one-time site-specific layout migration and Copier update boundaries for existing downstreams.
+- Advance the default engine, runtime, and reusable workflows to the immutable `v0.2.0rc12` release without changing the adapted upstream component pins.
 
 ## 0.2.0rc13 - 2026-08-27
 
@@ -97,19 +66,13 @@
 
 - Build browser acceptance artifacts with a path-only project base so the dynamic test server supplies the actual loopback origin, while leaving site-specific graph-navigation repairs in protected consumer tests.
 - Document open references as the fresh-site default and prove framework updates preserve existing explicit strict reference and graph policies.
-- Advance the default engine and runtime to immutable `v0.2.0rc8` artifacts
-  and the matching reusable workflow without changing the adapted upstream
-  component pins.
+- Advance the default engine and runtime to immutable `v0.2.0rc8` artifacts and the matching reusable workflow without changing the adapted upstream component pins.
 
 ## 0.2.0rc11 - 2026-08-27
 
-- Keep the deployed downstream `/edit/` route as the sole SHACL Vue editor,
-  with **Download bundle** and **Propose via GitHub** driven by explicit
-  repository and curation-service configuration.
-- Remove exact-head editor-input Actions artifacts and central-editor links
-  while retaining the trusted fixed-path bundle materialization workflow.
-- Advance the default engine and runtime to immutable `v0.2.0rc7` artifacts
-  and the matching reusable workflow.
+- Keep the deployed downstream `/edit/` route as the sole SHACL Vue editor, with **Download bundle** and **Propose via GitHub** driven by explicit repository and curation-service configuration.
+- Remove exact-head editor-input Actions artifacts and central-editor links while retaining the trusted fixed-path bundle materialization workflow.
+- Advance the default engine and runtime to immutable `v0.2.0rc7` artifacts and the matching reusable workflow.
 
 ## 0.2.0rc8 - 2026-08-26
 

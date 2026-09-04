@@ -54,7 +54,7 @@ pr_previews:
 package_version:
   type: str
   help: Exact orinoco-lite Python distribution version
-  default: 0.3.0rc2
+  default: 0.3.0rc3
   when: false
   validator: >-
     <% if not (package_version | regex_search('^[0-9]+\.[0-9]+\.[0-9]+([a-z0-9.-]+)?$')) %>
@@ -64,7 +64,7 @@ package_version:
 package_url:
   type: str
   help: Immutable orinoco-lite wheel release URL
-  default: https://github.com/ORINOCO-Lite/orinoco-lite-dev/releases/download/v0.3.0rc2/orinoco_lite-0.3.0rc2-py3-none-any.whl
+  default: https://github.com/ORINOCO-Lite/orinoco-lite-dev/releases/download/v0.3.0rc3/orinoco_lite-0.3.0rc3-py3-none-any.whl
   when: false
   validator: >-
     <% if '#' in package_url %>
@@ -74,7 +74,7 @@ package_url:
 package_sha256:
   type: str
   help: SHA-256 digest of the immutable orinoco-lite wheel
-  default: "88272737eff6e5f16b1b45ed4860be20768afb50ece3cac6d8ad0c598ccd6cd3"
+  default: "0fe031eba7e809a5d7014af3e946f14710cf2571f5cb71b09ea3f9e83d19b7fc"
   when: false
   validator: >-
     <% if not (package_sha256 | regex_search('^[0-9a-f]{64}$')) %>
@@ -90,7 +90,7 @@ template_source:
 template_version:
   type: str
   help: Exact Copier template release
-  default: v0.2.0rc24
+  default: v0.3.0rc1
   when: false
   validator: >-
     <% if not (template_version | regex_search('^v[0-9]+\.[0-9]+\.[0-9]+([a-z0-9.-]+)?$')) %>
@@ -106,7 +106,7 @@ workflow_repository:
 workflow_sha:
   type: str
   help: Full reviewed commit SHA associated with the release workflows
-  default: "8f9f53ef27a6bd095cb52d687ca190d2f7210c8d"
+  default: "553ba050bb2b01edf81a01994dd3e9b2a19fa34e"
   when: false
   validator: >-
     <% if not (workflow_sha | regex_search('^[0-9a-f]{40}$')) %>
@@ -116,7 +116,7 @@ workflow_sha:
 workflow_ref:
   type: str
   help: Full immutable reusable-workflow reference, including path and commit SHA
-  default: ORINOCO-Lite/orinoco-lite-dev/.github/workflows/orinoco-consumer-ci.yml@8f9f53ef27a6bd095cb52d687ca190d2f7210c8d
+  default: ORINOCO-Lite/orinoco-lite-dev/.github/workflows/orinoco-consumer-ci.yml@553ba050bb2b01edf81a01994dd3e9b2a19fa34e
   when: false
   validator: >-
     <% if not (workflow_ref | regex_search('^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/\.github/workflows/[A-Za-z0-9_.-]+\.ya?ml@[0-9a-f]{40}$')) %>
