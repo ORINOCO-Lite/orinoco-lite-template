@@ -10,7 +10,7 @@ hugo = "==0.161.1"
 pyyaml = "==6.0.2"
 
 [pypi-dependencies]
-orinoco-lite = { url = "[[ engine_url ]]#sha256=[[ engine_sha256 ]]" }
+orinoco-lite = { url = "[[ package_url ]]#sha256=[[ package_sha256 ]]" }
 datalad = ">=1.6.2,<2"
 
 [tasks]
@@ -25,6 +25,5 @@ verify-build = { depends-on = ["verify-deterministic", "verify-local-preview"] }
 build-pages = { depends-on = ["projection-update"], cmd = "python .orinoco-lite/tools/build_pages.py build/pages" }
 serve = "orinoco serve --directory build/site --port 8765"
 apply-editor-bundle = "orinoco editor apply"
-verify-runtime = "orinoco runtime verify"
 verify-hugo = "python .orinoco-lite/tools/verify_hugo.py --version 0.161.1 --extended"
 verify-ownership = "python .orinoco-lite/tools/verify_template_ownership.py"
