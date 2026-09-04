@@ -83,18 +83,21 @@ site-specific/projection.yaml        optional projection contract override
 extensions/                          optional metadata-acquisition code
 ```
 
+Declare menus in the `navigation.main` and `navigation.footer` lists in `site.yaml`.
+An entry's explicit `url` takes precedence over its `page_ref`.
+
 Four rules are enforced by the package and are worth knowing before the first build:
 
 - Everything below `site-specific/metadata/records/` must be a Thing YAML record, and the inventory may not be empty.
 Delete the scaffold's `.gitkeep` and add at least one record — commonly the organization or project that the homepage projects from — or the build stops before Hugo runs.
 - Images referenced from editorial Markdown through Hugo shortcodes such as `figure` are resolved through the asset pipeline, so they belong under `site-specific/assets/`.
 `site-specific/static/` is for files that are published verbatim and referenced by absolute URL.
-- A custom Congo colour scheme is `site-specific/assets/css/schemes/<name>.css` named by `presentation.color_scheme`; extra Congo icons are `site-specific/assets/icons/<name>.svg`; site CSS is `site-specific/assets/css/custom.css`.
+- A custom Congo colour scheme is `site-specific/assets/css/schemes/<name>.css` named by `theme.color_scheme`; extra Congo icons are `site-specific/assets/icons/<name>.svg`; site CSS is `site-specific/assets/css/custom.css`.
 - `extensions/` is for executable metadata adapters only.
 Website functionality there is rejected: no `.css`, `.html`, `.js`, `.svg` files and no `assets`, `content`, `layouts`, or `static` directories.
 Presentation belongs in `site-specific/overrides/`.
 
-`orinoco.yaml` carries only path selection, and rejects unknown keys.
+`orinoco.yaml` selects workspace paths and optional GitHub repository and curation service coordinates.
 The recognized paths are `records`, `editorial`, `site`, `generated`, `extensions`, and `build`; public site identity belongs in `site-specific/site.yaml`.
 
 #### Example inputs
