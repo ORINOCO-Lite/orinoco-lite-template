@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+import importlib.util
+import json
 import subprocess
 import sys
 import tempfile
+import tomllib
 from pathlib import Path
 import unittest
 
 import yaml
+from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -77,6 +81,59 @@ class TemplateArchitectureTests(unittest.TestCase):
         self.assertEqual("delta-atlas", answers["project_slug"])
         self.assertIsInstance(answers["_src_path"], str)
         self.assertIsInstance(answers["_commit"], str)
+
+    def render_presentation(self, relative: str, site: dict) -> str:
+        environment = Environment(
+            loader=FileSystemLoader(self.rendered / ".orinoco-lite/presentation"),
+            undefined=StrictUndefined,
+        )
+        environment.filters["json_string"] = json.dumps
+        return environment.get_template(relative).render(site=site)
+
+    def test_default_site_data_renders_valid_menu_and_theme_configuration(self) -> None:
+        site = yaml.safe_load((self.rendered / "site-specific/site.yaml").read_text())
+        menus = tomllib.loads(self.render_presentation("config-templates/menus.en.toml.j2", site))
+        self.assertEqual(menus["footer"], [])
+        self.assertEqual(menus["main"][0]["pageRef"], "/projects/")
+        self.assertEqual(menus["main"][-1]["params"]["action"], "search")
+        params = tomllib.loads(self.render_presentation("config-templates/params.toml.j2", site))
+        self.assertEqual(params["colorScheme"], "fire")
+        self.assertEqual(params["header"]["layout"], "hybrid")
+
+    def test_site_navigation_and_presentation_choices_reach_hugo(self) -> None:
+        site = {
+            "identity": {"title": "Delta", "description": "Delta site", "base_url": "https://delta.example/", "copyright": "Delta terms"},
+            "language": {"code": "en", "name": "English", "direction": "ltr", "weight": 2, "date_format": "January 2006"},
+            "author": {"name": "Delta group", "headline": "Research", "links": [{"name": "github", "url": "https://github.com/delta"}]},
+            "navigation": {
+                "main": [{"name": "People", "page_ref": "people", "url": "/whoweare/", "weight": 30, "icon": "account-group", "show_name": True}],
+                "footer": [{"name": "Contact", "page_ref": "contact", "url": "/contact/", "weight": 100, "icon": None, "show_name": False}],
+                "sections": {},
+            },
+            "theme": {"color_scheme": "delta", "default_appearance": "dark", "auto_switch_appearance": False, "header": {"layout": "hybrid", "logo": "img/delta.png", "logo_dark": "img/delta-dark.png", "show_title": False}, "article": {"show_reading_time": True, "show_table_of_contents": True}},
+            "webmanifest": {"name": "Delta", "short_name": "D", "start_url": ".", "display": "standalone", "icons": [{"src": "icon.png", "sizes": "any", "type": "image/png"}], "theme_color": "#112233", "background_color": "#ffffff"},
+        }
+        menus = tomllib.loads(self.render_presentation("config-templates/menus.en.toml.j2", site))
+        self.assertEqual(menus["main"][0], {"name": "People", "url": "/whoweare/", "weight": 30, "params": {"icon": "account-group", "showName": True}})
+        self.assertEqual(menus["footer"][0], {"name": "Contact", "url": "/contact/", "weight": 100, "params": {"showName": False}})
+        params = tomllib.loads(self.render_presentation("config-templates/params.toml.j2", site))
+        self.assertEqual(params["colorScheme"], "delta")
+        self.assertFalse(params["autoSwitchAppearance"])
+        self.assertEqual(params["header"]["logoDark"], "img/delta-dark.png")
+        self.assertFalse(params["header"]["showTitle"])
+        self.assertTrue(params["article"]["showReadingTime"])
+        self.assertTrue(params["article"]["showTableOfContents"])
+        language = tomllib.loads(self.render_presentation("config-templates/languages.en.toml.j2", site))
+        self.assertEqual(language["locale"], "en")
+        self.assertEqual(language["label"], "English")
+        self.assertEqual(language["direction"], "ltr")
+        self.assertEqual(language["copyright"], "Delta terms")
+        self.assertEqual(language["params"]["dateFormat"], "January 2006")
+        self.assertEqual(language["params"]["author"]["links"], [{"github": "https://github.com/delta"}])
+        manifest = json.loads(self.render_presentation("static-templates/site.webmanifest.j2", site))
+        self.assertEqual(manifest["short_name"], "D")
+        self.assertEqual(manifest["icons"], site["webmanifest"]["icons"])
+        self.assertEqual(manifest["theme_color"], "#112233")
 
     def test_consumer_surfaces_are_forward_looking_and_small(self) -> None:
         for relative in ("site-specific", "extensions"):
@@ -163,7 +220,7 @@ class TemplateArchitectureTests(unittest.TestCase):
             any(path.startswith(".orinoco-lite/") for path in copier["_skip_if_exists"])
         )
 
-    def test_engine_runtime_is_the_only_presentation_pin_authority(self) -> None:
+    def test_package_is_the_only_presentation_pin_authority(self) -> None:
         config = yaml.safe_load(
             (self.rendered / "orinoco.yaml").read_text(encoding="utf-8")
         )
@@ -175,7 +232,7 @@ class TemplateArchitectureTests(unittest.TestCase):
         self.assertNotIn("website", lock)
         self.assertNotIn("presentation", lock)
         self.assertEqual(
-            {"engine", "lock_version", "runtime", "template", "workflow"},
+            {"package", "lock_version", "template", "workflow"},
             set(lock),
         )
         for configuration in (
@@ -187,6 +244,29 @@ class TemplateArchitectureTests(unittest.TestCase):
             text = (self.rendered / configuration).read_text(encoding="utf-8")
             self.assertNotIn("www-from-model", text)
             self.assertNotIn("congo", text.lower())
+
+    def test_package_coordinates_match_the_frozen_environment(self) -> None:
+        helper = self.rendered / ".orinoco-lite/tools/template_contract.py"
+        spec = importlib.util.spec_from_file_location("template_contract", helper)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        contract = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(contract)
+        package = yaml.safe_load(
+            (self.rendered / "orinoco.lock").read_text(encoding="utf-8")
+        )["package"]
+
+        self.assertEqual(
+            [], contract.pixi_package_pin_failures(self.rendered, package)
+        )
+        wrong_version = {**package, "version": "0.0.0"}
+        self.assertTrue(
+            contract.pixi_package_pin_failures(self.rendered, wrong_version)
+        )
+        wrong_digest = {**package, "sha256": "0" * 64}
+        self.assertTrue(
+            contract.pixi_package_pin_failures(self.rendered, wrong_digest)
+        )
 
     def test_no_generic_projection_or_record_is_materialized(self) -> None:
         site_specific = self.rendered / "site-specific"
