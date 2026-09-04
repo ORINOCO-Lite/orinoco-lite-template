@@ -13,7 +13,7 @@ import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_DESTINATION = ROOT / "build" / "github-template"
+DEFAULT_DESTINATION = ROOT / "build" / "rendered-template"
 
 
 class RenderError(RuntimeError):
@@ -140,7 +140,7 @@ def render(
     ]
     # Copier otherwise selects the latest template tag for a local Git source.
     # Development renders must exercise the current checkout, including its
-    # deliberate uncommitted changes; publication passes an immutable tag or
+    # deliberate uncommitted changes; release checks pass an immutable tag or
     # commit explicitly.
     command.extend(["--vcs-ref", source_ref or "HEAD"])
     if data_file is not None:

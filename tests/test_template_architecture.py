@@ -33,7 +33,7 @@ class TemplateArchitectureTests(unittest.TestCase):
         result = subprocess.run(
             [
                 sys.executable,
-                "tools/render_github_template.py",
+                "tools/render_template.py",
                 "--destination",
                 cls.rendered.as_posix(),
                 "--data-file",
@@ -203,8 +203,7 @@ class TemplateArchitectureTests(unittest.TestCase):
                 "git",
                 "ls-files",
                 "--",
-                "github-template",
-                ".github-template-answers.yml",
+                "build/rendered-template",
             ],
             cwd=ROOT,
             text=True,
@@ -219,7 +218,7 @@ class TemplateArchitectureTests(unittest.TestCase):
         result = subprocess.run(
             [
                 sys.executable,
-                "tools/render_github_template.py",
+                "tools/render_template.py",
                 "--destination",
                 destination.as_posix(),
                 "--replace",

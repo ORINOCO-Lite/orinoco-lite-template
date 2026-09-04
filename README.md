@@ -27,10 +27,9 @@ pixi run render
 pixi run check
 ```
 
-The `github-template` branch is a derived distribution for GitHub's repository
-template feature. It is rendered from an exact source tag and is not used as a
-test fixture. See [testing](docs/testing.md),
-[publishing](docs/publishing.md), and [releasing](docs/releasing.md).
+Copier is the only supported creation and update path. Disposable renders are
+development and test output, not a second distribution. See
+[testing](docs/testing.md) and [releasing](docs/releasing.md).
 
 ## Creating a downstream site
 

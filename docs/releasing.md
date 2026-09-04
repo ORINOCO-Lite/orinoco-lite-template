@@ -7,9 +7,7 @@
    candidate against this working tree.
 4. Review and merge the release preparation, then create the immutable tag and
    GitHub Release.
-5. Publish and verify the derived branch from that exact tag as described in
-   [publishing](publishing.md).
-6. Verify a clean checkout can instantiate the tag without access to the
+5. Verify a clean checkout can instantiate the tag without access to the
    engineering repository. The engine may resolve the runtime-manifest-pinned
    upstream sources through its normal cache path.
 

@@ -10,6 +10,8 @@
 - Add `pixi run build-sample-site` and a source-CI job that render a sample
   consumer, build it through the rendered `verify-build`, and upload the built
   site as a workflow artifact.
+- Retire the GitHub repository-template distribution; Copier is the sole
+  supported creation and update path.
 
 ## 0.2.0rc24 - 2026-09-02
 

@@ -8,9 +8,8 @@ pixi run check
 
 They create a fresh disposable consumer with compact custom inputs and verify
 substitution, ownership boundaries, the thin presentation adapter, release
-locks, the licensed materialized-presentation boundary, publication-tree
-derivation, and helper behavior. No generated consumer tree is stored or
-compared as a snapshot.
+locks, the licensed materialized-presentation boundary, and helper behavior.
+No generated consumer tree is stored or compared as a snapshot.
 
 The source checks stop at the rendered tree. To prove that a rendered tree
 still builds a website, run:
