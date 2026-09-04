@@ -18,8 +18,7 @@ The rendered ownership contract distinguishes:
 - ignored generated output.
 
 The source branch does not store a rendered consumer. Disposable renders test
-composition, while the derived `github-template` branch exists only as a
-GitHub repository-creation distribution.
+composition; Copier is the only supported creation and update path.
 
 This is a forward-looking contract for new downstreams. Earlier structures and
 automated migration are outside its scope.
