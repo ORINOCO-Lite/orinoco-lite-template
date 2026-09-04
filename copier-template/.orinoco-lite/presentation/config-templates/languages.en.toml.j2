@@ -1,7 +1,7 @@
 {% set language = site.language | default({}) %}
-languageCode = {{ language.code | default('en') | json_string }}
-languageName = {{ language.name | default('English') | json_string }}
-languageDirection = {{ language.direction | default('ltr') | json_string }}
+locale = {{ language.code | default('en') | json_string }}
+label = {{ language.name | default('English') | json_string }}
+direction = {{ language.direction | default('ltr') | json_string }}
 weight = {{ language.weight | default(1) }}
 title = {{ site.identity.title | json_string }}
 copyright = {{ site.identity.copyright | default('') | json_string }}
