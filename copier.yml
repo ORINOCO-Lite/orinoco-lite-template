@@ -106,7 +106,7 @@ workflow_repository:
 workflow_sha:
   type: str
   help: Full reviewed commit SHA associated with the release workflows
-  default: "8f9f53ef27a6bd095cb52d687ca190d2f7210c8d"
+  default: "6cee7f0378241ee3cd56b30642d2b6da0ce03fcc"
   when: false
   validator: >-
     <% if not (workflow_sha | regex_search('^[0-9a-f]{40}$')) %>
@@ -116,7 +116,7 @@ workflow_sha:
 workflow_ref:
   type: str
   help: Full immutable reusable-workflow reference, including path and commit SHA
-  default: ORINOCO-Lite/orinoco-lite-dev/.github/workflows/orinoco-consumer-ci.yml@8f9f53ef27a6bd095cb52d687ca190d2f7210c8d
+  default: ORINOCO-Lite/orinoco-lite-dev/.github/workflows/orinoco-consumer-ci.yml@6cee7f0378241ee3cd56b30642d2b6da0ce03fcc
   when: false
   validator: >-
     <% if not (workflow_ref | regex_search('^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/\.github/workflows/[A-Za-z0-9_.-]+\.ya?ml@[0-9a-f]{40}$')) %>
