@@ -9,8 +9,8 @@
 5. Configure repository Pages and curation settings before enabling hosted
    editing.
 
-The engine supplies the default projection and resolves the presentation
-selected by its verified runtime manifest. Ordinary site construction should
+Orinoco Lite supplies the default projection and resolves the presentation
+selected by its packaged resources. Ordinary site construction should
 use declarative inputs and the supported small overrides under
 `site-specific/overrides/`, not copy the upstream presentation into this
 repository.

@@ -6,9 +6,9 @@ coordinates, a small Orinoco presentation adapter, and a bounded licensed
 overlay for required presentation assets. It does not distribute the reusable
 website.
 
-The verified engine runtime is the single authority for the exact German
+The released `orinoco-lite` package is the single authority for the exact German
 [`www-from-model`](https://hub.psychoinformatics.de/www/www-from-model)
-revision and official Congo dependency. At build time the engine resolves
+revision and official Congo dependency. At build time the package resolves
 those sources and composes them with:
 
 ```text
@@ -54,7 +54,7 @@ DataLad is optional and is used here only to record instantiation provenance;
 
 ```console
 uvx copier copy --trust \
-  --vcs-ref v0.2.0rc24 gh:ORINOCO-Lite/orinoco-lite-template .
+  --vcs-ref v0.3.0rc1 gh:ORINOCO-Lite/orinoco-lite-template .
 ```
 
 Pass `--vcs-ref` explicitly. Copier resolves a bare `gh:` source to the newest
@@ -97,7 +97,7 @@ site-specific/projection.yaml        optional projection contract override
 extensions/                          optional metadata-acquisition code
 ```
 
-Four rules are enforced by the engine and are worth knowing before the first
+Four rules are enforced by Orinoco Lite and are worth knowing before the first
 build:
 
 - Everything below `site-specific/metadata/records/` must be a Thing YAML
@@ -147,15 +147,14 @@ pixi run build
 pixi run serve
 ```
 
-The first build resolves and caches the verified runtime and the exact
-upstream presentation, so it needs network access to GitHub and takes longer
-than later builds. `pixi run serve` publishes the built site on
+The first build resolves and caches the exact upstream presentation, so it
+needs network access to GitHub and takes longer than later builds.
+`pixi run serve` publishes the built site on
 <http://127.0.0.1:8765/>, including the static `/edit/` metadata editor.
 
 Before proposing a change, run what CI runs:
 
 ```console
-pixi run verify-runtime
 pixi run verify-hugo
 pixi run verify-ownership
 pixi run projection-verify
@@ -164,6 +163,12 @@ pixi run verify-build
 
 `verify-build` builds twice and compares the trees, so it also proves the
 site is reproducible.
+
+The `package` mapping in `orinoco.lock` selects one immutable Orinoco Lite
+package by version, wheel URL, and SHA-256. Template and workflow selections
+remain independent coordinates. Resources and specifications required to build
+or operate Orinoco Lite are internal to that package and share its version and
+integrity boundary.
 
 ### 5. Publish
 

@@ -1,7 +1,7 @@
 # Orinoco Lite template internals
 
 `.orinoco-lite/presentation/` is a small adapter applied to the upstream
-presentation resolved by the verified engine runtime. It contains only the
+presentation resolved by the selected Orinoco Lite package. It contains only the
 configuration, footer, and static-file templates needed to map the generic
 source to this downstream contract; it is not a standalone website.
 
@@ -16,4 +16,5 @@ framework-owned and replaced by template updates.
 
 Downstream data and policy belong under `site-specific/` and `extensions/`;
 downstream-specific acceptance tests belong under top-level `tests/`.
-Generated projection, browser, runtime, and build state is ignored.
+Generated projection, browser downloads, package caches, and build state is
+ignored.

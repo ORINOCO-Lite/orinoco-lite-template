@@ -8,7 +8,7 @@ documentation is licensed under
 Files in `.orinoco-lite/materialized-presentation/` are distributed under its
 adjacent MIT `LICENSE`. Maintainer repinning copies required presentation
 assets into its `upstream/` tree and preserves applicable notices there. The
-engine resolves the remainder of the German `www-from-model` website and its
+package resolves the remainder of the German `www-from-model` website and its
 declared dependency closure at build time.
 
 These grants do not license site-owned records, editorial prose, media,
