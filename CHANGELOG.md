@@ -4,9 +4,9 @@
 
 - Add the optional `pr_previews` Copier question and its single `netlify`
   provider. Selecting it renders a pull-request-only `netlify.toml` that
-  installs Pixi and runs the repository's ordinary root-relative build, without
-  touching the canonical GitHub Pages deployment, adding preview-specific
-  tooling, or pinning a second toolchain coordinate.
+  installs the reviewed Pixi release and runs the repository's ordinary
+  root-relative build, without touching the canonical GitHub Pages deployment
+  or adding preview-specific tooling.
 - Add `pixi run build-sample-site` and a source-CI job that render a sample
   consumer, build it through the rendered `verify-build`, and upload the built
   site as a workflow artifact.
