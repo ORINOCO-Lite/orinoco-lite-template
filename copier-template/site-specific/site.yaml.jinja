@@ -5,15 +5,36 @@ identity:
   description: "[[ site_description ]]"
   base_url: "[[ site_base_url ]]"
 navigation:
-  - name: Projects
-    page_ref: /projects/
-    weight: 10
   - name: People
     page_ref: /persons/
-    weight: 20
+    icon: account-group
+    weight: 10
+  - name: Projects
+    page_ref: /projects/
+    icon: human-dolly
+    weight: 25
   - name: Publications
     page_ref: /publications/
+    icon: cast-education
     weight: 30
+  - name: Outputs
+    identifier: outputs
+    icon: export
+    weight: 32
+  - name: Datasets
+    page_ref: /datasets/
+    parent: outputs
+    icon: mdi-database-outline
+    weight: 34
+  - name: Instruments
+    page_ref: /instruments/
+    parent: outputs
+    icon: mdi-microscope
+    weight: 36
+  - name: Explore
+    page_ref: /explore/
+    icon: circle-info
+    weight: 40
 presentation:
   color_scheme: fire
   default_appearance: light
