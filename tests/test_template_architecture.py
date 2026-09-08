@@ -190,14 +190,20 @@ class TemplateArchitectureTests(unittest.TestCase):
             contract.pixi_package_pin_failures(self.rendered, wrong_digest)
         )
 
-    def test_no_generic_projection_or_record_is_materialized(self) -> None:
+    def test_generic_starter_site_is_materialized(self) -> None:
         site_specific = self.rendered / "site-specific"
         self.assertFalse((site_specific / "projection.yaml").exists())
         records = site_specific / "metadata/records"
         self.assertEqual(
-            [".gitkeep"],
+            [
+                "site-root.yaml",
+                "starter-person.yaml",
+                "starter-project.yaml",
+                "starter-publication.yaml",
+            ],
             sorted(path.name for path in records.iterdir() if path.is_file()),
         )
+        self.assertTrue((site_specific / "content/explore.md").is_file())
 
     def test_rendered_output_is_build_state_not_source_state(self) -> None:
         tracked = subprocess.run(

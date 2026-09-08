@@ -65,7 +65,7 @@ Copier asks for four site-identity answers; every release coordinate is supplied
 
 Answers can also be supplied non-interactively with repeated `--data key=value` options plus `--defaults`, or from a file with `--data-file answers.yml`.
 
-### 3. Supply the site-owned inputs
+### 3. Review the starter site and supply site-owned inputs
 
 Everything a site owns is declarative and lives in two trees:
 
@@ -86,7 +86,8 @@ extensions/                          optional metadata-acquisition code
 Four rules are enforced by Orinoco Lite and are worth knowing before the first build:
 
 - Everything below `site-specific/metadata/records/` must be a Thing YAML record, and the inventory may not be empty.
-  Delete the scaffold's `.gitkeep` and add at least one record — commonly the organization or project that the homepage projects from — or the build stops before Hugo runs.
+  The scaffold provides a small starter record graph and `/explore` page so its first build works.
+  Replace those clearly labeled starter inputs with reviewed site metadata and editorial content before publishing a real site.
 - Images referenced from editorial Markdown through Hugo shortcodes such as `figure` are resolved through the asset pipeline, so they belong under `site-specific/assets/`.
   `site-specific/static/` is for files that are published verbatim and referenced by absolute URL.
 - A custom Congo colour scheme is `site-specific/assets/css/schemes/<name>.css` named by `presentation.color_scheme`; extra Congo icons are `site-specific/assets/icons/<name>.svg`; site CSS is `site-specific/assets/css/custom.css`.

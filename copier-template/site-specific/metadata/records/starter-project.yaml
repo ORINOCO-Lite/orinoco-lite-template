@@ -1,0 +1,12 @@
+pid: xyzrins:projects/starter-project
+schema_type: xyzri:XYZProject
+title: Starter Project
+display_label: Starter Project
+description: Replace this example project with reviewed site metadata.
+part_of:
+  - xyzrins:.
+associated_with:
+  - object: xyzrins:persons/starter-person
+    roles:
+      - marcrel:led
+    schema_type: dlthings:Association
