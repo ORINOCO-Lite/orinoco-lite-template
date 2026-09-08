@@ -90,7 +90,7 @@ template_source:
 template_version:
   type: str
   help: Exact Copier template release
-  default: v0.3.0rc1
+  default: v0.3.0rc2
   when: false
   validator: >-
     <% if not (template_version | regex_search('^v[0-9]+\.[0-9]+\.[0-9]+([a-z0-9.-]+)?$')) %>
@@ -106,7 +106,7 @@ workflow_repository:
 workflow_sha:
   type: str
   help: Full reviewed commit SHA associated with the release workflows
-  default: "553ba050bb2b01edf81a01994dd3e9b2a19fa34e"
+  default: "41d349ed2680d89044596800e3af6b6f7e133b72"
   when: false
   validator: >-
     <% if not (workflow_sha | regex_search('^[0-9a-f]{40}$')) %>
@@ -116,7 +116,7 @@ workflow_sha:
 workflow_ref:
   type: str
   help: Full immutable reusable-workflow reference, including path and commit SHA
-  default: ORINOCO-Lite/orinoco-lite-dev/.github/workflows/orinoco-consumer-ci.yml@553ba050bb2b01edf81a01994dd3e9b2a19fa34e
+  default: ORINOCO-Lite/orinoco-lite-dev/.github/workflows/orinoco-consumer-ci.yml@41d349ed2680d89044596800e3af6b6f7e133b72
   when: false
   validator: >-
     <% if not (workflow_ref | regex_search('^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/\.github/workflows/[A-Za-z0-9_.-]+\.ya?ml@[0-9a-f]{40}$')) %>
