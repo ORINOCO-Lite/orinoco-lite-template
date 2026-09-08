@@ -54,7 +54,7 @@ pr_previews:
 package_version:
   type: str
   help: Exact orinoco-lite Python distribution version
-  default: 0.3.0rc3
+  default: 0.3.0rc4
   when: false
   validator: >-
     <% if not (package_version | regex_search('^[0-9]+\.[0-9]+\.[0-9]+([a-z0-9.-]+)?$')) %>
@@ -64,7 +64,7 @@ package_version:
 package_url:
   type: str
   help: Immutable orinoco-lite wheel release URL
-  default: https://github.com/ORINOCO-Lite/orinoco-lite-dev/releases/download/v0.3.0rc3/orinoco_lite-0.3.0rc3-py3-none-any.whl
+  default: https://github.com/ORINOCO-Lite/orinoco-lite-dev/releases/download/v0.3.0rc4/orinoco_lite-0.3.0rc4-py3-none-any.whl
   when: false
   validator: >-
     <% if '#' in package_url %>
@@ -74,7 +74,7 @@ package_url:
 package_sha256:
   type: str
   help: SHA-256 digest of the immutable orinoco-lite wheel
-  default: "0fe031eba7e809a5d7014af3e946f14710cf2571f5cb71b09ea3f9e83d19b7fc"
+  default: "bd78cc7cbf77f3a20394c395916df51cc0e44a4a692265e457e2420994894aa3"
   when: false
   validator: >-
     <% if not (package_sha256 | regex_search('^[0-9a-f]{64}$')) %>
