@@ -1,0 +1,7 @@
+pid: xyzrins:persons/starter-person
+schema_type: xyzri:XYZPerson
+given_name: Starter
+family_name: Person
+formatted_name: Starter Person
+display_label: Starter Person
+description: Replace this example person with reviewed site metadata.

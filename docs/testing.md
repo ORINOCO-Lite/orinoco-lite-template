@@ -6,22 +6,21 @@ Run the source checks with:
 pixi run check
 ```
 
-They create a fresh disposable consumer with compact custom inputs and verify substitution, package/template boundaries, the thin presentation adapter, release locks, the licensed materialized-presentation boundary, and helper behavior.
+They create a fresh default consumer and verify that its locked environment installs, its starter site validates and builds, and its same-origin navigation serves without 404s.
+They also verify package/template boundaries, the thin presentation adapter, release locks, the licensed materialized-presentation boundary, and helper behavior.
 No generated consumer tree is stored or compared as a snapshot.
 
-The source checks stop at the rendered tree.
-To prove that a rendered tree still builds a website, run:
+To exercise a richer record and editorial fixture beyond the deployable default, run:
 
 ```console
 pixi run build-sample-site
 ```
 
-That renders `tests/sample-site/answers.yml` into ignored build state, overlays the compact record and editorial fixture beside it, and runs the rendered consumer's own `verify-build`: a website build and host-neutral local-preview verification.
+That renders `tests/sample-site/answers.yml` into ignored build state, overlays the richer record and editorial fixture, and runs the rendered consumer's own `verify-build`: a website build and host-neutral local-preview verification.
 Source CI runs it on Linux without a repository coordinate, so the job builds exactly what a contributor builds locally, and uploads the built site as a workflow artifact, so a template pull request can be inspected as a website rather than only as a rendered tree.
 
-The fixture is a test input, not a template default.
-The template deliberately materializes no record, and a rendered site without one cannot build.
-The fixture also supplies an editorial `explore.md`, because the upstream homepage links `/explore`; a site without that page fails local-preview verification on that dead link.
+The richer fixture is optional coverage, not required scaffolding for the default render.
+The default template carries a small replaceable starter graph and `/explore` page because the upstream homepage links that route.
 
 The engineering repository supplies the combined candidate exercise.
 When a template candidate is selected, it renders the template afresh and overlays only the downstream's declared site-owned inputs.

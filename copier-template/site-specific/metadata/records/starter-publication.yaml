@@ -1,0 +1,11 @@
+pid: xyzrins:publications/starter-publication
+schema_type: xyzri:XYZPublication
+title: Starter Publication
+display_label: Starter Publication
+description: Replace this example publication with reviewed site metadata.
+kind: bibo:Document
+attributed_to:
+  - object: xyzrins:persons/starter-person
+    roles:
+      - marcrel:aut
+    schema_type: dlthings:Attribution
