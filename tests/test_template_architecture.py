@@ -66,6 +66,14 @@ class TemplateArchitectureTests(unittest.TestCase):
         )
 
         self.assertNotIn("site", config)
+        self.assertEqual(
+            {
+                "records": "site-specific/metadata/records",
+                "editorial": "site-specific/content",
+                "extensions": "extensions",
+            },
+            config["paths"],
+        )
         self.assertEqual("Orinoco Lite Site", site["identity"]["title"])
         self.assertEqual(
             "A site built with Orinoco Lite.",
