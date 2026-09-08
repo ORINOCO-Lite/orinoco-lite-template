@@ -100,5 +100,5 @@ labels, silence, closure, or absence; approve; merge; or deploy. Require human
 review of the latest pushed head.
 
 Use `$manage-orinoco-content` for ordinary editorial and asset work. Use
-`$develop-orinoco-lite`, when available in the engineering workspace, for engine,
+`$develop-orinoco-lite`, when available in the engineering workspace, for package,
 schema, shared adapter-contract, or upstream-adoption changes.

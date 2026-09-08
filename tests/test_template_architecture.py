@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib.util
 import subprocess
 import sys
 import tempfile
@@ -163,7 +164,7 @@ class TemplateArchitectureTests(unittest.TestCase):
             any(path.startswith(".orinoco-lite/") for path in copier["_skip_if_exists"])
         )
 
-    def test_engine_runtime_is_the_only_presentation_pin_authority(self) -> None:
+    def test_package_is_the_only_presentation_pin_authority(self) -> None:
         config = yaml.safe_load(
             (self.rendered / "orinoco.yaml").read_text(encoding="utf-8")
         )
@@ -175,7 +176,7 @@ class TemplateArchitectureTests(unittest.TestCase):
         self.assertNotIn("website", lock)
         self.assertNotIn("presentation", lock)
         self.assertEqual(
-            {"engine", "lock_version", "runtime", "template", "workflow"},
+            {"package", "lock_version", "template", "workflow"},
             set(lock),
         )
         for configuration in (
@@ -187,6 +188,29 @@ class TemplateArchitectureTests(unittest.TestCase):
             text = (self.rendered / configuration).read_text(encoding="utf-8")
             self.assertNotIn("www-from-model", text)
             self.assertNotIn("congo", text.lower())
+
+    def test_package_coordinates_match_the_frozen_environment(self) -> None:
+        helper = self.rendered / ".orinoco-lite/tools/template_contract.py"
+        spec = importlib.util.spec_from_file_location("template_contract", helper)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        contract = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(contract)
+        package = yaml.safe_load(
+            (self.rendered / "orinoco.lock").read_text(encoding="utf-8")
+        )["package"]
+
+        self.assertEqual(
+            [], contract.pixi_package_pin_failures(self.rendered, package)
+        )
+        wrong_version = {**package, "version": "0.0.0"}
+        self.assertTrue(
+            contract.pixi_package_pin_failures(self.rendered, wrong_version)
+        )
+        wrong_digest = {**package, "sha256": "0" * 64}
+        self.assertTrue(
+            contract.pixi_package_pin_failures(self.rendered, wrong_digest)
+        )
 
     def test_no_generic_projection_or_record_is_materialized(self) -> None:
         site_specific = self.rendered / "site-specific"

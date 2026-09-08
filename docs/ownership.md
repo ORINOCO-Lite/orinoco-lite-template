@@ -3,7 +3,7 @@
 The Copier source owns the downstream scaffold, a small Orinoco presentation
 adapter, a bounded licensed materialized-presentation overlay, generic
 workflows and tools, documentation, and exact release coordinates. It does not
-own the reusable website. The engine runtime resolves the exact upstream
+own the reusable website. The released package resolves the exact upstream
 presentation and theme. Consumer acceptance tests are created once and remain
 site-owned.
 

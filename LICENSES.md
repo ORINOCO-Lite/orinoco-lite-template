@@ -11,7 +11,7 @@ A generated consumer inherits that license only for the original Orinoco Lite
 scaffold software and for files in its bounded
 `.orinoco-lite/materialized-presentation/` overlay. Maintainer repinning copies
 required assets there at upstream-relative paths and preserves applicable
-notices. The engine resolves the remainder of the German `www-from-model`
+notices. The package resolves the remainder of the German `www-from-model`
 website and its declared dependency closure at build time.
 
 Consumer owners must separately state the licenses for their records,

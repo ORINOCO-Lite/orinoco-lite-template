@@ -1,6 +1,6 @@
 ---
 name: maintain-orinoco-site
-description: Inspect, validate, and review an ordinary released Orinoco Lite downstream while preserving site-owned data and extensions. Use for immutable-release review, downstream recovery, or a deliberate release-adoption pull request. Do not use to release the engine or template, change external source systems, or invent an in-place template updater.
+description: Inspect, validate, and review an ordinary released Orinoco Lite downstream while preserving site-owned data and extensions. Use for immutable-release review, downstream recovery, or a deliberate release-adoption pull request. Do not use to release the package or template, change external source systems, or invent an in-place template updater.
 ---
 
 # Maintain an Orinoco site
@@ -14,7 +14,7 @@ source-adapter extensions.
 1. Read every applicable `AGENTS.md`, the site README,
    `.orinoco-lite/template-ownership.yml`, `.copier-answers.yml`, `orinoco.lock`,
    and the current Git diff.
-2. Use the ownership manifest to distinguish template-owned files, exact engine
+2. Use the ownership manifest to distinguish template-owned files, exact package
    and workflow pins, create-once site files, extensions, and consumer tests.
    Do not infer ownership from a path convention that the site has not adopted.
 3. Treat remote latest versions as advisory. Adopt only reviewed, immutable
@@ -22,15 +22,15 @@ source-adapter extensions.
 
 ## Adopt a reviewed release
 
-1. Start with a clean worktree and the exact reviewed engine and template
+1. Start with a clean worktree and the exact reviewed package and template
    release proposed for this downstream.
-2. Review the release's downstream pull request as one change. The engine,
-   runtime, template, and workflow coordinates must remain a coherent reviewed
+2. Review the release's downstream pull request as one change. The package,
+   template, and workflow coordinates must remain a coherent reviewed
    set; this scaffold intentionally provides no in-place updater.
 3. Confirm that declarative `site-specific/` inputs, `extensions/`, create-once
    acceptance tests, and repository policy change only when the pull request
    explicitly requires and explains that site-owned change.
-4. Put reusable defects in the engine or template. Keep site-specific behavior
+4. Put reusable defects in the package or template. Keep site-specific behavior
    in declared downstream inputs, supported overrides, or metadata-adapter
    extensions.
 
@@ -39,7 +39,7 @@ source-adapter extensions.
 - Run an extension's own focused test when its behavior changes, followed by
   `pixi run validate` and `pixi run build`.
 - Run the relevant browser acceptance for changed routes. For release adoption,
-  finish with `pixi run test-all` and review the rendered result.
+  finish with `pixi run verify-build` and review the rendered result.
 - When enabling hosted editing or changing the Pages hostname, follow
   `docs/custom-domain.md`: verify the custom domain in GitHub and Pages, update
   `site.base_url`, and confirm the deployed `/edit/` flow no longer shows the
