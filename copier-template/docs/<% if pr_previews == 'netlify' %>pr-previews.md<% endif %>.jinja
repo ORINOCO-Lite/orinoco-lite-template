@@ -24,11 +24,11 @@ cancels those builds and only builds pull requests.
 
 ## What a preview build does
 
-The build command installs Pixi with its upstream installer and runs
-`pixi run --frozen build`, this repository's ordinary root-relative build. A
-preview is therefore exactly the site that `pixi run build` and `pixi run serve`
-produce locally, from the same frozen lock, and needs no preview-specific
-tooling.
+The build command installs the same reviewed Pixi release the workflows use,
+with Pixi's upstream installer, and runs `pixi run --frozen build`, this
+repository's ordinary root-relative build. A preview is therefore exactly the
+site that `pixi run build` and `pixi run serve` produce locally, from the same
+frozen lock, and needs no preview-specific tooling.
 
 A preview is not the deployed site:
 
@@ -44,7 +44,7 @@ A preview is not the deployed site:
 A preview build runs the `netlify.toml` of the pull request it renders,
 including one opened from a fork. That build receives no repository secret and
 cannot publish the canonical site, but it does spend the Netlify account's build
-minutes, and it installs the current Pixi release rather than a reviewed pin.
+minutes, and a fork can change the Pixi release its own configuration installs.
 Review Netlify's build-minute and concurrency limits, and leave deploy previews
 disabled where untrusted contributors can open pull requests.
 
