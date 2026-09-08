@@ -32,8 +32,10 @@ fixture also supplies an editorial `explore.md`, because the upstream homepage
 links `/explore`; a site without that page fails local-preview verification on
 that dead link.
 
-The engineering repository supplies the authoritative combined proof. Its
-quick candidate validates, projects, builds, and runs Chromium against a fresh
-rendering. Its full candidate additionally checks deterministic and offline
-builds, WebKit, editor/review behavior, layout overrides, extension isolation,
-links, assets, and project paths.
+The engineering repository supplies the combined candidate exercise. When a
+template candidate is selected, it renders the template afresh and overlays
+only the downstream's declared site-owned inputs. Quick mode runs the rendered
+downstream's `validate` and `build` tasks. Full mode also runs
+`projection-verify`, `verify-hugo`, `verify-ownership`, and `verify-build`.
+Browser, source-adapter, offline-cache, and live GitHub behavior require their
+focused tests or acceptance exercises; neither candidate mode implies them.
