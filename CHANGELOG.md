@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Select Orinoco Lite `v0.3.0rc3` as one package containing the code and
+- Select Orinoco Lite `v0.3.0rc4` as one package containing the code and
   resources required by downstream tasks, with one version and wheel digest.
 - Remove the separate release coordinates and verification task from rendered
   downstreams; package, template, and workflow selections remain independent.
