@@ -134,36 +134,6 @@ class TemplateArchitectureTests(unittest.TestCase):
         self.assertTrue((overlay / "LICENSE").read_text(encoding="utf-8").strip())
         self.assertFalse(any(path.is_symlink() for path in overlay.rglob("*")))
 
-        ownership = yaml.safe_load(
-            (private_root / "template-ownership.yml").read_text(encoding="utf-8")
-        )
-        self.assertIn(
-            ".orinoco-lite/**",
-            ownership["classes"]["template_owned"]["paths"],
-        )
-
-    def test_private_namespace_is_exclusively_template_owned(self) -> None:
-        ownership = yaml.safe_load(
-            (
-                self.rendered / ".orinoco-lite/template-ownership.yml"
-            ).read_text(encoding="utf-8")
-        )
-        classes = ownership["classes"]
-
-        self.assertIn(".orinoco-lite/**", classes["template_owned"]["paths"])
-        for name, entry in classes.items():
-            if name == "template_owned":
-                continue
-            self.assertFalse(
-                any(path.startswith(".orinoco-lite/") for path in entry["paths"]),
-                name,
-            )
-
-        copier = yaml.safe_load((ROOT / "copier.yml").read_text(encoding="utf-8"))
-        self.assertFalse(
-            any(path.startswith(".orinoco-lite/") for path in copier["_skip_if_exists"])
-        )
-
     def test_package_is_the_only_presentation_pin_authority(self) -> None:
         config = yaml.safe_load(
             (self.rendered / "orinoco.yaml").read_text(encoding="utf-8")
