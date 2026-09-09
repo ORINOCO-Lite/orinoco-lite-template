@@ -243,5 +243,106 @@ class TemplateArchitectureTests(unittest.TestCase):
         self.assertFalse(destination.exists())
 
 
+class CopierUpdateTests(unittest.TestCase):
+    def test_update_does_not_restore_starters_or_sentinels(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="orinoco-template-update-") as temp:
+            rendered = Path(temp) / "consumer"
+            self.run_command(
+                [
+                    sys.executable,
+                    "tools/render_template.py",
+                    "--destination",
+                    rendered.as_posix(),
+                ],
+                ROOT,
+            )
+            self.run_command(["git", "init"], rendered)
+            self.run_command(
+                ["git", "config", "user.email", "template@example.invalid"],
+                rendered,
+            )
+            self.run_command(
+                ["git", "config", "user.name", "Template Test"], rendered
+            )
+            self.run_command(["git", "add", "."], rendered)
+            self.run_command(["git", "commit", "-m", "baseline"], rendered)
+
+            placeholders = (
+                "extensions/.gitkeep",
+                "site-specific/assets/.gitkeep",
+                "site-specific/content/.gitkeep",
+                "site-specific/metadata/records/site-root.yaml",
+                "site-specific/metadata/records/starter-person.yaml",
+                "site-specific/metadata/records/starter-project.yaml",
+                "site-specific/metadata/records/starter-publication.yaml",
+                "site-specific/overrides/config/.gitkeep",
+                "site-specific/overrides/layouts/.gitkeep",
+                "site-specific/overrides/static/.gitkeep",
+                "site-specific/static/.gitkeep",
+            )
+            for relative in placeholders:
+                (rendered / relative).unlink()
+
+            for relative in (
+                "extensions/site_adapter.py",
+                "site-specific/assets/logo.svg",
+                "site-specific/content/home.md",
+                "site-specific/metadata/records/site.yaml",
+                "site-specific/overrides/config/site.toml",
+                "site-specific/overrides/layouts/site.html",
+                "site-specific/overrides/static/site.js",
+                "site-specific/static/site.txt",
+            ):
+                path = rendered / relative
+                path.write_text("site-owned\n", encoding="utf-8")
+
+            self.run_command(["git", "add", "."], rendered)
+            self.run_command(
+                ["git", "commit", "-m", "remove starters"], rendered
+            )
+
+            self.run_command(
+                ["copier", "update", "--defaults", "--vcs-ref", ":current:"],
+                rendered,
+            )
+
+            for relative in placeholders:
+                self.assertFalse((rendered / relative).exists(), relative)
+
+    def test_copy_renders_selected_preview(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="orinoco-template-preview-") as temp:
+            temporary = Path(temp)
+            rendered = temporary / "consumer"
+            answers = temporary / "answers.yml"
+            answers.write_text("pr_previews: netlify\n", encoding="utf-8")
+            self.run_command(
+                [
+                    sys.executable,
+                    "tools/render_template.py",
+                    "--destination",
+                    rendered.as_posix(),
+                    "--data-file",
+                    answers.as_posix(),
+                ],
+                ROOT,
+            )
+            self.assertTrue((rendered / "netlify.toml").is_file())
+            self.assertTrue((rendered / "docs/pr-previews.md").is_file())
+
+    def run_command(self, command: list[str], cwd: Path) -> None:
+        result = subprocess.run(
+            command,
+            cwd=cwd,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        if result.returncode:
+            self.fail(
+                f"{' '.join(command)} failed with status {result.returncode}\n"
+                f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}"
+            )
+
+
 if __name__ == "__main__":
     unittest.main()

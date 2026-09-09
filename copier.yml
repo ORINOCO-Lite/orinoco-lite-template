@@ -12,6 +12,18 @@ _exclude:
   - "*.jinja"
   - __pycache__
   - .DS_Store
+  # Starter inputs and empty-directory sentinels belong only to a new site.
+  - "<% if _copier_operation == 'update' -%>extensions/.gitkeep<% endif %>"
+  - "<% if _copier_operation == 'update' -%>site-specific/assets/.gitkeep<% endif %>"
+  - "<% if _copier_operation == 'update' -%>site-specific/content/.gitkeep<% endif %>"
+  - "<% if _copier_operation == 'update' -%>site-specific/metadata/records/site-root.yaml<% endif %>"
+  - "<% if _copier_operation == 'update' -%>site-specific/metadata/records/starter-person.yaml<% endif %>"
+  - "<% if _copier_operation == 'update' -%>site-specific/metadata/records/starter-project.yaml<% endif %>"
+  - "<% if _copier_operation == 'update' -%>site-specific/metadata/records/starter-publication.yaml<% endif %>"
+  - "<% if _copier_operation == 'update' -%>site-specific/overrides/config/.gitkeep<% endif %>"
+  - "<% if _copier_operation == 'update' -%>site-specific/overrides/layouts/.gitkeep<% endif %>"
+  - "<% if _copier_operation == 'update' -%>site-specific/overrides/static/.gitkeep<% endif %>"
+  - "<% if _copier_operation == 'update' -%>site-specific/static/.gitkeep<% endif %>"
 _skip_if_exists:
   - orinoco.yaml
   - orinoco.lock
