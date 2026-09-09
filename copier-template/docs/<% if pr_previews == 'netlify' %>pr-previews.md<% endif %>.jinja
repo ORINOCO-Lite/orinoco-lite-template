@@ -17,8 +17,10 @@ this repository. Netlify reads `netlify.toml`, so leave the build command and
 publish directory empty in the import form.
 2. Keep the repository's default branch as the production branch. Netlify
 cancels those builds and only builds pull requests.
-3. Confirm that deploy previews are enabled for pull requests in
-**Site configuration → Build & deploy → Continuous deployment**.
+3. Deploy previews are enabled by default for connected repositories. To change
+that setting, use **Project configuration → Build & deploy → Continuous
+Deployment → Branches and deploy contexts**. Preview Server settings do not
+control deploy previews.
 4. Open a pull request and check the Netlify status on it. The preview URL is
 `https://deploy-preview-<number>--<netlify-site>.netlify.app/`.
 
