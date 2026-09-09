@@ -1,6 +1,13 @@
 # Changelog
 
-## Unreleased
+## 0.3.0rc3 - 2026-09-08
+
+- Select Orinoco Lite `0.3.0rc5`, which repins the upstream website and editor, restores projected relationships and publication years, and repairs static editing.
+- Provide upstream navigation with mobile labels, nested Outputs, and declarative footer links.
+- Reuse upstream cards and graphs for grouped people and editorial pages without downstream layout overrides.
+- Remove hardcoded German institutional branding from the homepage while retaining upstream graph support.
+
+## 0.3.0rc2 - 2026-09-08
 
 - Make a default Copier render deployable with a small replaceable starter record graph and `/explore` page, and exercise it through the locked package environment and local preview.
 - Select Orinoco Lite `v0.3.0rc4` as one package containing the code and resources required by downstream tasks, with one version and wheel digest.

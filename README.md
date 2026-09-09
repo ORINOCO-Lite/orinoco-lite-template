@@ -47,7 +47,7 @@ The build never requires Git Annex, so `--no-annex` is the correct mode and no G
 
 ```console
 uvx copier copy --trust \
-  --vcs-ref v0.3.0rc1 gh:ORINOCO-Lite/orinoco-lite-template .
+  --vcs-ref v0.3.0rc3 gh:ORINOCO-Lite/orinoco-lite-template .
 ```
 
 Pass `--vcs-ref` explicitly.
