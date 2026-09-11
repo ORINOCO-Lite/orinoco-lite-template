@@ -54,7 +54,7 @@ Pass `--vcs-ref` explicitly.
 Copier resolves a bare `gh:` source to the newest *stable* tag, so while this template publishes release candidates an unpinned copy silently instantiates the last 0.1 release instead.
 Use the newest tag from [releases](https://github.com/ORINOCO-Lite/orinoco-lite-template/tags), and record the instantiation with `datalad run` if the repository is a DataLad dataset.
 
-Copier asks for four site-identity answers; every release coordinate is supplied by the template and written to `orinoco.lock`:
+Copier asks for four site-identity answers; the template supplies the package dependency and downstream workflows:
 
 | Answer             | Meaning                                                         |
 | ------------------ | --------------------------------------------------------------- |
@@ -125,15 +125,13 @@ The first build resolves and caches the exact upstream presentation, so it needs
 Before proposing a change, run what CI runs:
 
 ```console
-pixi run verify-hugo
-pixi run verify-release-selection
 pixi run verify-build
 ```
 
 `verify-build` checks the locally built site before it is published.
 
-The `package` mapping in `orinoco.lock` selects one immutable Orinoco Lite package by version, wheel URL, and SHA-256.
-Template and workflow selections remain independent coordinates.
+Pixi installs the package dependency declared in `pixi.toml` and resolved in `pixi.lock`.
+Copier records the template selection in `.copier-answers.yml`; workflows contain their pinned action references.
 Resources and specifications required to build or operate Orinoco Lite are internal to that package and share its version and integrity boundary.
 
 ### 5. Publish

@@ -164,6 +164,14 @@ jobs:
           persist-credentials: false
           ref: ${{ steps.coordinates.outputs.head_sha }}
 
+      - name: Install the trusted locked Pixi environment
+        uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          cache: true
+          frozen: true
+          manifest-path: trusted/pixi.toml
+          pixi-version: v0.73.0
+
       - name: Classify the fixed handoff or canonical metadata head
         id: inspect
         env:
@@ -173,7 +181,7 @@ jobs:
           set -euo pipefail
           test "$(git -C trusted rev-parse HEAD)" = "$BASE_SHA"
           test "$(git -C proposal rev-parse HEAD)" = "$HEAD_SHA"
-          python trusted/.orinoco-lite/tools/shacl_vue_handoff.py \
+          pixi run --manifest-path trusted/pixi.toml shacl-handoff \
             inspect \
             --root "$GITHUB_WORKSPACE/proposal" \
             --base-sha "$BASE_SHA" \
@@ -277,15 +285,6 @@ jobs:
           gh api "repos/${REPOSITORY}/issues/${NUMBER}/comments" \
             --field body="$COMMENT_BODY" > /dev/null
 
-      - name: Install the trusted locked Pixi environment
-        if: steps.inspect.outputs.phase != 'irrelevant'
-        uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
-        with:
-          cache: true
-          frozen: true
-          manifest-path: trusted/pixi.toml
-          pixi-version: v0.73.0
-
       - name: Create an isolated exact-parent metadata checkout
         if: steps.inspect.outputs.phase == 'handoff'
         env:
@@ -304,14 +303,14 @@ jobs:
           SOURCE_COMMIT: ${{ steps.inspect.outputs.parent_sha }}
         run: |
           set -euo pipefail
-          python trusted/.orinoco-lite/tools/shacl_vue_handoff.py \
+          pixi run --manifest-path trusted/pixi.toml shacl-handoff \
             extract \
             --root "$GITHUB_WORKSPACE/proposal" \
             --head-sha "$HEAD_SHA" \
             --output "$RUNNER_TEMP/shacl-vue-review-bundle.json" \
             > "$RUNNER_TEMP/shacl-vue-extract.json"
           unset GH_TOKEN GITHUB_TOKEN
-          pixi run --manifest-path trusted/pixi.toml orinoco \
+          pixi run --manifest-path trusted/pixi.toml cli \
             --root "$GITHUB_WORKSPACE/source" editor apply \
             "$RUNNER_TEMP/shacl-vue-review-bundle.json" --write \
             > "$RUNNER_TEMP/shacl-vue-apply.json"
@@ -329,7 +328,7 @@ jobs:
           ):
               raise SystemExit("trusted editor did not materialize a metadata change")
           PY
-          python trusted/.orinoco-lite/tools/shacl_vue_handoff.py \
+          pixi run --manifest-path trusted/pixi.toml shacl-handoff \
             inspect-materialized \
             --root "$GITHUB_WORKSPACE/source" \
             --source-commit "$SOURCE_COMMIT" \
@@ -343,11 +342,11 @@ jobs:
           set -euo pipefail
           unset GH_TOKEN GITHUB_TOKEN
           test "$(git -C source rev-parse HEAD)" = "$SOURCE_COMMIT"
-          pixi run --manifest-path trusted/pixi.toml orinoco \
+          pixi run --manifest-path trusted/pixi.toml cli \
             --root "$GITHUB_WORKSPACE/source" projection update
-          pixi run --manifest-path trusted/pixi.toml orinoco \
+          pixi run --manifest-path trusted/pixi.toml cli \
             --root "$GITHUB_WORKSPACE/source" validate
-          python trusted/.orinoco-lite/tools/shacl_vue_handoff.py \
+          pixi run --manifest-path trusted/pixi.toml shacl-handoff \
             inspect-materialized \
             --root "$GITHUB_WORKSPACE/source" \
             --source-commit "$SOURCE_COMMIT" \
@@ -365,7 +364,7 @@ jobs:
           set -euo pipefail
           unset GH_TOKEN GITHUB_TOKEN
           git -C source add -A -- site-specific/metadata
-          python trusted/.orinoco-lite/tools/shacl_vue_handoff.py \
+          pixi run --manifest-path trusted/pixi.toml shacl-handoff \
             inspect-materialized \
             --root "$GITHUB_WORKSPACE/source" \
             --source-commit "$SOURCE_COMMIT" \
@@ -380,7 +379,7 @@ jobs:
             git -C source commit -m "feat(metadata): apply SHACL Vue edit"
           replacement="$(git -C source rev-parse HEAD)"
           [[ "$replacement" =~ ^[0-9a-f]{40}$ ]]
-          python trusted/.orinoco-lite/tools/shacl_vue_handoff.py \
+          pixi run --manifest-path trusted/pixi.toml shacl-handoff \
             verify-commit \
             --root "$GITHUB_WORKSPACE/source" \
             --source-commit "$SOURCE_COMMIT" \
@@ -472,7 +471,7 @@ jobs:
         run: |
           set -euo pipefail
           observed=""
-          for attempt in 1 2 3 4 5; do
+          for _attempt in 1 2 3 4 5; do
             observed="$(gh api "repos/${REPOSITORY}/pulls/${NUMBER}" \
               --jq '.head.sha')"
             if [[ "$observed" == "$REPLACEMENT_SHA" ]]; then
@@ -499,8 +498,8 @@ jobs:
           unset GH_TOKEN GITHUB_TOKEN
           test "$(git -C proposal rev-parse HEAD)" = "$HEAD_SHA"
           test -z "$(git -C proposal status --porcelain --untracked-files=no)"
-          pixi run --manifest-path trusted/pixi.toml orinoco \
+          pixi run --manifest-path trusted/pixi.toml cli \
             --root "$GITHUB_WORKSPACE/proposal" projection update
-          pixi run --manifest-path trusted/pixi.toml orinoco \
+          pixi run --manifest-path trusted/pixi.toml cli \
             --root "$GITHUB_WORKSPACE/proposal" validate
           test -z "$(git -C proposal status --porcelain --untracked-files=no)"

@@ -27,7 +27,6 @@ _exclude:
   - "<% if _copier_operation == 'update' -%>site-specific/static/.gitkeep<% endif %>"
 _skip_if_exists:
   - orinoco.yaml
-  - orinoco.lock
   - .github/workflows/curation-review.yml
   - site-specific/**
   - extensions/**
@@ -70,15 +69,6 @@ pr_previews:
     No pull-request previews: none
     Netlify deploy previews: netlify
 
-package_version:
-  type: str
-  help: Exact orinoco-lite Python distribution version
-  default: 0.3.0rc5
-  when: false
-  validator: >-
-    <% if not (package_version | regex_search('^[0-9]+\.[0-9]+\.[0-9]+([a-z0-9.-]+)?$')) %>
-    Use an exact release version such as 0.1.0.
-    <% endif %>
 
 package_url:
   type: str
@@ -98,46 +88,4 @@ package_sha256:
   validator: >-
     <% if not (package_sha256 | regex_search('^[0-9a-f]{64}$')) %>
     Supply exactly 64 lower-case hexadecimal characters.
-    <% endif %>
-
-template_source:
-  type: str
-  help: Versioned Copier template source
-  default: gh:ORINOCO-Lite/orinoco-lite-template
-  when: false
-
-template_version:
-  type: str
-  help: Exact Copier template release
-  default: v0.3.0rc3
-  when: false
-  validator: >-
-    <% if not (template_version | regex_search('^v[0-9]+\.[0-9]+\.[0-9]+([a-z0-9.-]+)?$')) %>
-    Use an exact release tag such as v0.1.0.
-    <% endif %>
-
-workflow_repository:
-  type: str
-  help: Repository that publishes the reviewed Orinoco release
-  default: ORINOCO-Lite/orinoco-lite-dev
-  when: false
-
-workflow_sha:
-  type: str
-  help: Full reviewed commit SHA associated with the release workflows
-  default: "41d349ed2680d89044596800e3af6b6f7e133b72"
-  when: false
-  validator: >-
-    <% if not (workflow_sha | regex_search('^[0-9a-f]{40}$')) %>
-    Supply exactly 40 lower-case hexadecimal characters.
-    <% endif %>
-
-workflow_ref:
-  type: str
-  help: Full immutable reusable-workflow reference, including path and commit SHA
-  default: ORINOCO-Lite/orinoco-lite-dev/.github/workflows/orinoco-consumer-ci.yml@41d349ed2680d89044596800e3af6b6f7e133b72
-  when: false
-  validator: >-
-    <% if not (workflow_ref | regex_search('^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/\.github/workflows/[A-Za-z0-9_.-]+\.ya?ml@[0-9a-f]{40}$')) %>
-    Use owner/repository/.github/workflows/name.yml@ followed by a full commit SHA.
     <% endif %>

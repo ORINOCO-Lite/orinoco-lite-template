@@ -9,7 +9,6 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / "copier-template/.github/workflows/shacl-vue-proposal.yml"
-HELPER = ROOT / "copier-template/.orinoco-lite/tools/shacl_vue_handoff.py"
 
 
 class ShaclVueWorkflowTests(unittest.TestCase):
@@ -67,13 +66,9 @@ class ShaclVueWorkflowTests(unittest.TestCase):
         self.assertIn('[[ "$EVENT_AUTHOR_MATCH" == "true" ]]', enforce)
         self.assertNotIn("IS_CURATION", enforce)
         self.assertNotIn('[[ "$PARENT_SHA" == "$BASE_SHA" ]]', enforce)
-        self.assertIn("shacl_vue_handoff.py", classify)
+        self.assertIn("pixi run --manifest-path trusted/pixi.toml shacl-handoff", classify)
         self.assertIn('--head-sha "$HEAD_SHA"', classify)
         self.assertIn('--base-sha "$BASE_SHA"', classify)
-        self.assertIn(
-            ".orinoco-lite/shacl-vue-review-bundle.json",
-            HELPER.read_text(encoding="utf-8"),
-        )
         authority = self.steps["Verify the attributed curator remains authorized"]
         boundary = self.steps["Enforce the authenticated exact-head handoff boundary"]
         self.assertEqual("steps.inspect.outputs.phase == 'handoff'", authority["if"])
@@ -152,16 +147,15 @@ class ShaclVueWorkflowTests(unittest.TestCase):
             "review-url",
         ):
             self.assertNotIn(obsolete, self.text)
-        helper = HELPER.read_text(encoding="utf-8")
+        helper = self.text
         self.assertNotIn("review-url", helper)
         self.assertNotIn("/edit/?", helper)
 
     def test_profile_and_helper_are_adapter_neutral(self) -> None:
-        combined = self.text + HELPER.read_text(encoding="utf-8")
+        combined = self.text
         self.assertNotIn("dump-research-info", combined)
         self.assertNotIn("source-adapters/zotero", combined)
         self.assertIn("site-specific", combined)
-        self.assertIn("curation-records", combined)
 
     def test_profile_never_executes_head_or_adds_adapter_decision_behavior(
         self,
