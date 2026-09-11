@@ -60,6 +60,7 @@ include_site_specific:
   type: bool
   help: Include starter site-specific inputs (disable to supply your own tree)
   default: true
+  when: false
 
 pr_previews:
   type: str
