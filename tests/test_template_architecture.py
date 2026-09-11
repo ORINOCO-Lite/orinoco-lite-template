@@ -329,11 +329,67 @@ class CopierUpdateTests(unittest.TestCase):
             self.assertTrue((rendered / "netlify.toml").is_file())
             self.assertTrue((rendered / "docs/pr-previews.md").is_file())
 
+    def test_site_specific_default_does_not_prompt(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="orinoco-template-hidden-option-") as temp:
+            rendered = Path(temp) / "consumer"
+            self.run_command(
+                [
+                    "copier", "copy", "--vcs-ref", "HEAD",
+                    "--data", "project_slug=test-site",
+                    "--data", "project_name=Test Site",
+                    "--data", "site_description=Test site",
+                    "--data", "site_base_url=https://example.invalid/",
+                    "--data", "pr_previews=none",
+                    str(ROOT), str(rendered),
+                ],
+                ROOT,
+            )
+            self.assertTrue((rendered / "site-specific/site.yaml").is_file())
+
+    def test_copy_can_omit_site_specific_with_netlify(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="orinoco-template-no-site-") as temp:
+            rendered = Path(temp) / "consumer"
+            self.run_command(
+                [
+                    "copier", "copy", "--defaults", "--vcs-ref", "HEAD",
+                    "--data", "include_site_specific=false",
+                    "--data", "pr_previews=netlify",
+                    str(ROOT), str(rendered),
+                ],
+                ROOT,
+            )
+            self.assertFalse((rendered / "site-specific").exists())
+            self.assertTrue((rendered / "netlify.toml").is_file())
+            self.assertTrue((rendered / "pixi.toml").is_file())
+            answers = yaml.safe_load(
+                (rendered / ".copier-answers.yml").read_text(encoding="utf-8")
+            )
+            self.assertIs(answers["include_site_specific"], False)
+
+            # Existing inputs must also survive a repeated copy with this option.
+            site = rendered / "site-specific"
+            site.mkdir()
+            owned = site / "site.yaml"
+            owned.write_text("site-owned\n", encoding="utf-8")
+            self.run_command(
+                [
+                    "copier", "copy", "--defaults", "--overwrite",
+                    "--vcs-ref", "HEAD",
+                    "--data", "include_site_specific=false",
+                    "--data", "pr_previews=netlify",
+                    str(ROOT), str(rendered),
+                ],
+                ROOT,
+            )
+            self.assertEqual(owned.read_text(encoding="utf-8"), "site-owned\n")
+            self.assertEqual(list(site.iterdir()), [owned])
+
     def run_command(self, command: list[str], cwd: Path) -> None:
         result = subprocess.run(
             command,
             cwd=cwd,
             text=True,
+            input="",
             capture_output=True,
             check=False,
         )
