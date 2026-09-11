@@ -6,7 +6,7 @@ platforms = [{ platform = "osx-arm64", macos = "14.0" }, "linux-64"]
 [dependencies]
 python = ">=3.12,<3.13"
 copier = "==9.10.3"
-hugo = "==0.161.1"
+hugo = "==0.154.5"
 pyyaml = "==6.0.2"
 
 [pypi-dependencies]
@@ -22,5 +22,5 @@ verify-build = { depends-on = ["verify-local-preview"] }
 build-pages = { depends-on = ["projection-update"], cmd = "python .orinoco-lite/tools/build_pages.py build/pages" }
 serve = "orinoco serve --directory build/site --port 8765"
 apply-editor-bundle = "orinoco editor apply"
-verify-hugo = "python .orinoco-lite/tools/verify_hugo.py --version 0.161.1 --extended"
+verify-hugo = "python .orinoco-lite/tools/verify_hugo.py --version 0.154.5 --extended"
 verify-release-selection = "python .orinoco-lite/tools/verify_template_ownership.py"
