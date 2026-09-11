@@ -12,6 +12,7 @@ _exclude:
   - "*.jinja"
   - __pycache__
   - .DS_Store
+  - "<% if not include_site_specific -%>site-specific<% endif %>"
   # Starter inputs and empty-directory sentinels belong only to a new site.
   - "<% if _copier_operation == 'update' -%>extensions/.gitkeep<% endif %>"
   - "<% if _copier_operation == 'update' -%>site-specific/assets/.gitkeep<% endif %>"
@@ -54,6 +55,11 @@ site_base_url:
   type: str
   help: Canonical public base URL, including any project path and trailing slash
   default: https://example.invalid/[[ project_slug ]]/
+
+include_site_specific:
+  type: bool
+  help: Include starter site-specific inputs (disable to supply your own tree)
+  default: true
 
 pr_previews:
   type: str

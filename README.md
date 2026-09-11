@@ -65,6 +65,10 @@ Copier asks for four site-identity answers; every release coordinate is supplied
 
 Answers can also be supplied non-interactively with repeated `--data key=value` options plus `--defaults`, or from a file with `--data-file answers.yml`.
 
+When supplying an existing site-specific tree, pass `--data include_site_specific=false` to omit the entire `site-specific/` directory, including starter content and empty directories.
+The default is `true`.
+This option can be combined with `--data pr_previews=netlify`; supply your own `site-specific/` tree before building.
+
 ### 3. Review the starter site and supply site-owned inputs
 
 Everything a site owns is declarative and lives in two trees:
