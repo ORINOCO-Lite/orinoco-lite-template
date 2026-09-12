@@ -460,11 +460,12 @@ jobs:
             "https://github.com/${REPOSITORY}.git" \
             "${REPLACEMENT_SHA}:refs/heads/${HEAD_REF}"
 
-      - name: Retrigger trusted validation at the replacement head
+      - name: Retrigger trusted and downstream validation at the replacement head
         if: steps.inspect.outputs.phase == 'handoff'
         env:
           DEFAULT_BRANCH: ${{ steps.coordinates.outputs.default_branch }}
           GH_TOKEN: ${{ github.token }}
+          HEAD_REF: ${{ steps.coordinates.outputs.head_ref }}
           NUMBER: ${{ steps.coordinates.outputs.number }}
           REPLACEMENT_SHA: ${{ steps.materialized.outputs.sha }}
           REPOSITORY: ${{ github.repository }}
@@ -485,6 +486,9 @@ jobs:
             --ref "$DEFAULT_BRANCH" \
             -f "pull_request=${NUMBER}" \
             -f "expected_head=${REPLACEMENT_SHA}"
+          gh workflow run validate.yml \
+            --repo "$REPOSITORY" \
+            --ref "$HEAD_REF"
 
       - name: Validate the exact canonical joined metadata graph
         if: steps.inspect.outputs.phase == 'canonical'

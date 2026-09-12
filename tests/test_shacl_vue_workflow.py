@@ -118,9 +118,9 @@ class ShaclVueWorkflowTests(unittest.TestCase):
 
     def test_replacement_is_one_exact_lease_then_retriggers_validation(self) -> None:
         push = self.steps["Replace only the exact handoff head with a lease"]["run"]
-        retrigger = self.steps["Retrigger trusted validation at the replacement head"][
-            "run"
-        ]
+        retrigger = self.steps[
+            "Retrigger trusted and downstream validation at the replacement head"
+        ]["run"]
         self.assertIn('pull.get("head", {}).get("sha")', push)
         self.assertIn('permission.get("permission") not in {"write", "admin"}', push)
         self.assertIn(
@@ -131,6 +131,8 @@ class ShaclVueWorkflowTests(unittest.TestCase):
         self.assertIn('test "$observed" = "$REPLACEMENT_SHA"', retrigger)
         self.assertIn("gh workflow run shacl-vue-proposal.yml", retrigger)
         self.assertIn('-f "expected_head=${REPLACEMENT_SHA}"', retrigger)
+        self.assertIn("gh workflow run validate.yml", retrigger)
+        self.assertIn('--ref "$HEAD_REF"', retrigger)
 
     def test_canonical_validation_is_exact_and_does_not_rehost_the_editor(
         self,
