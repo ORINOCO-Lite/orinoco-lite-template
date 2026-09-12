@@ -142,53 +142,36 @@ class TemplateArchitectureTests(unittest.TestCase):
         self.assertTrue((overlay / "LICENSE").read_text(encoding="utf-8").strip())
         self.assertFalse(any(path.is_symlink() for path in overlay.rglob("*")))
 
+    def test_downstream_jobs_run_pixi_tasks_directly(self) -> None:
+        for name in ("pages.yml", "validate.yml"):
+            workflow = yaml.load(
+                (self.rendered / ".github/workflows" / name).read_text(),
+                Loader=yaml.BaseLoader,
+            )
+            for job in workflow["jobs"].values():
+                self.assertNotIn("uses", job)
+            scripts = "\n".join(
+                step.get("run", "")
+                for job in workflow["jobs"].values()
+                for step in job["steps"]
+            )
+            self.assertIn("pixi run validate", scripts)
+            self.assertNotIn(".orinoco-lite/tools", scripts)
+
     def test_package_is_the_only_presentation_pin_authority(self) -> None:
         config = yaml.safe_load(
             (self.rendered / "orinoco.yaml").read_text(encoding="utf-8")
         )
-        lock = yaml.safe_load(
-            (self.rendered / "orinoco.lock").read_text(encoding="utf-8")
-        )
-
         self.assertNotIn("framework", config["paths"])
-        self.assertNotIn("website", lock)
-        self.assertNotIn("presentation", lock)
-        self.assertEqual(
-            {"package", "lock_version", "template", "workflow"},
-            set(lock),
-        )
+        self.assertFalse((self.rendered / "orinoco.lock").exists())
         for configuration in (
             "orinoco.yaml",
-            "orinoco.lock",
             "pixi.toml",
             ".copier-answers.yml",
         ):
             text = (self.rendered / configuration).read_text(encoding="utf-8")
             self.assertNotIn("www-from-model", text)
             self.assertNotIn("congo", text.lower())
-
-    def test_package_coordinates_match_the_frozen_environment(self) -> None:
-        helper = self.rendered / ".orinoco-lite/tools/template_contract.py"
-        spec = importlib.util.spec_from_file_location("template_contract", helper)
-        self.assertIsNotNone(spec)
-        self.assertIsNotNone(spec.loader)
-        contract = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(contract)
-        package = yaml.safe_load(
-            (self.rendered / "orinoco.lock").read_text(encoding="utf-8")
-        )["package"]
-
-        self.assertEqual(
-            [], contract.pixi_package_pin_failures(self.rendered, package)
-        )
-        wrong_version = {**package, "version": "0.0.0"}
-        self.assertTrue(
-            contract.pixi_package_pin_failures(self.rendered, wrong_version)
-        )
-        wrong_digest = {**package, "sha256": "0" * 64}
-        self.assertTrue(
-            contract.pixi_package_pin_failures(self.rendered, wrong_digest)
-        )
 
     def test_generic_starter_site_is_materialized(self) -> None:
         site_specific = self.rendered / "site-specific"
