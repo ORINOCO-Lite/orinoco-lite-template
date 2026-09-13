@@ -1,10 +1,10 @@
 # Orinoco Lite downstream template
 
 This repository publishes a thin Copier scaffold for Orinoco Lite downstreams.
-It supplies repository structure, workflows, helper tools, exact release coordinates, a small Orinoco presentation adapter, and a bounded licensed overlay for required presentation assets.
+It supplies repository structure, workflows, helper tools, a small Orinoco presentation adapter, and a bounded licensed overlay for required presentation assets.
 It does not distribute the reusable website.
 
-The released `orinoco-lite` package is the single authority for the exact German [`www-from-model`](https://hub.psychoinformatics.de/www/www-from-model) revision and official Congo dependency.
+The selected `orinoco-lite` package revision is the single authority for the exact German [`www-from-model`](https://hub.psychoinformatics.de/www/www-from-model) revision and official Congo dependency.
 At build time the package resolves those sources and composes them with:
 
 ```text
@@ -54,7 +54,8 @@ Pass `--vcs-ref` explicitly.
 Copier resolves a bare `gh:` source to the newest *stable* tag, so while this template publishes release candidates an unpinned copy silently instantiates the last 0.1 release instead.
 Use the newest tag from [releases](https://github.com/ORINOCO-Lite/orinoco-lite-template/tags), and record the instantiation with `datalad run` if the repository is a DataLad dataset.
 
-Copier asks for four site-identity answers; every release coordinate is supplied by the template and written to `orinoco.lock`:
+Copier asks for site identity and the package source. The package may come from
+the official repository or a fork, at a release tag or exact commit:
 
 | Answer             | Meaning                                                         |
 | ------------------ | --------------------------------------------------------------- |
@@ -62,6 +63,8 @@ Copier asks for four site-identity answers; every release coordinate is supplied
 | `project_name`     | human-readable site title                                       |
 | `site_description` | short public description                                        |
 | `site_base_url`    | canonical public base URL, with project path and trailing slash |
+| `package_repository` | Git repository containing `packages/orinoco-lite`             |
+| `package_revision` | release tag or exact package commit                              |
 
 Answers can also be supplied non-interactively with repeated `--data key=value` options plus `--defaults`, or from a file with `--data-file answers.yml`.
 
@@ -125,15 +128,15 @@ The first build resolves and caches the exact upstream presentation, so it needs
 Before proposing a change, run what CI runs:
 
 ```console
-pixi run verify-hugo
-pixi run verify-release-selection
 pixi run verify-build
 ```
 
 `verify-build` checks the locally built site before it is published.
 
-The `package` mapping in `orinoco.lock` selects one immutable Orinoco Lite package by version, wheel URL, and SHA-256.
-Template and workflow selections remain independent coordinates.
+Pixi installs the downstream-selected package dependency declared in
+`pixi.toml`. A downstream may retain the generated `pixi.lock` for the complete
+resolved environment; no Orinoco-specific release lock is required.
+Copier records the template selection in `.copier-answers.yml`; workflows contain their pinned action references.
 Resources and specifications required to build or operate Orinoco Lite are internal to that package and share its version and integrity boundary.
 
 ### 5. Publish

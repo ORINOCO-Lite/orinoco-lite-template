@@ -28,6 +28,16 @@ class DefaultRenderTests(unittest.TestCase):
             self.assertTrue(
                 (rendered / "site-specific/content/explore.md").is_file()
             )
+            self.run_command(["git", "init"], rendered)
+            self.run_command(
+                ["git", "config", "user.email", "template@example.invalid"],
+                rendered,
+            )
+            self.run_command(
+                ["git", "config", "user.name", "Template Test"], rendered
+            )
+            self.run_command(["git", "add", "."], rendered)
+            self.run_command(["git", "commit", "-m", "initial render"], rendered)
             self.run_command(["pixi", "run", "--frozen", "validate"], rendered)
             self.run_command(["pixi", "run", "--frozen", "build"], rendered)
             self.run_command(
