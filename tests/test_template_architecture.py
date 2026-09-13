@@ -170,6 +170,8 @@ class TemplateArchitectureTests(unittest.TestCase):
         self.assertIn('git = "https://github.com/ORINOCO-Lite/orinoco-lite-dev.git"', manifest)
         self.assertIn('rev = "300eff672931cddd1895edc163ffa43059a6bb9f"', manifest)
         self.assertIn('subdirectory = "packages/orinoco-lite"', manifest)
+        self.assertIn('orinoco-lite = "orinoco-lite"', manifest)
+        self.assertNotIn('cli = "orinoco-lite"', manifest)
         for configuration in (
             "orinoco.yaml",
             "pixi.toml",
