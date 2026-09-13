@@ -61,9 +61,11 @@ class TemplateArchitectureTests(unittest.TestCase):
                 encoding="utf-8"
             )
         )
-        answers = yaml.safe_load(
-            (self.rendered / ".copier-answers.yml").read_text(encoding="utf-8")
+        answers_text = (self.rendered / ".copier-answers.yml").read_text(
+            encoding="utf-8"
         )
+        self.assertFalse(answers_text.endswith("\n\n"))
+        answers = yaml.safe_load(answers_text)
 
         self.assertNotIn("site", config)
         self.assertEqual(
