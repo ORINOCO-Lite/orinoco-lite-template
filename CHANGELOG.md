@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Let each downstream select an Orinoco Lite release or exact Git commit from
+  the official repository or a fork through its ordinary Pixi dependency.
+  Remove the separate Orinoco release lock.
+
 ## 0.3.0rc3 - 2026-09-08
 
 - Select Orinoco Lite `0.3.0rc5`, which repins the upstream website and editor, restores projected relationships and publication years, and repairs static editing.

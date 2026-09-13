@@ -164,6 +164,10 @@ class TemplateArchitectureTests(unittest.TestCase):
         )
         self.assertNotIn("framework", config["paths"])
         self.assertFalse((self.rendered / "orinoco.lock").exists())
+        manifest = (self.rendered / "pixi.toml").read_text(encoding="utf-8")
+        self.assertIn('git = "https://github.com/ORINOCO-Lite/orinoco-lite-dev.git"', manifest)
+        self.assertIn('rev = "300eff672931cddd1895edc163ffa43059a6bb9f"', manifest)
+        self.assertIn('subdirectory = "packages/orinoco-lite"', manifest)
         for configuration in (
             "orinoco.yaml",
             "pixi.toml",
@@ -323,6 +327,8 @@ class CopierUpdateTests(unittest.TestCase):
                     "--data", "site_description=Test site",
                     "--data", "site_base_url=https://example.invalid/",
                     "--data", "pr_previews=none",
+                    "--data", "package_repository=https://github.com/ORINOCO-Lite/orinoco-lite-dev.git",
+                    "--data", "package_revision=300eff672931cddd1895edc163ffa43059a6bb9f",
                     str(ROOT), str(rendered),
                 ],
                 ROOT,

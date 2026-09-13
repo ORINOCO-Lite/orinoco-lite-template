@@ -70,22 +70,16 @@ pr_previews:
     Netlify deploy previews: netlify
 
 
-package_url:
+package_repository:
   type: str
-  help: Immutable orinoco-lite wheel release URL
-  default: https://github.com/ORINOCO-Lite/orinoco-lite-dev/releases/download/v0.3.0rc5/orinoco_lite-0.3.0rc5-py3-none-any.whl
-  when: false
-  validator: >-
-    <% if '#' in package_url %>
-    Supply the wheel URL without a fragment; the template adds the reviewed SHA-256 fragment.
-    <% endif %>
+  help: Git repository containing packages/orinoco-lite
+  default: https://github.com/ORINOCO-Lite/orinoco-lite-dev.git
 
-package_sha256:
+package_revision:
   type: str
-  help: SHA-256 digest of the immutable orinoco-lite wheel
-  default: "55f67bd3dcc1e5d1f94d40436721913d52eb22ab918cb5c36a528db6853d3b0e"
-  when: false
+  help: Release tag or exact Git commit to install
+  default: "300eff672931cddd1895edc163ffa43059a6bb9f"
   validator: >-
-    <% if not (package_sha256 | regex_search('^[0-9a-f]{64}$')) %>
-    Supply exactly 64 lower-case hexadecimal characters.
+    <% if not package_revision %>
+    Supply a release tag or exact Git commit.
     <% endif %>

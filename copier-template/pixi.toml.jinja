@@ -10,7 +10,7 @@ hugo = "==0.161.1"
 pyyaml = "==6.0.2"
 
 [pypi-dependencies]
-orinoco-lite = { url = "[[ package_url ]]#sha256=[[ package_sha256 ]]" }
+orinoco-lite = { git = "[[ package_repository ]]", rev = "[[ package_revision ]]", subdirectory = "packages/orinoco-lite" }
 datalad = ">=1.6.2,<2"
 
 [tasks]
