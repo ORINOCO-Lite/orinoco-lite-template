@@ -22,7 +22,7 @@ verify-build = { depends-on = ["verify-local-preview"] }
 build-pages = { depends-on = ["projection-update"], cmd = "orinoco-lite build --destination build/pages" }
 serve = "orinoco-lite serve --directory build/site --port 8765"
 apply-editor-bundle = "orinoco-lite editor apply"
-cli = "orinoco-lite"
+orinoco-lite = "orinoco-lite"
 shacl-handoff = "orinoco-lite shacl-handoff"
 prepare-publication = "orinoco-lite publication prepare"
 record-publication = "orinoco-lite publication publish"

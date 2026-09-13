@@ -66,7 +66,11 @@ class ShaclVueWorkflowTests(unittest.TestCase):
         self.assertIn('[[ "$EVENT_AUTHOR_MATCH" == "true" ]]', enforce)
         self.assertNotIn("IS_CURATION", enforce)
         self.assertNotIn('[[ "$PARENT_SHA" == "$BASE_SHA" ]]', enforce)
-        self.assertIn("pixi run --manifest-path trusted/pixi.toml shacl-handoff", classify)
+        self.assertEqual("trusted", self.steps[
+            "Classify the fixed handoff or canonical metadata head"
+        ]["working-directory"])
+        self.assertIn("pixi run shacl-handoff", classify)
+        self.assertNotIn("--manifest-path", classify)
         self.assertIn('--head-sha "$HEAD_SHA"', classify)
         self.assertIn('--base-sha "$BASE_SHA"', classify)
         authority = self.steps["Verify the attributed curator remains authorized"]
@@ -95,7 +99,15 @@ class ShaclVueWorkflowTests(unittest.TestCase):
         commit = self.steps["Create the equivalent attributed human metadata commit"][
             "run"
         ]
-        self.assertIn("trusted/pixi.toml", apply)
+        for name in (
+            "Extract and apply the unchanged version 2 bundle",
+            "Validate the materialized joined graph",
+            "Create the equivalent attributed human metadata commit",
+            "Validate the exact canonical joined metadata graph",
+        ):
+            self.assertEqual("trusted", self.steps[name]["working-directory"])
+            self.assertNotIn("--manifest-path", self.steps[name]["run"])
+        self.assertIn("pixi run orinoco-lite", apply)
         self.assertIn("editor apply", apply)
         self.assertIn('"$RUNNER_TEMP/shacl-vue-review-bundle.json" --write', apply)
         self.assertIn("unset GH_TOKEN GITHUB_TOKEN", apply)
@@ -105,7 +117,10 @@ class ShaclVueWorkflowTests(unittest.TestCase):
         self.assertIn('GIT_COMMITTER_NAME="github-actions[bot]"', commit)
         self.assertIn('--source-commit "$SOURCE_COMMIT"', commit)
         self.assertIn("verify-commit", commit)
-        self.assertIn("git -C source add -A -- site-specific/metadata", commit)
+        self.assertIn(
+            'git -C "$GITHUB_WORKSPACE/source" add -A -- site-specific/metadata',
+            commit,
+        )
         self.assertNotIn(
             "site-specific/metadata/records site-specific/metadata/overlays/annotations",
             commit,
@@ -135,7 +150,9 @@ class ShaclVueWorkflowTests(unittest.TestCase):
         validate = self.steps["Validate the exact canonical joined metadata graph"][
             "run"
         ]
-        self.assertIn("git -C proposal rev-parse HEAD)", validate)
+        self.assertIn(
+            'git -C "$GITHUB_WORKSPACE/proposal" rev-parse HEAD)', validate
+        )
         self.assertIn('--root "$GITHUB_WORKSPACE/proposal" projection update', validate)
         self.assertIn('--root "$GITHUB_WORKSPACE/proposal" validate', validate)
         self.assertEqual({"validate"}, set(self.contract["jobs"]))

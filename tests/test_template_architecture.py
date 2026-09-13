@@ -170,6 +170,8 @@ class TemplateArchitectureTests(unittest.TestCase):
         self.assertIn('git = "https://github.com/ORINOCO-Lite/orinoco-lite-dev.git"', manifest)
         self.assertIn('rev = "300eff672931cddd1895edc163ffa43059a6bb9f"', manifest)
         self.assertIn('subdirectory = "packages/orinoco-lite"', manifest)
+        self.assertIn('orinoco-lite = "orinoco-lite"', manifest)
+        self.assertNotIn('cli = "orinoco-lite"', manifest)
         for configuration in (
             "orinoco.yaml",
             "pixi.toml",
@@ -336,6 +338,10 @@ class CopierUpdateTests(unittest.TestCase):
                 ROOT,
             )
             self.assertTrue((rendered / "site-specific/site.yaml").is_file())
+            answers = yaml.safe_load(
+                (rendered / ".copier-answers.yml").read_text(encoding="utf-8")
+            )
+            self.assertRegex(answers["_commit"], r"^[0-9a-f]{40}$")
 
     def test_copy_can_omit_site_specific_with_netlify(self) -> None:
         with tempfile.TemporaryDirectory(prefix="orinoco-template-no-site-") as temp:
