@@ -338,6 +338,10 @@ class CopierUpdateTests(unittest.TestCase):
                 ROOT,
             )
             self.assertTrue((rendered / "site-specific/site.yaml").is_file())
+            answers = yaml.safe_load(
+                (rendered / ".copier-answers.yml").read_text(encoding="utf-8")
+            )
+            self.assertRegex(answers["_commit"], r"^[0-9a-f]{40}$")
 
     def test_copy_can_omit_site_specific_with_netlify(self) -> None:
         with tempfile.TemporaryDirectory(prefix="orinoco-template-no-site-") as temp:
