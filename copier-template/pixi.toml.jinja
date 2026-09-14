@@ -10,19 +10,10 @@ hugo = "==0.154.5"
 pyyaml = "==6.0.2"
 
 [pypi-dependencies]
-orinoco-lite = { git = "[[ package_repository ]]", rev = "[[ package_revision ]]", subdirectory = "packages/orinoco-lite" }
+orinoco-lite = { git = "[[ package_repository ]]", rev = "[[ package_revision ]]" }
 datalad = ">=1.6.2,<2"
 
 [tasks]
-projection-update = "mkdir -p generated && orinoco-lite projection update"
-validate = { depends-on = ["projection-update"], cmd = "orinoco-lite validate" }
-build = { depends-on = ["projection-update"], cmd = "orinoco-lite build --destination build/site --base-url /" }
-verify-local-preview = { depends-on = ["build"], cmd = "orinoco-lite verify-site build/site" }
-verify-build = { depends-on = ["verify-local-preview"] }
-build-pages = { depends-on = ["projection-update"], cmd = "orinoco-lite build --destination build/pages" }
+build = "orinoco-lite build --destination build/site --base-url /"
+build-pages = "orinoco-lite build --destination build/pages"
 serve = "orinoco-lite serve --directory build/site --port 8765"
-apply-editor-bundle = "orinoco-lite editor apply"
-orinoco-lite = "orinoco-lite"
-shacl-handoff = "orinoco-lite shacl-handoff"
-prepare-publication = "orinoco-lite publication prepare"
-record-publication = "orinoco-lite publication publish"

@@ -31,8 +31,8 @@ jobs:
           cache: true
           frozen: true
           pixi-version: v0.73.0
-      - name: Check source and default deployable render
-        run: pixi run check
+      - name: Check source
+        run: pixi run pytest
 
   sample-site:
     name: Sample site build (Linux x86-64)
@@ -46,16 +46,7 @@ jobs:
           cache: true
           frozen: true
           pixi-version: v0.73.0
-      - name: Render the sample site and verify its build
-        # `orinoco-lite build` defaults its trusted repository coordinate to
-        # GITHUB_REPOSITORY. Unset it so the sample carries no curation identity
-        # and the job builds exactly what a contributor builds locally.
+      - name: Test a complete downstream build
         run: |
           unset GITHUB_REPOSITORY
-          pixi run build-sample-site
-      - name: Upload the built sample site
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
-        with:
-          name: sample-site-${{ github.sha }}
-          path: build/sample-site/build/site
-          retention-days: 14
+          pixi run pytest -m integration

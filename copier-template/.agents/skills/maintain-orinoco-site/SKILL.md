@@ -26,9 +26,9 @@ Keep released scaffold maintenance separate from the site's data, policy, presen
 
 ## Validate and hand off
 
-- Run an extension's own focused test when its behavior changes, followed by `pixi run validate` and `pixi run build`.
+- Run an extension's own focused test when its behavior changes, followed by `pixi run orinoco-lite validate` and `pixi run build`.
 - Run the relevant browser acceptance for changed routes.
-  For release adoption, finish with `pixi run verify-build` and review the rendered result.
+  For release adoption, finish with `pixi run build && pixi run orinoco-lite verify-site build/site` and review the rendered result.
 - When enabling hosted editing or changing the Pages hostname, follow `docs/custom-domain.md`: verify the custom domain in GitHub and Pages, update `site.base_url`, and confirm the deployed `/edit/` flow no longer shows the shared-`github.io` warning.
   **Download bundle** remains available either way.
 - Review locks, site-owned files, conflicts, and the final diff before using the downstream's normal pull-request, merge, and deployment policy.
