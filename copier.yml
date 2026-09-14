@@ -74,11 +74,13 @@ package_repository:
   type: str
   help: Git repository containing packages/orinoco-lite
   default: https://github.com/ORINOCO-Lite/orinoco-lite-dev.git
+  when: false
 
 package_revision:
   type: str
   help: Release tag or exact Git commit to install
   default: "7c0af0ccc92548ecfbd7849ea5a123949a8522c8"
+  when: false
   validator: >-
     <% if not package_revision %>
     Supply a release tag or exact Git commit.
