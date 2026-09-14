@@ -15,11 +15,12 @@ datalad = ">=1.6.2,<2"
 
 [tasks]
 projection-update = "mkdir -p generated && orinoco-lite projection update"
+prepare-package-resources = "if [ -e .orinoco-lite/dev ]; then python -m orinoco_lite.prepare_resources; fi"
 validate = { depends-on = ["projection-update"], cmd = "orinoco-lite validate" }
-build = { depends-on = ["projection-update"], cmd = "orinoco-lite build --destination build/site --base-url /" }
+build = { depends-on = ["projection-update", "prepare-package-resources"], cmd = "orinoco-lite build --destination build/site --base-url /" }
 verify-local-preview = { depends-on = ["build"], cmd = "orinoco-lite verify-site build/site" }
 verify-build = { depends-on = ["verify-local-preview"] }
-build-pages = { depends-on = ["projection-update"], cmd = "orinoco-lite build --destination build/pages" }
+build-pages = { depends-on = ["projection-update", "prepare-package-resources"], cmd = "orinoco-lite build --destination build/pages" }
 serve = "orinoco-lite serve --directory build/site --port 8765"
 apply-editor-bundle = "orinoco-lite editor apply"
 cli = "orinoco-lite"
