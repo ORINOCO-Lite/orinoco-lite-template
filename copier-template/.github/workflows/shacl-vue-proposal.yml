@@ -182,7 +182,7 @@ jobs:
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$BASE_SHA"
           test "$(git -C "$GITHUB_WORKSPACE/proposal" rev-parse HEAD)" = "$HEAD_SHA"
-          pixi run shacl-handoff \
+          pixi run orinoco-lite shacl-handoff \
             inspect \
             --root "$GITHUB_WORKSPACE/proposal" \
             --base-sha "$BASE_SHA" \
@@ -305,7 +305,7 @@ jobs:
         working-directory: trusted
         run: |
           set -euo pipefail
-          pixi run shacl-handoff \
+          pixi run orinoco-lite shacl-handoff \
             extract \
             --root "$GITHUB_WORKSPACE/proposal" \
             --head-sha "$HEAD_SHA" \
@@ -330,7 +330,7 @@ jobs:
           ):
               raise SystemExit("trusted editor did not materialize a metadata change")
           PY
-          pixi run shacl-handoff \
+          pixi run orinoco-lite shacl-handoff \
             inspect-materialized \
             --root "$GITHUB_WORKSPACE/source" \
             --source-commit "$SOURCE_COMMIT" \
@@ -349,7 +349,7 @@ jobs:
             --root "$GITHUB_WORKSPACE/source" projection update
           pixi run orinoco-lite \
             --root "$GITHUB_WORKSPACE/source" validate
-          pixi run shacl-handoff \
+          pixi run orinoco-lite shacl-handoff \
             inspect-materialized \
             --root "$GITHUB_WORKSPACE/source" \
             --source-commit "$SOURCE_COMMIT" \
@@ -368,7 +368,7 @@ jobs:
           set -euo pipefail
           unset GH_TOKEN GITHUB_TOKEN
           git -C "$GITHUB_WORKSPACE/source" add -A -- site-specific/metadata
-          pixi run shacl-handoff \
+          pixi run orinoco-lite shacl-handoff \
             inspect-materialized \
             --root "$GITHUB_WORKSPACE/source" \
             --source-commit "$SOURCE_COMMIT" \
@@ -383,7 +383,7 @@ jobs:
             git -C "$GITHUB_WORKSPACE/source" commit -m "feat(metadata): apply SHACL Vue edit"
           replacement="$(git -C "$GITHUB_WORKSPACE/source" rev-parse HEAD)"
           [[ "$replacement" =~ ^[0-9a-f]{40}$ ]]
-          pixi run shacl-handoff \
+          pixi run orinoco-lite shacl-handoff \
             verify-commit \
             --root "$GITHUB_WORKSPACE/source" \
             --source-commit "$SOURCE_COMMIT" \

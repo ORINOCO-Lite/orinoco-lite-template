@@ -69,7 +69,7 @@ class ShaclVueWorkflowTests(unittest.TestCase):
         self.assertEqual("trusted", self.steps[
             "Classify the fixed handoff or canonical metadata head"
         ]["working-directory"])
-        self.assertIn("pixi run shacl-handoff", classify)
+        self.assertIn("pixi run orinoco-lite shacl-handoff", classify)
         self.assertNotIn("--manifest-path", classify)
         self.assertIn('--head-sha "$HEAD_SHA"', classify)
         self.assertIn('--base-sha "$BASE_SHA"', classify)

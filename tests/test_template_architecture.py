@@ -157,7 +157,7 @@ class TemplateArchitectureTests(unittest.TestCase):
                 for job in workflow["jobs"].values()
                 for step in job["steps"]
             )
-            self.assertIn("pixi run validate", scripts)
+            self.assertIn("orinoco-lite", scripts)
             self.assertNotIn(".orinoco-lite/tools", scripts)
 
     def test_package_is_the_only_presentation_pin_authority(self) -> None:
@@ -168,9 +168,7 @@ class TemplateArchitectureTests(unittest.TestCase):
         self.assertFalse((self.rendered / "orinoco.lock").exists())
         manifest = (self.rendered / "pixi.toml").read_text(encoding="utf-8")
         self.assertIn('git = "https://github.com/ORINOCO-Lite/orinoco-lite-dev.git"', manifest)
-        self.assertIn('rev = "7c0af0ccc92548ecfbd7849ea5a123949a8522c8"', manifest)
-        self.assertIn('subdirectory = "packages/orinoco-lite"', manifest)
-        self.assertIn('orinoco-lite = "orinoco-lite"', manifest)
+        self.assertNotIn("subdirectory", manifest)
         self.assertNotIn('cli = "orinoco-lite"', manifest)
         for configuration in (
             "orinoco.yaml",

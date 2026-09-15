@@ -39,9 +39,8 @@ jobs:
         env:
           ORINOCO_BASE_URL: ${{ steps.pages.outputs.base_url }}
         run: |
-          pixi run validate
           pixi run build-pages
-          pixi run prepare-publication
+          pixi run orinoco-lite publication prepare
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
         with:
           path: build/pages
@@ -83,4 +82,4 @@ jobs:
         with:
           name: pages-publication-${{ github.run_id }}
           path: build
-      - run: pixi run record-publication
+      - run: pixi run orinoco-lite publication publish

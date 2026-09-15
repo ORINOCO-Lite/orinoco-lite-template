@@ -6,10 +6,13 @@ import tempfile
 from pathlib import Path
 import unittest
 
+import pytest
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
+@pytest.mark.integration
 class DefaultRenderTests(unittest.TestCase):
     def test_default_render_builds_and_serves_every_navigation_route(self) -> None:
         """A default Copier render is a deployable starter site."""
@@ -38,10 +41,10 @@ class DefaultRenderTests(unittest.TestCase):
             )
             self.run_command(["git", "add", "."], rendered)
             self.run_command(["git", "commit", "-m", "initial render"], rendered)
-            self.run_command(["pixi", "run", "--frozen", "validate"], rendered)
+            self.run_command(["pixi", "run", "--frozen", "orinoco-lite", "validate"], rendered)
             self.run_command(["pixi", "run", "--frozen", "build"], rendered)
             self.run_command(
-                ["pixi", "run", "--frozen", "verify-local-preview"], rendered
+                ["pixi", "run", "--frozen", "orinoco-lite", "verify-site", "build/site"], rendered
             )
 
     def run_command(self, command: list[str], cwd: Path) -> None:

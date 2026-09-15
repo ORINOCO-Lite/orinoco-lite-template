@@ -16,11 +16,11 @@ extensions/                  optional metadata acquisition and curation code
 ```
 
 The source branch contains maintainable inputs and behavioral tests.
-A local render goes to ignored build state:
+Render into ignored build state and run the source checks:
 
 ```console
 pixi run render
-pixi run check
+pixi run pytest
 ```
 
 Copier is the only supported creation and update path.
@@ -54,8 +54,9 @@ Pass `--vcs-ref` explicitly.
 Copier resolves a bare `gh:` source to the newest *stable* tag, so while this template publishes release candidates an unpinned copy silently instantiates the last 0.1 release instead.
 Use the newest tag from [releases](https://github.com/ORINOCO-Lite/orinoco-lite-template/tags), and record the instantiation with `datalad run` if the repository is a DataLad dataset.
 
-Copier asks for site identity and the package source. The package may come from
-the official repository or a fork, at a release tag or exact commit:
+Copier asks for site identity and preview settings.
+Package coordinates are maintained defaults in [`copier.yml`](copier.yml), not interactive questions.
+They may be overridden explicitly to select the official repository or a fork, at a release tag or exact commit:
 
 | Answer             | Meaning                                                         |
 | ------------------ | --------------------------------------------------------------- |
@@ -63,7 +64,7 @@ the official repository or a fork, at a release tag or exact commit:
 | `project_name`     | human-readable site title                                       |
 | `site_description` | short public description                                        |
 | `site_base_url`    | canonical public base URL, with project path and trailing slash |
-| `package_repository` | Git repository containing `packages/orinoco-lite`             |
+| `package_repository` | Git repository containing the Python project at its root      |
 | `package_revision` | release tag or exact package commit                              |
 
 Answers can also be supplied non-interactively with repeated `--data key=value` options plus `--defaults`, or from a file with `--data-file answers.yml`.
@@ -117,7 +118,6 @@ Each example tracks its own history, so check its README for the template versio
 
 ```console
 pixi install --frozen
-pixi run validate
 pixi run build
 pixi run serve
 ```
@@ -128,14 +128,13 @@ The first build resolves and caches the exact upstream presentation, so it needs
 Before proposing a change, run what CI runs:
 
 ```console
-pixi run verify-build
+pixi run build && pixi run orinoco-lite verify-site build/site
 ```
 
-`verify-build` checks the locally built site before it is published.
+`orinoco-lite verify-site` checks the locally built site before it is published.
 
-Pixi installs the downstream-selected package dependency declared in
-`pixi.toml`. A downstream may retain the generated `pixi.lock` for the complete
-resolved environment; no Orinoco-specific release lock is required.
+Pixi installs the downstream-selected package dependency declared in `pixi.toml`.
+A downstream may retain the generated `pixi.lock` for the complete resolved environment; no Orinoco-specific release lock is required.
 Copier records the template selection in `.copier-answers.yml`; workflows contain their pinned action references.
 Resources and specifications required to build or operate Orinoco Lite are internal to that package and share its version and integrity boundary.
 
