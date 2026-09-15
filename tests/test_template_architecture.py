@@ -1,16 +1,51 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
+import tomllib
 import unittest
 
+from jinja2 import Environment, StrictUndefined
 import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_navigation_preserves_external_urls_and_targets():
+    path = ROOT / "copier-template/.orinoco-lite/presentation/config-templates/menus.en.toml.j2"
+    environment = Environment(undefined=StrictUndefined)
+    environment.filters["json_string"] = json.dumps
+    site = {"navigation": [
+        {"name": "People", "page_ref": "persons"},
+        {"name": "Collaboration hub", "url": "https://hub.example.invalid/",
+         "target": "_blank", "icon": "forgejo-aneksajo"},
+        {"name": "External text link", "url": "https://example.invalid/docs",
+         "target": "_self"},
+    ]}
+    menus = tomllib.loads(environment.from_string(path.read_text()).render(site=site))
+    internal, hub, external, search = menus["main"]
+    assert internal["pageRef"] == "persons"
+    assert "url" not in internal
+    assert hub["url"] == site["navigation"][1]["url"]
+    assert hub["params"] == {
+        "target": "_blank", "icon": "forgejo-aneksajo", "showName": False,
+    }
+    assert external["url"] == site["navigation"][2]["url"]
+    assert external["params"] == {"target": "_self"}
+    assert search["params"]["action"] == "search"
+    assert menus["footer"] == []
+    site["footer_navigation"] = [
+        {"name": "Contact and location", "page_ref": "contact"},
+    ]
+    menus = tomllib.loads(environment.from_string(path.read_text()).render(site=site))
+    assert menus["footer"] == [{
+        "name": "Contact and location", "title": "Contact and location", "pageRef": "contact",
+    }]
 
 
 class TemplateArchitectureTests(unittest.TestCase):
