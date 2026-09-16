@@ -10,6 +10,9 @@ on:
 permissions:
   contents: read
 
+env:
+  PIXI_FROZEN: "true"
+
 jobs:
   source-check:
     name: Source check (${{ matrix.label }})
@@ -30,7 +33,6 @@ jobs:
         with:
           cache: true
           frozen: true
-          pixi-version: v0.73.0
       - name: Check source
         run: pixi run pytest
 
@@ -45,7 +47,6 @@ jobs:
         with:
           cache: true
           frozen: true
-          pixi-version: v0.73.0
       - name: Test a complete downstream build
         run: |
           unset GITHUB_REPOSITORY

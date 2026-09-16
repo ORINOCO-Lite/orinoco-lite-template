@@ -8,6 +8,9 @@ on:
 permissions:
   contents: read
 
+env:
+  PIXI_FROZEN: "true"
+
 jobs:
   validate:
     if: >-
@@ -41,8 +44,8 @@ jobs:
           restore-keys: projection-${{ runner.os }}-
       - name: Validate and build
         run: |
-          pixi run --frozen build --publication-bundle build/pages-publication.bundle
-          pixi run --frozen orinoco-lite verify-site build/site
+          pixi run build --publication-bundle build/pages-publication.bundle
+          pixi run orinoco-lite verify-site build/site
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         if: matrix.runner == 'ubuntu-24.04'
         with:

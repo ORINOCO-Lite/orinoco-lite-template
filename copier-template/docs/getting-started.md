@@ -12,7 +12,7 @@ Ordinary site construction should use declarative inputs and the supported small
 Use `pixi run orinoco-lite validate` to check inputs without generating a site or projection, and `pixi run orinoco-lite verify-site build/site` to check an existing local build without rebuilding it.
 Builds reuse unchanged metadata projections; `pixi run build --no-cache` repeats projection and semantic checks without fetching new source data.
 
-For GitHub Pages, `pixi run --frozen build-pages` builds the website and emits its publication bundle from clean committed inputs.
+For GitHub Pages, `pixi run build-pages` builds the website and emits its publication bundle from clean committed inputs.
 The workflow deploys the site, then runs `publication record` to retain that successful build outside the source branch.
 There is no separate preparation step and no rebuild after deployment.
 
