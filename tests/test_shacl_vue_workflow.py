@@ -118,7 +118,7 @@ class ShaclVueWorkflowTests(unittest.TestCase):
         self.assertIn('--source-commit "$SOURCE_COMMIT"', commit)
         self.assertIn("verify-commit", commit)
         self.assertIn(
-            'git -C "$GITHUB_WORKSPACE/source" add -A -- site-specific/metadata',
+            'git -C "$metadata_root" add -A -- "$metadata_path"',
             commit,
         )
         self.assertNotIn(

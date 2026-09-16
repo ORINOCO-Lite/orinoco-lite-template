@@ -203,7 +203,35 @@ jobs:
           with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as out:
               out.write(f"phase={phase}\n")
               out.write(f"parent_sha={parent}\n")
+              metadata = value.get("metadata", {})
+              for key in ("repository", "source_commit", "head_sha", "branch", "pull_request"):
+                  out.write(f"metadata_{key}={metadata.get(key, '')}\n")
+              out.write(f"metadata_owner={metadata.get('repository', '/').split('/')[0]}\n")
+              out.write(f"metadata_name={metadata.get('repository', '/').split('/')[1]}\n")
           PY
+
+      - name: Require metadata automation credentials
+        if: steps.inspect.outputs.metadata_repository != ''
+        env:
+          APP_ID: ${{ vars.ORINOCO_METADATA_APP_ID }}
+          APP_KEY: ${{ secrets.ORINOCO_METADATA_APP_PRIVATE_KEY }}
+        run: |
+          if [[ -z "$APP_ID" || -z "$APP_KEY" ]]; then
+            echo "::error::Configure ORINOCO_METADATA_APP_ID and ORINOCO_METADATA_APP_PRIVATE_KEY for an App installed on the metadata repository. Both proposals remain drafts."
+            exit 1
+          fi
+
+      - name: Obtain bounded metadata repository installation access
+        id: metadata-token
+        if: steps.inspect.outputs.metadata_repository != ''
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
+        with:
+          app-id: ${{ vars.ORINOCO_METADATA_APP_ID }}
+          private-key: ${{ secrets.ORINOCO_METADATA_APP_PRIVATE_KEY }}
+          owner: ${{ steps.inspect.outputs.metadata_owner }}
+          repositories: ${{ steps.inspect.outputs.metadata_name }}
+          permission-contents: write
+          permission-pull-requests: read
 
       - name: Verify the attributed curator remains authorized
         id: authority
@@ -296,6 +324,44 @@ jobs:
           test "$(git -C source rev-parse HEAD)" = "$SOURCE_COMMIT"
           test -z "$(git -C source status --porcelain --untracked-files=all)"
 
+      - name: Check out the exact metadata handoff as data
+        if: steps.inspect.outputs.phase == 'handoff' && steps.inspect.outputs.metadata_repository != ''
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ steps.inspect.outputs.metadata_repository }}
+          ref: ${{ steps.inspect.outputs.metadata_head_sha }}
+          token: ${{ steps.metadata-token.outputs.token }}
+          fetch-depth: 0
+          path: source/site-specific
+          persist-credentials: false
+
+      - name: Verify both handoffs and prepare exact metadata source
+        if: steps.inspect.outputs.phase == 'handoff' && steps.inspect.outputs.metadata_repository != ''
+        env:
+          GH_TOKEN: ${{ steps.metadata-token.outputs.token }}
+          METADATA_REPOSITORY: ${{ steps.inspect.outputs.metadata_repository }}
+          METADATA_NUMBER: ${{ steps.inspect.outputs.metadata_pull_request }}
+          METADATA_HEAD: ${{ steps.inspect.outputs.metadata_head_sha }}
+          METADATA_SOURCE: ${{ steps.inspect.outputs.metadata_source_commit }}
+          HEAD_SHA: ${{ steps.coordinates.outputs.head_sha }}
+          CURATOR: ${{ steps.coordinates.outputs.curator }}
+          CURATOR_ID: ${{ steps.coordinates.outputs.curator_id }}
+        working-directory: trusted
+        run: |
+          set -euo pipefail
+          gh api "repos/${METADATA_REPOSITORY}/pulls/${METADATA_NUMBER}" > "$RUNNER_TEMP/metadata-pr.json"
+          gh api "repos/${METADATA_REPOSITORY}/commits/${METADATA_HEAD}" > "$RUNNER_TEMP/metadata-head.json"
+          gh api "repos/${METADATA_REPOSITORY}/collaborators/${CURATOR}/permission" > "$RUNNER_TEMP/metadata-permission.json"
+          unset GH_TOKEN GITHUB_TOKEN
+          pixi run orinoco-lite shacl-handoff verify-submodule \
+            --root "$GITHUB_WORKSPACE/proposal" --head-sha "$HEAD_SHA" \
+            --metadata-root "$GITHUB_WORKSPACE/source/site-specific" \
+            --pull-json "$RUNNER_TEMP/metadata-pr.json" \
+            --commit-json "$RUNNER_TEMP/metadata-head.json" \
+            --permission-json "$RUNNER_TEMP/metadata-permission.json" \
+            --curator "$CURATOR" --curator-id "$CURATOR_ID"
+          git -C "$GITHUB_WORKSPACE/source/site-specific" checkout --detach "$METADATA_SOURCE"
+
       - name: Extract and apply the unchanged version 2 bundle
         if: steps.inspect.outputs.phase == 'handoff'
         env:
@@ -358,6 +424,7 @@ jobs:
         if: steps.inspect.outputs.phase == 'handoff'
         id: materialized
         env:
+          METADATA_REPOSITORY: ${{ steps.inspect.outputs.metadata_repository }}
           AUTHOR_DATE: ${{ steps.coordinates.outputs.author_date }}
           CURATOR: ${{ steps.coordinates.outputs.curator }}
           CURATOR_ID: ${{ steps.coordinates.outputs.curator_id }}
@@ -366,20 +433,36 @@ jobs:
         run: |
           set -euo pipefail
           unset GH_TOKEN GITHUB_TOKEN
-          git -C "$GITHUB_WORKSPACE/source" add -A -- site-specific/metadata
+          metadata_root="$GITHUB_WORKSPACE/source"
+          metadata_path="site-specific/metadata"
+          if [[ -n "$METADATA_REPOSITORY" ]]; then
+            metadata_root="$GITHUB_WORKSPACE/source/site-specific"
+            metadata_path="metadata"
+          fi
+          git -C "$metadata_root" add -A -- "$metadata_path"
           pixi run orinoco-lite shacl-handoff \
             inspect-materialized \
             --root "$GITHUB_WORKSPACE/source" \
             --source-commit "$SOURCE_COMMIT" \
             > "$RUNNER_TEMP/shacl-vue-staged.json"
-          test -z "$(git -C "$GITHUB_WORKSPACE/source" diff --name-only)"
-          git -C "$GITHUB_WORKSPACE/source" diff --cached --check
+          test -z "$(git -C "$metadata_root" diff --name-only)"
+          git -C "$metadata_root" diff --cached --check
           GIT_AUTHOR_NAME="$CURATOR" \
           GIT_AUTHOR_EMAIL="${CURATOR_ID}+${CURATOR}@users.noreply.github.com" \
           GIT_AUTHOR_DATE="$AUTHOR_DATE" \
           GIT_COMMITTER_NAME="github-actions[bot]" \
           GIT_COMMITTER_EMAIL="41898282+github-actions[bot]@users.noreply.github.com" \
-            git -C "$GITHUB_WORKSPACE/source" commit -m "feat(metadata): apply SHACL Vue edit"
+            git -C "$metadata_root" commit -m "feat(metadata): apply SHACL Vue edit"
+          if [[ -n "$METADATA_REPOSITORY" ]]; then
+            printf 'metadata_sha=%s\n' "$(git -C "$metadata_root" rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+            git -C "$GITHUB_WORKSPACE/source" add -- site-specific
+            GIT_AUTHOR_NAME="$CURATOR" \
+            GIT_AUTHOR_EMAIL="${CURATOR_ID}+${CURATOR}@users.noreply.github.com" \
+            GIT_AUTHOR_DATE="$AUTHOR_DATE" \
+            GIT_COMMITTER_NAME="github-actions[bot]" \
+            GIT_COMMITTER_EMAIL="41898282+github-actions[bot]@users.noreply.github.com" \
+              git -C "$GITHUB_WORKSPACE/source" commit -m "feat(metadata): advance site-specific proposal"
+          fi
           replacement="$(git -C "$GITHUB_WORKSPACE/source" rev-parse HEAD)"
           [[ "$replacement" =~ ^[0-9a-f]{40}$ ]]
           pixi run orinoco-lite shacl-handoff \
@@ -403,6 +486,12 @@ jobs:
           CURATOR: ${{ steps.coordinates.outputs.curator }}
           CURATOR_ID: ${{ steps.coordinates.outputs.curator_id }}
           GH_TOKEN: ${{ github.token }}
+          METADATA_TOKEN: ${{ steps.metadata-token.outputs.token }}
+          METADATA_REPOSITORY: ${{ steps.inspect.outputs.metadata_repository }}
+          METADATA_NUMBER: ${{ steps.inspect.outputs.metadata_pull_request }}
+          METADATA_HEAD: ${{ steps.inspect.outputs.metadata_head_sha }}
+          METADATA_BRANCH: ${{ steps.inspect.outputs.metadata_branch }}
+          METADATA_REPLACEMENT: ${{ steps.materialized.outputs.metadata_sha }}
           HANDOFF_SHA: ${{ steps.coordinates.outputs.head_sha }}
           HEAD_REF: ${{ steps.coordinates.outputs.head_ref }}
           NUMBER: ${{ steps.coordinates.outputs.number }}
@@ -456,6 +545,25 @@ jobs:
             "${SOURCE_COMMIT}..${REPLACEMENT_SHA}")" = 1
           test "$(git -C source show -s --format=%P "$REPLACEMENT_SHA")" = \
             "$SOURCE_COMMIT"
+          if [[ -n "$METADATA_REPOSITORY" ]]; then
+            GH_TOKEN="$METADATA_TOKEN" gh api "repos/${METADATA_REPOSITORY}/pulls/${METADATA_NUMBER}" > "$RUNNER_TEMP/metadata-pr.json"
+            GH_TOKEN="$METADATA_TOKEN" gh api "repos/${METADATA_REPOSITORY}/commits/${METADATA_HEAD}" > "$RUNNER_TEMP/metadata-head.json"
+            GH_TOKEN="$METADATA_TOKEN" gh api "repos/${METADATA_REPOSITORY}/collaborators/${CURATOR}/permission" > "$RUNNER_TEMP/metadata-permission.json"
+            (cd trusted && env -u GH_TOKEN -u GITHUB_TOKEN -u METADATA_TOKEN pixi run orinoco-lite shacl-handoff verify-submodule \
+              --root "$GITHUB_WORKSPACE/proposal" --head-sha "$HANDOFF_SHA" \
+              --metadata-root "$GITHUB_WORKSPACE/source/site-specific" \
+              --pull-json "$RUNNER_TEMP/metadata-pr.json" \
+              --commit-json "$RUNNER_TEMP/metadata-head.json" \
+              --permission-json "$RUNNER_TEMP/metadata-permission.json" \
+              --curator "$CURATOR" --curator-id "$CURATOR_ID")
+            (cd source/site-specific && GH_TOKEN="$METADATA_TOKEN" gh auth setup-git)
+            GH_TOKEN="$METADATA_TOKEN" git -C source/site-specific push \
+              --force-with-lease="refs/heads/${METADATA_BRANCH}:${METADATA_HEAD}" \
+              "https://github.com/${METADATA_REPOSITORY}.git" \
+              "${METADATA_REPLACEMENT}:refs/heads/${METADATA_BRANCH}"
+            echo "Metadata draft: https://github.com/${METADATA_REPOSITORY}/pull/${METADATA_NUMBER}" >> "$GITHUB_STEP_SUMMARY"
+            echo "Validated metadata commit: ${METADATA_REPLACEMENT}. If the website push fails, retain this draft and inspect both heads before retrying." >> "$GITHUB_STEP_SUMMARY"
+          fi
           (cd source && gh auth setup-git)
           git -C source push \
             --force-with-lease="refs/heads/${HEAD_REF}:${HANDOFF_SHA}" \
@@ -491,6 +599,16 @@ jobs:
           gh workflow run validate.yml \
             --repo "$REPOSITORY" \
             --ref "$HEAD_REF"
+
+      - name: Check out exact canonical site-specific metadata
+        if: steps.inspect.outputs.phase == 'canonical' && steps.inspect.outputs.metadata_repository != ''
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ steps.inspect.outputs.metadata_repository }}
+          ref: ${{ steps.inspect.outputs.metadata_source_commit }}
+          token: ${{ steps.metadata-token.outputs.token }}
+          path: proposal/site-specific
+          persist-credentials: false
 
       - name: Validate the exact canonical joined metadata graph
         if: steps.inspect.outputs.phase == 'canonical'
