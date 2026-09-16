@@ -36,10 +36,17 @@ A preview is not the deployed site:
 
 - it is served from the deploy-preview URL rather than `identity.base_url`, so
   its pages are root-relative rather than canonical;
-- it carries no trusted GitHub repository identity, so `/edit/` and `/review/`
-  keep **Download bundle** and cannot start a **Propose via GitHub** submission;
-  and
+- Netlify supplies read-only repository, pull-request, and exact-commit
+  coordinates to the build, but no GitHub credential;
+- `/edit/` may use **Propose via GitHub** only for its own open draft pull
+  request after the curation service verifies a successful Netlify deployment
+  for the exact head commit and preview origin; and
 - it is rebuilt from scratch for every pull-request revision.
+
+The editor shows the GitHub App installation warning before submission.
+**Download review bundle** remains available without GitHub authentication,
+and **Upload review bundle** can restore an edit after leaving or refreshing
+the page.
 
 ## Before enabling previews on a public repository
 
