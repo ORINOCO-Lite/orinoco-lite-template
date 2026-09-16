@@ -170,7 +170,6 @@ jobs:
           cache: true
           frozen: true
           manifest-path: trusted/pixi.toml
-          pixi-version: v0.73.0
 
       - name: Classify the fixed handoff or canonical metadata head
         id: inspect
