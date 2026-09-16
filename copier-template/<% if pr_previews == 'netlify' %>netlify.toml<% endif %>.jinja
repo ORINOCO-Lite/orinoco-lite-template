@@ -4,7 +4,8 @@
 #
 # A preview is this repository's ordinary root-relative build: the same
 # `pixi run build` that produces the local `pixi run serve` preview, from the
-# same frozen lock, with no repository identity and no extra build tooling.
+# same frozen lock. Netlify supplies read-only repository, pull-request, and
+# exact-commit coordinates; the build receives no GitHub credential.
 
 [build]
   publish = "build/site"
