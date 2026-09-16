@@ -2,6 +2,7 @@
 name = "[[ project_slug ]]"
 channels = ["conda-forge"]
 platforms = [{ platform = "osx-arm64", macos = "14.0" }, "linux-64"]
+requires-pixi = ">=0.81"
 
 [dependencies]
 python = ">=3.12,<3.13"
@@ -15,5 +16,5 @@ datalad = ">=1.6.2,<2"
 
 [tasks]
 build = "orinoco-lite build --destination build/site --base-url /"
-build-pages = "orinoco-lite build --destination build/pages"
+build-pages = "orinoco-lite build --destination build/pages --publication-bundle build/pages-publication.bundle"
 serve = "orinoco-lite serve --directory build/site --port 8765"

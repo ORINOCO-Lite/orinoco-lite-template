@@ -185,6 +185,7 @@ class TemplateArchitectureTests(unittest.TestCase):
                 (self.rendered / ".github/workflows" / name).read_text(),
                 Loader=yaml.BaseLoader,
             )
+            self.assertEqual(workflow["env"]["PIXI_FROZEN"], "true")
             for job in workflow["jobs"].values():
                 self.assertNotIn("uses", job)
             scripts = "\n".join(
@@ -193,6 +194,7 @@ class TemplateArchitectureTests(unittest.TestCase):
                 for step in job["steps"]
             )
             self.assertIn("orinoco-lite", scripts)
+            self.assertNotIn("--frozen", scripts)
             self.assertNotIn(".orinoco-lite/tools", scripts)
 
     def test_package_is_the_only_presentation_pin_authority(self) -> None:
@@ -352,6 +354,14 @@ class CopierUpdateTests(unittest.TestCase):
             )
             self.assertTrue((rendered / "netlify.toml").is_file())
             self.assertTrue((rendered / "docs/pr-previews.md").is_file())
+            netlify = tomllib.loads(
+                (rendered / "netlify.toml").read_text(encoding="utf-8")
+            )
+            self.assertEqual(
+                netlify["build"]["environment"]["PIXI_FROZEN"], "true"
+            )
+            self.assertIn("pixi run build", netlify["build"]["command"])
+            self.assertNotIn("--frozen", netlify["build"]["command"])
 
     def test_site_specific_default_does_not_prompt(self) -> None:
         with tempfile.TemporaryDirectory(prefix="orinoco-template-hidden-option-") as temp:
