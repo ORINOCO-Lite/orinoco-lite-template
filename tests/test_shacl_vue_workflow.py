@@ -32,6 +32,7 @@ class ShaclVueWorkflowTests(unittest.TestCase):
         self.assertEqual(
             {
                 "actions": "write",
+                "id-token": "write",
                 "contents": "write",
                 "pull-requests": "write",
             },

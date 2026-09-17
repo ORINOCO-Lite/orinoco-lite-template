@@ -114,9 +114,9 @@ An example is a `site-specific/` tree, not a whole downstream, so it can be copi
 
 For **Propose via GitHub** with a `site-specific` submodule, use an absolute GitHub HTTPS or SSH URL and deploy its current default-branch commit.
 Install the curation App on both repositories and give the curator write access to both.
-The website's trusted handoff workflow also needs an automation App installed only on the metadata repository, with Contents write and Pull requests read permissions.
-Set its ID as the website Actions variable `ORINOCO_METADATA_APP_ID` and its private key as the Actions secret `ORINOCO_METADATA_APP_PRIVATE_KEY`.
-Use a dedicated automation App; do not share the central service's credentials.
+The existing curation App authorizes the exact trusted workflow through GitHub Actions OIDC and supplies short-lived access limited to the metadata repository.
+No second App or downstream App private key is required.
+The service rejects changed proposal heads, expired authorization, and workflows that do not match the authenticated submission.
 The workflow validates the composed site before replacing the two handoffs.
 Merge the metadata draft first, preserving its validated commit (use a merge commit, not a squash or rebase), then merge the website gitlink proposal.
 If one update fails, inspect both draft heads before retrying; neither reviewed default branch is changed automatically.
