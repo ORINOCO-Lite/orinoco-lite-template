@@ -125,7 +125,8 @@ Initialize both repositories as DataLad datasets without Annex before running it
 Provide `extensions/source-adapters/<adapter>/review.py` in the trusted website default branch with a `build_candidate_plan(root, *, trusted_root, metadata_base)` function returning the package's `CandidatePlan`.
 The adapter reads captured source and mapping policy from the immutable base checkout at `root`; executable adapter code comes from `trusted_root`.
 Dispatch the workflow with that adapter name, follow its downstream review link, and submit one explicit decision for every candidate.
-The workflow records both commits with DataLad, retains decisions in the metadata repository, and validates the composed site before publishing either change.
+The package owns repository coordination, DataLad recording, composed validation, and temporary App access through `orinoco-lite curation validate`, `publish`, and `complete`.
+The workflow supplies the event, permissions, locked environment, and GitHub artifact upload.
 A stale head or lost access stops the write; a failure after the metadata push reports the partial result for inspection.
 Neither draft is merged automatically.
 

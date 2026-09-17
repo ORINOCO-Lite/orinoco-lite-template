@@ -43,81 +43,29 @@ jobs:
           frozen: true
           cache: true
 
-      - name: Resolve authenticated proposal coordinates
-        id: proposal
-        env:
-          GH_TOKEN: ${{ github.token }}
-          ADAPTER: ${{ inputs.adapter }}
-        run: pixi run python -m orinoco_lite.curation_actions prepare
-
-      - name: Obtain metadata read access from the existing App
-        id: read
-        env:
-          PROPOSAL_NUMBER: ${{ steps.proposal.outputs.number }}
-          PROPOSAL_HEAD: ${{ steps.proposal.outputs.head }}
-          CURATION_COMMENT_ID: ${{ steps.proposal.outputs.comment_id }}
-        run: pixi run python -m orinoco_lite.workflow_access --curation
-
-      - name: Check out exact website and metadata states as data
-        env:
-          GH_TOKEN: ${{ github.token }}
-          METADATA_TOKEN: ${{ steps.read.outputs.token }}
-          METADATA_REPOSITORY: ${{ steps.read.outputs.repository }}
-          METADATA_HEAD: ${{ steps.read.outputs.head }}
-        run: pixi run python -m orinoco_lite.curation_actions checkout
-
+      # The App grants repository write access only after this step succeeds.
       - name: Validate and record the composed adapter result
-        id: record
-        run: pixi run python -m orinoco_lite.curation_actions record
-
-      - name: Obtain metadata write access after validation
-        if: steps.record.outputs.has_changes == 'true'
-        id: write
         env:
-          PROPOSAL_NUMBER: ${{ steps.proposal.outputs.number }}
-          PROPOSAL_HEAD: ${{ steps.proposal.outputs.head }}
-          CURATION_COMMENT_ID: ${{ steps.proposal.outputs.comment_id }}
-        run: pixi run python -m orinoco_lite.workflow_access --curation --write
+          GH_TOKEN: ${{ github.token }}
+        run: pixi run orinoco-lite curation validate
 
-      - name: Publish both drafts with exact-head leases
-        if: steps.record.outputs.has_changes == 'true'
+      - name: Publish validated changes
         id: publish
-        env:
-          GH_TOKEN: ${{ steps.write.outputs.website_token }}
-          METADATA_TOKEN: ${{ steps.write.outputs.token }}
-          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-        run: pixi run python -m orinoco_lite.curation_actions publish
+        run: pixi run orinoco-lite curation publish
 
-      - name: Render proposal presentation
-        if: github.event_name == 'workflow_dispatch' && steps.record.outputs.has_changes == 'true'
-        run: pixi run python -m orinoco_lite.curation_actions bundle
-
-      - name: Publish expiring review presentation
-        if: github.event_name == 'workflow_dispatch' && steps.record.outputs.has_changes == 'true'
-        id: artifact
+      - name: Upload review presentation
+        if: steps.publish.outputs.review_artifact != ''
+        id: review
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: orinoco-curation-review-${{ steps.publish.outputs.proposal }}
+          name: ${{ steps.publish.outputs.review_artifact }}
           path: build/curation/artifact/review-bundle.json
           retention-days: 14
           if-no-files-found: error
 
-      - name: Report review link or completed decisions
-        if: steps.record.outputs.has_changes == 'true'
-        env:
-          GH_TOKEN: ${{ steps.write.outputs.website_token }}
-          ARTIFACT_ID: ${{ steps.artifact.outputs.artifact-id }}
-        run: pixi run python -m orinoco_lite.curation_actions announce
-
-      - name: Revoke metadata access
+      - name: Complete review and release temporary access
         if: always()
         env:
-          READ_TOKEN: ${{ steps.read.outputs.token }}
-          WRITE_TOKEN: ${{ steps.write.outputs.token }}
-          WEBSITE_TOKEN: ${{ steps.write.outputs.website_token }}
-        run: |
-          for token in "$READ_TOKEN" "$WRITE_TOKEN" "$WEBSITE_TOKEN"; do
-            if [[ -n "$token" ]]; then
-              GH_TOKEN="$token" gh api --method DELETE installation/token
-            fi
-          done
+          CURATION_REVIEW_TOKEN: ${{ steps.publish.outputs.review_token }}
+          REVIEW_ARTIFACT_ID: ${{ steps.review.outputs.artifact-id }}
+        run: pixi run orinoco-lite curation complete --artifact-id "$REVIEW_ARTIFACT_ID"
