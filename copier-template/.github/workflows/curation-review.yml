@@ -22,8 +22,8 @@ jobs:
         contains(github.event.comment.body, '/curation submit')))
     runs-on: ubuntu-24.04
     permissions:
-      contents: write
-      pull-requests: write
+      contents: read
+      pull-requests: read
       actions: read
       id-token: write
     concurrency:
@@ -83,7 +83,7 @@ jobs:
         if: steps.record.outputs.has_changes == 'true'
         id: publish
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.write.outputs.website_token }}
           METADATA_TOKEN: ${{ steps.write.outputs.token }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: pixi run python -m orinoco_lite.curation_actions publish
@@ -105,7 +105,7 @@ jobs:
       - name: Report review link or completed decisions
         if: steps.record.outputs.has_changes == 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.write.outputs.website_token }}
           ARTIFACT_ID: ${{ steps.artifact.outputs.artifact-id }}
         run: pixi run python -m orinoco_lite.curation_actions announce
 
@@ -114,8 +114,9 @@ jobs:
         env:
           READ_TOKEN: ${{ steps.read.outputs.token }}
           WRITE_TOKEN: ${{ steps.write.outputs.token }}
+          WEBSITE_TOKEN: ${{ steps.write.outputs.website_token }}
         run: |
-          for token in "$READ_TOKEN" "$WRITE_TOKEN"; do
+          for token in "$READ_TOKEN" "$WRITE_TOKEN" "$WEBSITE_TOKEN"; do
             if [[ -n "$token" ]]; then
               GH_TOKEN="$token" gh api --method DELETE installation/token
             fi
