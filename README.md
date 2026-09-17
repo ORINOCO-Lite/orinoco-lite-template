@@ -111,6 +111,15 @@ Published `site-specific/` trees to read before writing your own:
 | [`con-site-specific`](https://github.com/ORINOCO-Lite/con-site-specific) | The Center for Open Neuroscience site: ~220 Things records with annotation overlays, five editorial pages, navigation, and a custom Congo colour scheme. |
 
 An example is a `site-specific/` tree, not a whole downstream, so it can be copied in or embedded as a submodule or subtree at `site-specific/`.
+
+For **Propose via GitHub** with a `site-specific` submodule, use an absolute GitHub HTTPS or SSH URL and deploy its current default-branch commit.
+Install the curation App on both repositories and give the curator write access to both.
+The existing curation App authorizes the exact trusted workflow through GitHub Actions OIDC and supplies short-lived access limited to the metadata repository.
+No second App or downstream App private key is required.
+The service rejects changed proposal heads, expired authorization, and workflows that do not match the authenticated submission.
+The workflow validates the composed site before replacing the two handoffs.
+Merge the metadata draft first, preserving its validated commit (use a merge commit, not a squash or rebase), then merge the website gitlink proposal.
+If one update fails, inspect both draft heads before retrying; neither reviewed default branch is changed automatically.
 Embedding keeps the inputs reviewable on their own and lets several downstreams share one metadata collection.
 Each example tracks its own history, so check its README for the template version it currently follows; older trees may still use conventions the rules above have moved on from.
 
