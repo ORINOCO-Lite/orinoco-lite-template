@@ -120,6 +120,16 @@ The service rejects changed proposal heads, expired authorization, and workflows
 The workflow validates the composed site before replacing the two handoffs.
 Merge the metadata draft first, preserving its validated commit (use a merge commit, not a squash or rebase), then merge the website gitlink proposal.
 If one update fails, inspect both draft heads before retrying; neither reviewed default branch is changed automatically.
+For source adapters, the `curation-review.yml` workflow coordinates proposal and finalization drafts with the same App.
+Initialize both repositories as DataLad datasets without Annex before running it.
+Provide `extensions/source-adapters/<adapter>/review.py` in the trusted website default branch with a `build_candidate_plan(root, *, trusted_root, metadata_base)` function returning the package's `CandidatePlan`.
+The adapter reads captured source and mapping policy from the immutable base checkout at `root`; executable adapter code comes from `trusted_root`.
+Dispatch the workflow with that adapter name, follow its downstream review link, and submit one explicit decision for every candidate.
+The package owns repository coordination, DataLad recording, composed validation, and temporary App access through `orinoco-lite curation validate`, `publish`, and `complete`.
+The workflow supplies the event, permissions, locked environment, and GitHub artifact upload.
+A stale head or lost access stops the write; a failure after the metadata push reports the partial result for inspection.
+Neither draft is merged automatically.
+
 Embedding keeps the inputs reviewable on their own and lets several downstreams share one metadata collection.
 Each example tracks its own history, so check its README for the template version it currently follows; older trees may still use conventions the rules above have moved on from.
 
