@@ -26,6 +26,7 @@ jobs:
     if: >-
       github.repository != 'ORINOCO-Lite/orinoco-lite-template' &&
       ((github.event_name == 'pull_request_target' &&
+        !startsWith(github.event.pull_request.head.ref, 'automation/curation/') &&
         github.event.pull_request.state == 'open' &&
         github.event.pull_request.draft &&
         github.event.pull_request.base.ref ==
