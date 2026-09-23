@@ -47,7 +47,7 @@ project_name:
 
 site_description:
   type: str
-  help: Short public description; this is presentation text, not a license claim
+  help: Short public description; this is display text, not a license claim
   default: A site built with Orinoco Lite.
 
 site_base_url:

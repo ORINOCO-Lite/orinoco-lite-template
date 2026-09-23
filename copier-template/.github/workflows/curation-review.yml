@@ -53,7 +53,7 @@ jobs:
         id: publish
         run: pixi run orinoco-lite curation publish
 
-      - name: Upload review presentation
+      - name: Upload review artifact
         if: steps.publish.outputs.review_artifact != ''
         id: review
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

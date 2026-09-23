@@ -7,7 +7,7 @@ pixi run pytest
 ```
 
 By default, pytest excludes integration tests.
-Source tests check the rendered scaffold, package/template boundaries, the thin presentation adapter, licensed materialized assets, and workflow behavior without installing or building a downstream.
+Source tests check the rendered scaffold, package/template boundaries, the thin Hugo adapter, licensed materialized assets, and workflow behavior without installing or building a downstream.
 Use test paths or pytest selection flags for focused checks:
 
 ```console

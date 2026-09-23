@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_navigation_preserves_external_urls_and_targets():
-    path = ROOT / "copier-template/.orinoco-lite/presentation/config-templates/menus.en.toml.j2"
+    path = ROOT / "copier-template/.orinoco-lite/hugo-adapter/config-templates/menus.en.toml.j2"
     environment = Environment(undefined=StrictUndefined)
     environment.filters["json_string"] = json.dumps
     site = {"navigation": [
@@ -136,17 +136,17 @@ class TemplateArchitectureTests(unittest.TestCase):
             (self.rendered / ".orinoco-lite/tools/update_orinoco.py").exists()
         )
 
-    def test_presentation_is_an_adapter_not_a_copied_website(self) -> None:
-        presentation = self.rendered / ".orinoco-lite/presentation"
+    def test_hugo_adapter_is_an_adapter_not_a_copied_website(self) -> None:
+        adapter = self.rendered / ".orinoco-lite/hugo-adapter"
         self.assertLessEqual(
             {"config-templates", "layouts", "static-templates"},
-            {path.name for path in presentation.iterdir()},
+            {path.name for path in adapter.iterdir()},
         )
         for relative in (
             "config-templates/hugo.toml.j2",
             "static-templates/site.webmanifest.j2",
         ):
-            self.assertTrue((presentation / relative).is_file(), relative)
+            self.assertTrue((adapter / relative).is_file(), relative)
         forbidden_names = {
             "archetypes",
             "assets",
@@ -156,10 +156,10 @@ class TemplateArchitectureTests(unittest.TestCase):
         }
         self.assertFalse(
             forbidden_names
-            & {path.name for path in presentation.rglob("*") if path.is_dir()}
+            & {path.name for path in adapter.rglob("*") if path.is_dir()}
         )
         self.assertLessEqual(
-            len([path for path in presentation.rglob("*") if path.is_file()]),
+            len([path for path in adapter.rglob("*") if path.is_file()]),
             20,
         )
 
@@ -170,9 +170,9 @@ class TemplateArchitectureTests(unittest.TestCase):
             any(path.name == "themes" for path in private_root.rglob("*"))
         )
 
-    def test_materialized_presentation_is_a_bounded_licensed_overlay(self) -> None:
+    def test_materialized_hugo_assets_is_a_bounded_licensed_overlay(self) -> None:
         private_root = self.rendered / ".orinoco-lite"
-        overlay = private_root / "materialized-presentation"
+        overlay = private_root / "materialized-hugo-assets"
         upstream = overlay / "upstream"
 
         self.assertTrue(upstream.is_dir())
@@ -197,7 +197,7 @@ class TemplateArchitectureTests(unittest.TestCase):
             self.assertNotIn("--frozen", scripts)
             self.assertNotIn(".orinoco-lite/tools", scripts)
 
-    def test_package_is_the_only_presentation_pin_authority(self) -> None:
+    def test_package_is_the_only_www_from_model_pin_authority(self) -> None:
         config = yaml.safe_load(
             (self.rendered / "orinoco.yaml").read_text(encoding="utf-8")
         )
@@ -442,3 +442,14 @@ class CopierUpdateTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_appearance_settings_reach_hugo():
+    path = ROOT / "copier-template/.orinoco-lite/hugo-adapter/config-templates/params.toml.j2"
+    environment = Environment(undefined=StrictUndefined)
+    environment.filters["json_string"] = json.dumps
+    site = {"appearance": {"color_scheme": "ocean", "default_appearance": "dark", "header_layout": "basic"}}
+    params = tomllib.loads(environment.from_string(path.read_text()).render(site=site))
+    assert params["colorScheme"] == "ocean"
+    assert params["defaultAppearance"] == "dark"
+    assert params["header"]["layout"] == "basic"

@@ -1,15 +1,15 @@
 # Orinoco Lite downstream template
 
 This repository publishes a thin Copier scaffold for Orinoco Lite downstreams.
-It supplies repository structure, workflows, helper tools, a small Orinoco presentation adapter, and a bounded licensed overlay for required presentation assets.
+It supplies repository structure, workflows, helper tools, a small Orinoco Hugo adapter, and a bounded licensed overlay for required Hugo assets.
 It does not distribute the reusable website.
 
 The selected `orinoco-lite` package revision is the single authority for the exact German [`www-from-model`](https://hub.psychoinformatics.de/www/www-from-model) revision and official Congo dependency.
 At build time the package resolves those sources and composes them with:
 
 ```text
-.orinoco-lite/presentation/  small template-owned adaptation
-.orinoco-lite/materialized-presentation/upstream/
+.orinoco-lite/hugo-adapter/  small template-owned adaptation
+.orinoco-lite/materialized-hugo-assets/upstream/
                              required ordinary-file asset overlay
 site-specific/               declarative downstream inputs and overrides
 extensions/                  optional metadata acquisition and curation code
@@ -74,7 +74,7 @@ Answers can also be supplied non-interactively with repeated `--data key=value` 
 Everything a site owns is declarative and lives in two trees:
 
 ```text
-site-specific/site.yaml              identity, navigation, presentation
+site-specific/site.yaml              identity, navigation, appearance
 site-specific/metadata/records/      Thing YAML records, one entity per file
 site-specific/metadata/overlays/machine-provenance-annotations/
                                      companion annotations for those records
@@ -82,7 +82,7 @@ site-specific/content/               editorial Markdown pages
 site-specific/assets/                Hugo asset-pipeline inputs
 site-specific/static/                files published verbatim at the site root
 site-specific/overrides/{config,layouts,static}
-                                     bounded presentation overrides
+                                     bounded Hugo overrides
 site-specific/projection.yaml        optional projection contract override
 extensions/                          optional metadata-acquisition code
 ```
@@ -94,10 +94,10 @@ Four rules are enforced by Orinoco Lite and are worth knowing before the first b
   Replace those clearly labeled starter inputs with reviewed site metadata and editorial content before publishing a real site.
 - Images referenced from editorial Markdown through Hugo shortcodes such as `figure` are resolved through the asset pipeline, so they belong under `site-specific/assets/`.
   `site-specific/static/` is for files that are published verbatim and referenced by absolute URL.
-- A custom Congo colour scheme is `site-specific/assets/css/schemes/<name>.css` named by `presentation.color_scheme`; extra Congo icons are `site-specific/assets/icons/<name>.svg`; site CSS is `site-specific/assets/css/custom.css`.
+- A custom Congo colour scheme is `site-specific/assets/css/schemes/<name>.css` named by `appearance.color_scheme`; extra Congo icons are `site-specific/assets/icons/<name>.svg`; site CSS is `site-specific/assets/css/custom.css`.
 - `extensions/` is for executable metadata adapters only.
   Website functionality there is rejected: no `.css`, `.html`, `.js`, `.svg` files and no `assets`, `content`, `layouts`, or `static` directories.
-  Presentation belongs in `site-specific/overrides/`.
+  Hugo overrides belong in `site-specific/overrides/`.
 
 `orinoco.yaml` carries only path selection, and rejects unknown keys.
 The recognized paths are `records`, `editorial`, `site`, `generated`, `extensions`, and `build`; public site identity belongs in `site-specific/site.yaml`.
@@ -141,7 +141,7 @@ pixi run build
 pixi run serve
 ```
 
-The first build resolves and caches the exact upstream presentation, so it needs network access to GitHub and takes longer than later builds.
+The first build resolves and caches the exact www-from-model checkout, so it needs network access to GitHub and takes longer than later builds.
 `pixi run serve` publishes the built site on <http://127.0.0.1:8765/>, including the static `/edit/` metadata editor.
 
 Before proposing a change, run what CI runs:
@@ -165,6 +165,6 @@ See [`docs/custom-domain.md`](copier-template/docs/custom-domain.md) in a render
 
 ## License
 
-Original scaffold software and the bounded materialized presentation overlay are MIT licensed; original documentation is CC BY 4.0.
+Original scaffold software and the bounded materialized Hugo asset overlay are MIT licensed; original documentation is CC BY 4.0.
 Applicable dependency notices are preserved.
 See [LICENSES.md](LICENSES.md).
