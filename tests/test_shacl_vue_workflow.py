@@ -123,7 +123,7 @@ class ShaclVueWorkflowTests(unittest.TestCase):
             commit,
         )
         self.assertNotIn(
-            "site-specific/metadata/records site-specific/metadata/overlays/annotations",
+            "site-specific/metadata/records site-specific/metadata/overlays/machine-provenance-annotations",
             commit,
         )
 
