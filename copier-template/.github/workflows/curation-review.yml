@@ -12,6 +12,9 @@ on:
 
 permissions: {}
 
+env:
+  PIXI_LOCKED: "true"
+
 jobs:
   curate:
     if: >-
@@ -40,7 +43,7 @@ jobs:
       - name: Install the trusted locked environment
         uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
-          frozen: true
+          locked: true
           cache: true
 
       # The App grants repository write access only after this step succeeds.
