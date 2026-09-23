@@ -76,7 +76,7 @@ Everything a site owns is declarative and lives in two trees:
 ```text
 site-specific/site.yaml              identity, navigation, presentation
 site-specific/metadata/records/      Thing YAML records, one entity per file
-site-specific/metadata/overlays/annotations/
+site-specific/metadata/overlays/machine-provenance-annotations/
                                      companion annotations for those records
 site-specific/content/               editorial Markdown pages
 site-specific/assets/                Hugo asset-pipeline inputs
