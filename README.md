@@ -31,6 +31,9 @@ See [testing](docs/testing.md) and [releasing](docs/releasing.md).
 
 A downstream is an ordinary Git repository.
 Only [Pixi](https://pixi.sh) 0.76 or newer and a Copier runner are required; the scaffold pins everything else.
+CI always installs the latest Pixi and sets `PIXI_LOCKED=true` to reject stale locks without rewriting them.
+For the same local default, run `export PIXI_LOCKED=true` in your shell.
+For deliberate dependency updates, run `env -u PIXI_LOCKED pixi lock`, then review and commit the changes.
 The commands below use [`uv`](https://docs.astral.sh/uv/) to run Copier and DataLad without installing them.
 
 ### 1. Create the repository

@@ -27,7 +27,7 @@ control deploy previews.
 ## What a preview build does
 
 The build command installs the current Pixi release with Pixi's upstream
-installer and runs `pixi run build` with `PIXI_FROZEN=true`, this repository's
+installer and runs `pixi run build` with `PIXI_LOCKED=true`, this repository's
 ordinary root-relative build. A preview is therefore exactly the
 site that `pixi run build` and `pixi run serve` produce locally, from the same
 frozen lock, and needs no preview-specific tooling.
