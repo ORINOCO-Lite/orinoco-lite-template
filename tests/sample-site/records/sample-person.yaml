@@ -4,4 +4,4 @@ given_name: Sample
 family_name: Person
 formatted_name: Sample Person
 display_label: Sample Person
-description: A neutral person that exercises generic relationship presentation.
+description: A neutral person that exercises generic relationship rendering.

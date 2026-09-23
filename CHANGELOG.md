@@ -2,8 +2,11 @@
 
 ## Unreleased
 
-- Let each downstream select an Orinoco Lite release or exact Git commit from
-  the official repository or a fork through its ordinary Pixi dependency.
+- Rename the Hugo adaptation to `.orinoco-lite/hugo-adapter/`, the asset overlay to `.orinoco-lite/materialized-hugo-assets/`, and `site.yaml`'s `presentation` key to `appearance`.
+  Update the package and template together; custom projection references now use `www-from-model:` instead of `presentation:`.
+  Existing downstreams require an explicit update; no automatic migration or compatibility aliases are provided.
+
+- Let each downstream select an Orinoco Lite release or exact Git commit from the official repository or a fork through its ordinary Pixi dependency.
   Remove the separate Orinoco release lock.
 
 ## 0.3.0rc3 - 2026-09-08
