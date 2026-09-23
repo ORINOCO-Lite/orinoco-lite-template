@@ -185,7 +185,7 @@ class TemplateArchitectureTests(unittest.TestCase):
                 (self.rendered / ".github/workflows" / name).read_text(),
                 Loader=yaml.BaseLoader,
             )
-            self.assertEqual(workflow["env"]["PIXI_FROZEN"], "true")
+            self.assertEqual(workflow["env"]["PIXI_LOCKED"], "true")
             for job in workflow["jobs"].values():
                 self.assertNotIn("uses", job)
             scripts = "\n".join(
@@ -358,7 +358,7 @@ class CopierUpdateTests(unittest.TestCase):
                 (rendered / "netlify.toml").read_text(encoding="utf-8")
             )
             self.assertEqual(
-                netlify["build"]["environment"]["PIXI_FROZEN"], "true"
+                netlify["build"]["environment"]["PIXI_LOCKED"], "true"
             )
             self.assertIn("pixi run build", netlify["build"]["command"])
             self.assertNotIn("--frozen", netlify["build"]["command"])
