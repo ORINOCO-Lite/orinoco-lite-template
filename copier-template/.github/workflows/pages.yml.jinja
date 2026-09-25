@@ -91,4 +91,4 @@ jobs:
         with:
           name: pages-publication-${{ github.run_id }}
           path: build
-      - run: pixi run orinoco-lite publication record
+      - run: pixi run orinoco-lite publication record --history-limit [[ pages_history_limit ]]

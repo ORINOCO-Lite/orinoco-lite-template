@@ -66,6 +66,11 @@ They may be overridden explicitly to select the official repository or a fork, a
 | `site_base_url`    | canonical public base URL, with project path and trailing slash |
 | `package_repository` | Git repository containing the Python project at its root      |
 | `package_revision` | release tag or exact package commit                              |
+| `pages_history_limit` | maximum successful publications retained on `gh-pages` (default: 3) |
+
+`pages_history_limit` is not prompted; supply `--data pages_history_limit=5` to change it.
+The value is retained during template updates.
+After successful deployment, the package records the latest DataLad projection commit and keeps the selected number of website snapshots on an orphan `gh-pages` branch.
 
 Answers can also be supplied non-interactively with repeated `--data key=value` options plus `--defaults`, or from a file with `--data-file answers.yml`.
 
