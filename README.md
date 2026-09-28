@@ -24,6 +24,9 @@ pixi run pytest
 ```
 
 Copier is the only supported creation and update path.
+For updates, the package wraps Copier and DataLad in `orinoco-lite template update`.
+The downstream's **Update downstream template** workflow invokes that command and opens a draft pull request.
+See [template updates](copier-template/docs/template-updates.md) for selection, conflicts, and rollback.
 Disposable renders are development and test output, not a second distribution.
 See [testing](docs/testing.md) and [releasing](docs/releasing.md).
 
