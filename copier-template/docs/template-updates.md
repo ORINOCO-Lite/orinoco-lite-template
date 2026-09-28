@@ -1,7 +1,9 @@
 # Update the template
 
 In GitHub, open **Actions → Update downstream template → Run workflow**.
-Select the branch to update and enter a template commit, tag, or branch.
+Select the branch to update.
+**Latest release** is selected by default and uses Copier’s latest version tag, including release candidates.
+Choose **main** for the current development branch, or **Specific commit** and enter a full commit hash.
 The command records the resolved commit and selects the package declared by that template.
 Optional package revision and repository inputs apply an explicit override in a separate commit.
 
@@ -10,9 +12,11 @@ Review it, resolve any conflicts, and merge when ready.
 An unchanged selection produces no pull request.
 Site inputs under `site-specific/`, submodule selections, `extensions/`, and `orinoco.yaml` remain site-owned.
 
-Repository administrators must enable **Settings → Actions → General → Allow GitHub Actions to create and approve pull requests**.
-Updates that change `.github/workflows/` require the `ORINOCO_UPDATE_TOKEN` Actions secret with repository contents, pull request, and workflow write access; the default Actions token cannot push those changes.
-GitHub may ask a maintainer to approve validation runs on the generated pull request.
+Install the central Orinoco Lite GitHub App on the downstream repository.
+The App’s bot opens the pull request; no downstream personal token or private key is needed.
+The workflow authenticates to the service through GitHub Actions and obtains temporary access only in its separate publishing job.
+The App installation must grant contents, pull request, and workflow write permissions.
+The Actions run summary links to the resulting draft and reports validation.
 
 ## Resolve conflicts in GitHub
 
@@ -23,6 +27,7 @@ Commit the resolution to that branch and check the validation results.
 These edits record the human resolution separately from the generated update.
 
 If `pixi.toml` conflicted, resolve it first, then run **Update downstream template** on that branch with the same selections to regenerate its lock.
+The workflow on the recovery branch must match the current default branch; restore that workflow file from the default branch if the update changed it.
 Set **environment_revision** to a known-good branch such as `main` so the updater can run before the edited manifest has a matching lock.
 Review and merge the resulting follow-up pull request into the update branch before merging the original update.
 Local resolution is also supported.
@@ -32,11 +37,12 @@ Local resolution is also supported.
 Start from a clean checkout:
 
 ```console
-pixi run orinoco-lite template update --revision TEMPLATE_REVISION
+pixi run orinoco-lite template update
 pixi run build
 pixi run orinoco-lite verify-site build/site
 ```
 
+Use `--revision main` or `--revision COMMIT` for a different template selection.
 Add `--package-revision` and, when needed, `--package-repository` for an override.
 Exit status 1 means the update was recorded with conflicts; resolve and commit those files before validation.
 Other failures leave diagnostic output and any partial changes available for inspection.
