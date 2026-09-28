@@ -79,9 +79,19 @@ package_repository:
 package_revision:
   type: str
   help: Release tag or exact Git commit to install
-  default: "8e5e2f2764b511cdae867144ecd6ca8584b63fc9"
+  default: "80ef10aee32c3fd18181658b10ffe4fff71f0018"
   when: false
   validator: >-
     <% if not package_revision %>
     Supply a release tag or exact Git commit.
+    <% endif %>
+
+pages_history_limit:
+  type: int
+  help: Maximum successful publications retained on gh-pages
+  default: "[[ pages_history_limit | default(3) ]]"
+  when: false
+  validator: >-
+    <% if pages_history_limit < 1 %>
+    Retain at least one publication.
     <% endif %>
