@@ -24,6 +24,9 @@ pixi run pytest
 ```
 
 Copier is the only supported creation and update path.
+For updates, the package wraps Copier and DataLad in `orinoco-lite template update`.
+The downstream's **Update downstream template** workflow invokes that command and opens a draft pull request.
+See [template updates](copier-template/docs/template-updates.md) for selection, conflicts, and rollback.
 Disposable renders are development and test output, not a second distribution.
 See [testing](docs/testing.md) and [releasing](docs/releasing.md).
 
@@ -79,10 +82,10 @@ Answers can also be supplied non-interactively with repeated `--data key=value` 
 
 ### 3. Review the starter site and supply site-owned inputs
 
-Everything a site owns is declarative and lives in two trees:
+A site owns its root configuration and the inputs below:
 
 ```text
-site-specific/site.yaml              identity, navigation, appearance
+pyproject.toml                      runtime settings, identity, navigation, appearance
 site-specific/metadata/records/      Thing YAML records, one entity per file
 site-specific/metadata/overlays/machine-provenance-annotations/
                                      companion annotations for those records
@@ -107,8 +110,9 @@ Four rules are enforced by Orinoco Lite and are worth knowing before the first b
   Website functionality there is rejected: no `.css`, `.html`, `.js`, `.svg` files and no `assets`, `content`, `layouts`, or `static` directories.
   Hugo overrides belong in `site-specific/overrides/`.
 
-`orinoco.yaml` carries only path selection, and rejects unknown keys.
-The recognized paths are `records`, `editorial`, `site`, `generated`, `extensions`, and `build`; public site identity belongs in `site-specific/site.yaml`.
+`pyproject.toml` owns runtime configuration under `[tool.orinoco]`; `pixi.toml` owns dependencies and tasks.
+Public site settings belong in `[tool.orinoco.site]`; optional path overrides belong in `[tool.orinoco.paths]`.
+See the generated `docs/configuration.md` for operation opt-ins and service selection.
 
 #### Example inputs
 
@@ -168,7 +172,7 @@ Resources and specifications required to build or operate Orinoco Lite are inter
 ### 5. Publish
 
 The rendered `.github/workflows/pages.yml` deploys to GitHub Pages.
-Enable Pages for the repository with the GitHub Actions source, and keep `identity.base_url` in `site-specific/site.yaml` equal to the published URL, including the project path and trailing slash.
+Enable Pages for the repository with the GitHub Actions source, and keep `identity.base_url` in `pyproject.toml` (`tool.orinoco.site`) equal to the published URL, including the project path and trailing slash.
 See [`docs/custom-domain.md`](copier-template/docs/custom-domain.md) in a rendered site for the custom-domain variant.
 
 ## License

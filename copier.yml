@@ -26,7 +26,7 @@ _exclude:
   - "<% if _copier_operation == 'update' -%>site-specific/overrides/static/.gitkeep<% endif %>"
   - "<% if _copier_operation == 'update' -%>site-specific/static/.gitkeep<% endif %>"
 _skip_if_exists:
-  - orinoco.yaml
+  - pyproject.toml
   - .github/workflows/curation-review.yml
   - site-specific/**
   - extensions/**
@@ -79,7 +79,7 @@ package_repository:
 package_revision:
   type: str
   help: Release tag or exact Git commit to install
-  default: "80ef10aee32c3fd18181658b10ffe4fff71f0018"
+  default: "31fc15e124329ef1598d38b4b0636882423fbe21"
   when: false
   validator: >-
     <% if not package_revision %>

@@ -6,7 +6,7 @@ The package resolves the complete upstream website, projection templates, and th
 
 The downstream owns all declarative inputs under `site-specific/`, executable metadata adapters under `extensions/`, optional downstream-specific tests under `tests/`, release selection, repository policy, and generated deployment history.
 
-Website appearance is configured in `site-specific/site.yaml`, content, assets, and static inputs.
+Website appearance is configured in `pyproject.toml` (`tool.orinoco.site`), content, assets, and static inputs.
 A custom layout is supported only as an explicit file under `site-specific/overrides/layouts/`.
 Website code under `extensions/` is invalid, and extension source or generated outputs are never copied into a build.
 

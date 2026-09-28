@@ -1,10 +1,12 @@
 # Getting started
 
-1. Set the site identity and canonical public URL in `site-specific/site.yaml`.
+1. Set the site identity and canonical public URL in `pyproject.toml` (`tool.orinoco.site`).
 2. Replace the starter records and `/explore` page with reviewed site metadata and editorial content before publishing.
 3. Add further editorial pages, assets, and static inputs only under their `site-specific/` directories.
 4. Run `pixi run build`; it validates the inputs as part of building the site.
 5. Configure repository Pages and curation settings before enabling hosted editing.
+
+Use [template updates](template-updates.md) to update the scaffold and package through a GitHub draft pull request or the local CLI.
 
 Orinoco Lite supplies the default projection and resolves the www-from-model checkout selected by its packaged resources.
 Ordinary site construction should use declarative inputs and the supported small overrides under `site-specific/overrides/`, not copy the upstream Hugo components into this repository.
