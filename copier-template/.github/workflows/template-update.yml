@@ -13,6 +13,9 @@ on:
       package_repository:
         description: Optional package repository override
         type: string
+      environment_revision:
+        description: Optional known-good commit or branch to run the updater (for conflict recovery)
+        type: string
 
 permissions:
   contents: write
@@ -35,9 +38,18 @@ jobs:
           fetch-depth: 0
           submodules: recursive
           persist-credentials: false
+      - name: Prepare the updater environment
+        env:
+          ENVIRONMENT_REVISION: ${{ inputs.environment_revision || github.sha }}
+        run: |
+          revision=$(git rev-parse --verify --end-of-options "$ENVIRONMENT_REVISION^{commit}" || git rev-parse --verify --end-of-options "origin/$ENVIRONMENT_REVISION^{commit}")
+          mkdir -p "$RUNNER_TEMP/orinoco-update"
+          git archive "$revision" pixi.toml pixi.lock | tar -x -C "$RUNNER_TEMP/orinoco-update"
+          echo "ORINOCO_UPDATE_ENVIRONMENT=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY@$revision" >> "$GITHUB_ENV"
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
           locked: true
+          manifest-path: ${{ runner.temp }}/orinoco-update/pixi.toml
       - name: Configure update commit identity
         run: |
           git config user.name 'github-actions[bot]'
@@ -53,7 +65,7 @@ jobs:
           if [[ -n "$PACKAGE_REVISION" ]]; then args+=(--package-revision "$PACKAGE_REVISION"); fi
           if [[ -n "$PACKAGE_REPOSITORY" ]]; then args+=(--package-repository "$PACKAGE_REPOSITORY"); fi
           status=0
-          pixi run orinoco-lite template update "${args[@]}" || status=$?
+          pixi run --manifest-path "$RUNNER_TEMP/orinoco-update/pixi.toml" orinoco-lite --root "$GITHUB_WORKSPACE" template update "${args[@]}" || status=$?
           if [[ "$status" -gt 1 ]]; then exit "$status"; fi
           echo "conflicts=$status" >> "$GITHUB_OUTPUT"
       - name: Validate in the selected environment
@@ -82,3 +94,8 @@ jobs:
             Review the commits and resolve any conflict markers by editing the files
             in this branch. Validation must pass before merging. See
             `docs/template-updates.md` for browser editing and rollback.
+      - name: Report required resolution
+        if: steps.update.outputs.conflicts == '1' || steps.validate.outcome == 'failure'
+        run: |
+          echo '::error::The draft update needs conflict resolution or a validation fix. Review the pull request and the steps above.'
+          exit 1
