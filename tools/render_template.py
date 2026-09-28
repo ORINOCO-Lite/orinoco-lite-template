@@ -93,22 +93,20 @@ def verify_frozen_lock(destination: Path) -> None:
     lock = destination / "pixi.lock"
     if not lock.is_file():
         raise RenderError("copier-template/pixi.lock was not rendered")
-    before = lock.read_bytes()
     run(
         [
             executable("pixi"),
-            "lock",
+            "run",
+            "--locked",
             "--no-config",
             "--no-install",
             "--manifest-path",
             (destination / "pixi.toml").as_posix(),
+            "--",
+            "true",
         ],
         cwd=destination,
     )
-    if lock.read_bytes() != before:
-        raise RenderError(
-            "copier-template/pixi.lock is stale; refresh and review the source lock"
-        )
 
 
 def render(

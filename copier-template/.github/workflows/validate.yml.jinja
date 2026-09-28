@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 env:
-  PIXI_FROZEN: "true"
+  PIXI_LOCKED: "true"
 
 jobs:
   validate:
@@ -34,7 +34,7 @@ jobs:
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
           cache: true
-          frozen: true
+          locked: true
       - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: |
