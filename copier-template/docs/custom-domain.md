@@ -29,7 +29,7 @@ Use a hostname dedicated to this trusted site, then follow these steps:
    Do not use a wildcard DNS record.
    This template publishes with GitHub Actions, so it neither needs nor tracks a `CNAME` file.
 4. Wait for GitHub's DNS and certificate checks to succeed, then enable **Enforce HTTPS** using GitHub's [HTTPS procedure](https://docs.github.com/en/pages/getting-started-with-github-pages/securing-your-github-pages-site-with-https).
-5. Set `identity.base_url` in `site-specific/site.yaml` to the exact canonical HTTPS URL, including any path and a trailing slash.
+5. Set `identity.base_url` in `pyproject.toml` (`tool.orinoco.site`) to the exact canonical HTTPS URL, including any path and a trailing slash.
    Commit that identity change and let the Pages workflow deploy it.
 
 For a GitHub Actions Pages deployment, repository settings are authoritative for the custom domain.
@@ -49,12 +49,12 @@ If the page is still served from `*.github.io`, do not suppress the warning in s
 
 ## Use a self-hosted curation service
 
-The central Orinoco Lite service at `https://orinoco-curation-review.pages.dev` is used when `site.curation_service` is absent; do not repeat that default in site configuration.
-To replace only that backend, add its credential-free HTTPS origin to `orinoco.yaml`:
+The central Orinoco Lite service at `https://orinoco-curation-review.pages.dev` is used when `tool.orinoco.service.url` is absent; do not repeat that default in site configuration.
+To replace only that backend, add its credential-free HTTPS origin to `pyproject.toml`:
 
-```yaml
-site:
-  curation_service: https://curation.example.org
+```toml
+[tool.orinoco.service]
+url = "https://curation.example.org"
 ```
 
 Do not add repository identity beside it.

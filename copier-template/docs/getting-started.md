@@ -1,6 +1,6 @@
 # Getting started
 
-1. Set the site identity and canonical public URL in `site-specific/site.yaml`.
+1. Set the site identity and canonical public URL in `pyproject.toml` (`tool.orinoco.site`).
 2. Replace the starter records and `/explore` page with reviewed site metadata and editorial content before publishing.
 3. Add further editorial pages, assets, and static inputs only under their `site-specific/` directories.
 4. Run `pixi run build`; it validates the inputs as part of building the site.

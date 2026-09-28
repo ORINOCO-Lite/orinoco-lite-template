@@ -11,6 +11,7 @@ import unittest
 
 from jinja2 import Environment, StrictUndefined
 import yaml
+import tomllib
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -61,6 +62,7 @@ class TemplateArchitectureTests(unittest.TestCase):
             yaml.safe_dump(
                 {
                     "project_slug": "delta-atlas",
+                    "project_name": 'Research "Lab" 📚',
                 },
                 sort_keys=False,
             ),
@@ -87,32 +89,19 @@ class TemplateArchitectureTests(unittest.TestCase):
     def tearDownClass(cls) -> None:
         cls.temporary.cleanup()
 
-    def test_site_yaml_is_the_only_persisted_identity(self) -> None:
-        config = yaml.safe_load(
-            (self.rendered / "orinoco.yaml").read_text(encoding="utf-8")
-        )
-        site = yaml.safe_load(
-            (self.rendered / "site-specific/site.yaml").read_text(
-                encoding="utf-8"
-            )
-        )
+    def test_root_manifest_owns_runtime_settings(self) -> None:
+        config = tomllib.loads(
+            (self.rendered / "pyproject.toml").read_text(encoding="utf-8")
+        )["tool"]["orinoco"]
+        site = config["site"]
         answers_text = (self.rendered / ".copier-answers.yml").read_text(
             encoding="utf-8"
         )
         self.assertFalse(answers_text.endswith("\n\n"))
         answers = yaml.safe_load(answers_text)
 
-        self.assertNotIn("identity", config.get("site", {}))
-        self.assertTrue(all(value is False for value in config["site"]["operations"].values()))
-        self.assertEqual(
-            {
-                "records": "site-specific/metadata/records",
-                "editorial": "site-specific/content",
-                "extensions": "extensions",
-            },
-            config["paths"],
-        )
-        self.assertEqual("Orinoco Lite Site", site["identity"]["title"])
+        self.assertNotIn("operations", config)
+        self.assertEqual('Research "Lab" 📚', site["identity"]["title"])
         self.assertEqual(
             "A site built with Orinoco Lite.",
             site["identity"]["description"],
@@ -199,17 +188,17 @@ class TemplateArchitectureTests(unittest.TestCase):
             self.assertNotIn(".orinoco-lite/tools", scripts)
 
     def test_package_is_the_only_www_from_model_pin_authority(self) -> None:
-        config = yaml.safe_load(
-            (self.rendered / "orinoco.yaml").read_text(encoding="utf-8")
-        )
-        self.assertNotIn("framework", config["paths"])
+        config = tomllib.loads(
+            (self.rendered / "pyproject.toml").read_text(encoding="utf-8")
+        )["tool"]["orinoco"]
+        self.assertNotIn("framework", config.get("paths", {}))
         self.assertFalse((self.rendered / "orinoco.lock").exists())
         manifest = (self.rendered / "pixi.toml").read_text(encoding="utf-8")
         self.assertIn('git = "https://github.com/ORINOCO-Lite/orinoco-lite-dev.git"', manifest)
         self.assertNotIn("subdirectory", manifest)
         self.assertNotIn('cli = "orinoco-lite"', manifest)
         for configuration in (
-            "orinoco.yaml",
+            "pyproject.toml",
             "pixi.toml",
             ".copier-answers.yml",
         ):
@@ -323,10 +312,10 @@ class CopierUpdateTests(unittest.TestCase):
                 path = rendered / relative
                 path.write_text("site-owned\n", encoding="utf-8")
 
-            config_path = rendered / "orinoco.yaml"
-            config = yaml.safe_load(config_path.read_text())
-            config["site"]["operations"]["template_updates"] = True
-            config_path.write_text(yaml.safe_dump(config))
+            config_path = rendered / "pyproject.toml"
+            config = tomllib.loads(config_path.read_text())
+            config_path.write_text(config_path.read_text() + "\n[tool.orinoco.operations]\ntemplate_updates = true\n")
+            config = tomllib.loads(config_path.read_text())
             self.run_command(["git", "add", "."], rendered)
             self.run_command(
                 ["git", "commit", "-m", "remove starters"], rendered
@@ -337,7 +326,7 @@ class CopierUpdateTests(unittest.TestCase):
                 rendered,
             )
 
-            self.assertEqual(config, yaml.safe_load(config_path.read_text()))
+            self.assertEqual(config, tomllib.loads(config_path.read_text()))
             for relative in placeholders:
                 self.assertFalse((rendered / relative).exists(), relative)
 
@@ -380,20 +369,15 @@ class CopierUpdateTests(unittest.TestCase):
                     "--data", "site_description=Test site",
                     "--data", "site_base_url=https://example.invalid/",
                     "--data", "pr_previews=none",
-                    "--data", "allow_shacl_materialization=false",
-                    "--data", "allow_automated_curation=false",
-                    "--data", "allow_template_updates=true",
-                    "--data", "allow_preview_editing=false",
                     "--data", "package_repository=https://github.com/ORINOCO-Lite/orinoco-lite-dev.git",
                     "--data", "package_revision=300eff672931cddd1895edc163ffa43059a6bb9f",
                     str(ROOT), str(rendered),
                 ],
                 ROOT,
             )
-            self.assertTrue((rendered / "site-specific/site.yaml").is_file())
-            config = yaml.safe_load((rendered / "orinoco.yaml").read_text())
-            self.assertTrue(config["site"]["operations"]["template_updates"])
-            self.assertFalse(config["site"]["operations"]["preview_editing"])
+            self.assertTrue((rendered / "pyproject.toml").is_file())
+            config = tomllib.loads((rendered / "pyproject.toml").read_text())["tool"]["orinoco"]
+            self.assertNotIn("operations", config)
             answers = yaml.safe_load(
                 (rendered / ".copier-answers.yml").read_text(encoding="utf-8")
             )
@@ -414,6 +398,7 @@ class CopierUpdateTests(unittest.TestCase):
             self.assertFalse((rendered / "site-specific").exists())
             self.assertTrue((rendered / "netlify.toml").is_file())
             self.assertTrue((rendered / "pixi.toml").is_file())
+            self.assertIn("site", tomllib.loads((rendered / "pyproject.toml").read_text())["tool"]["orinoco"])
             answers = yaml.safe_load(
                 (rendered / ".copier-answers.yml").read_text(encoding="utf-8")
             )
@@ -422,7 +407,7 @@ class CopierUpdateTests(unittest.TestCase):
             # Existing inputs must also survive a repeated copy with this option.
             site = rendered / "site-specific"
             site.mkdir()
-            owned = site / "site.yaml"
+            owned = site / "authored.md"
             owned.write_text("site-owned\n", encoding="utf-8")
             self.run_command(
                 [
