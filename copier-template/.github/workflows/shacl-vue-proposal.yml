@@ -485,6 +485,13 @@ jobs:
         working-directory: trusted
         run: pixi run python -m orinoco_lite.workflow_access --write
 
+      - name: Check current downstream materialization opt-in
+        if: steps.inspect.outputs.phase == 'handoff'
+        working-directory: trusted
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: pixi run python -m orinoco_lite.workflow_access --check-operation shacl_materialization
+
       - name: Replace only the exact handoff head with a lease
         if: steps.inspect.outputs.phase == 'handoff'
         env:

@@ -13,6 +13,11 @@ An unchanged selection produces no pull request.
 Site inputs under `site-specific/`, submodule selections, `extensions/`, and `orinoco.yaml` remain site-owned.
 
 Install the central Orinoco Lite GitHub App on the downstream repository.
+Enable template-update proposals during Copier setup, or set `site.operations.template_updates: true` in `orinoco.yaml` on the default branch.
+Copier's operation choices default to disabled and explain each feature's required GitHub permissions.
+Edit `orinoco.yaml` to change these choices later; changing Copier answers or an update branch does not authorize the service.
+The service reports whether a refused update needs a downstream opt-in or an App installation permission.
+Existing site-owned operation choices remain unchanged by template updates.
 The App’s bot opens the pull request; no downstream personal token or private key is needed.
 The workflow authenticates to the service through GitHub Actions and obtains temporary access only in its separate publishing job.
 The App installation must grant contents, pull request, and workflow write permissions.

@@ -70,6 +70,27 @@ pr_previews:
     Netlify deploy previews: netlify
 
 
+allow_shacl_materialization:
+  type: bool
+  help: "Allow automated SHACL proposal materialization (Actions read; Contents and Pull requests write)"
+  default: false
+
+allow_automated_curation:
+  type: bool
+  help: "Allow automated curation completion (Actions read; Contents and Pull requests write)"
+  default: false
+
+allow_template_updates:
+  type: bool
+  help: "Allow template update proposals, including workflow files (Actions read; Contents, Pull requests and Workflows write)"
+  default: false
+
+allow_preview_editing:
+  type: bool
+  help: "Allow editing from verified development deploy previews (Commit statuses read in addition to edit permissions)"
+  default: false
+
+
 package_repository:
   type: str
   help: Git repository containing the Orinoco Lite Python project
@@ -79,7 +100,7 @@ package_repository:
 package_revision:
   type: str
   help: Release tag or exact Git commit to install
-  default: "dfb5fccfb0dc1ce1aa2473beb9255f246fba5fcf"
+  default: "345c5bfd71688d7b928b3b405cea0206c8de1c19"
   when: false
   validator: >-
     <% if not package_revision %>

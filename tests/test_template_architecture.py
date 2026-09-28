@@ -102,7 +102,8 @@ class TemplateArchitectureTests(unittest.TestCase):
         self.assertFalse(answers_text.endswith("\n\n"))
         answers = yaml.safe_load(answers_text)
 
-        self.assertNotIn("site", config)
+        self.assertNotIn("identity", config.get("site", {}))
+        self.assertTrue(all(value is False for value in config["site"]["operations"].values()))
         self.assertEqual(
             {
                 "records": "site-specific/metadata/records",
@@ -322,6 +323,10 @@ class CopierUpdateTests(unittest.TestCase):
                 path = rendered / relative
                 path.write_text("site-owned\n", encoding="utf-8")
 
+            config_path = rendered / "orinoco.yaml"
+            config = yaml.safe_load(config_path.read_text())
+            config["site"]["operations"]["template_updates"] = True
+            config_path.write_text(yaml.safe_dump(config))
             self.run_command(["git", "add", "."], rendered)
             self.run_command(
                 ["git", "commit", "-m", "remove starters"], rendered
@@ -332,6 +337,7 @@ class CopierUpdateTests(unittest.TestCase):
                 rendered,
             )
 
+            self.assertEqual(config, yaml.safe_load(config_path.read_text()))
             for relative in placeholders:
                 self.assertFalse((rendered / relative).exists(), relative)
 
@@ -374,6 +380,10 @@ class CopierUpdateTests(unittest.TestCase):
                     "--data", "site_description=Test site",
                     "--data", "site_base_url=https://example.invalid/",
                     "--data", "pr_previews=none",
+                    "--data", "allow_shacl_materialization=false",
+                    "--data", "allow_automated_curation=false",
+                    "--data", "allow_template_updates=true",
+                    "--data", "allow_preview_editing=false",
                     "--data", "package_repository=https://github.com/ORINOCO-Lite/orinoco-lite-dev.git",
                     "--data", "package_revision=300eff672931cddd1895edc163ffa43059a6bb9f",
                     str(ROOT), str(rendered),
@@ -381,6 +391,9 @@ class CopierUpdateTests(unittest.TestCase):
                 ROOT,
             )
             self.assertTrue((rendered / "site-specific/site.yaml").is_file())
+            config = yaml.safe_load((rendered / "orinoco.yaml").read_text())
+            self.assertTrue(config["site"]["operations"]["template_updates"])
+            self.assertFalse(config["site"]["operations"]["preview_editing"])
             answers = yaml.safe_load(
                 (rendered / ".copier-answers.yml").read_text(encoding="utf-8")
             )
