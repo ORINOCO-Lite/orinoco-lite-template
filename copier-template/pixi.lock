@@ -74,7 +74,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/wcwidth-0.8.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
       - pypi: git+https://github.com/ORINOCO-Lite/dump-things-pyclient.git?rev=1e79391195ad4412286344189dc5f81a06accb90#1e79391195ad4412286344189dc5f81a06accb90
-      - pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?rev=31fc15e124329ef1598d38b4b0636882423fbe21#31fc15e124329ef1598d38b4b0636882423fbe21
+      - pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?rev=4ffb9211bac92005bdc603daadf18ee5170d40e6#4ffb9211bac92005bdc603daadf18ee5170d40e6
       - pypi: git+https://github.com/ORINOCO-Lite/things-enrichment-tools.git?rev=9f036a4cdfb53f87346152f9cd4620aaef38bce2#9f036a4cdfb53f87346152f9cd4620aaef38bce2
       - pypi: https://files.pythonhosted.org/packages/00/cc/7fbd75d3362e939eb98bcf9bd22f3f7df8c237a85148899ed3d38e5614e5/json_flattener-0.1.9-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/02/10/5da547df7a391dcde17f59520a231527b8571e6f46fc8efb02ccb370ab12/docutils-0.22.4-py3-none-any.whl
@@ -151,6 +151,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/71/43/1947f06babed6b3f1d7f38b0c767f52df66bfb2bc10b468c4a7de9eceff2/aiohappyeyeballs-2.7.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/71/57/38c47753c67ad67f76ba04ea673c9b77431a19e7b2601937e6872a99e841/jsonasobj-1.3.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/73/f7/b1884cb3188ab181fc81fa00c266699dab600f927a964df02ec3d5d1916a/sphinx-9.1.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/76/72/58d553f050049ef2666abca85bc60ebaf1b4ca972d73e74b80e0a8b6070c/pyoxigraph-0.5.11-cp312-cp312-manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/77/f5/21d2de20e8b8b0408f0681956ca2c69f1320a3848ac50e6e7f39c6159675/babel-2.18.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/78/ac/5c5b959999b6f09c3026b5dfe171575bc3121c5236ce74f495096f25b203/greenlet-3.5.5-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/7b/24/61844afbf38acf419e01ca2639f7bd079584523d34471acbc4152ee991c5/hbreader-0.9.1-py3-none-any.whl
@@ -270,7 +271,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/tk-8.6.13-hd3d0363_3.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/yaml-0.2.5-h925e9cb_3.conda
       - pypi: git+https://github.com/ORINOCO-Lite/dump-things-pyclient.git?rev=1e79391195ad4412286344189dc5f81a06accb90#1e79391195ad4412286344189dc5f81a06accb90
-      - pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?rev=31fc15e124329ef1598d38b4b0636882423fbe21#31fc15e124329ef1598d38b4b0636882423fbe21
+      - pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?rev=4ffb9211bac92005bdc603daadf18ee5170d40e6#4ffb9211bac92005bdc603daadf18ee5170d40e6
       - pypi: git+https://github.com/ORINOCO-Lite/things-enrichment-tools.git?rev=9f036a4cdfb53f87346152f9cd4620aaef38bce2#9f036a4cdfb53f87346152f9cd4620aaef38bce2
       - pypi: https://files.pythonhosted.org/packages/00/cc/7fbd75d3362e939eb98bcf9bd22f3f7df8c237a85148899ed3d38e5614e5/json_flattener-0.1.9-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/02/10/5da547df7a391dcde17f59520a231527b8571e6f46fc8efb02ccb370ab12/docutils-0.22.4-py3-none-any.whl
@@ -290,6 +291,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/14/2f/967ba146e6d58cf6a652da73885f52fc68001525b4197effc174321d70b4/jmespath-1.1.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/15/aa/0aca39a37d3c7eb941ba736ede56d689e7be91cab5d9ca846bde3999eba6/isodate-0.7.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/17/c1/3226e6d7f5a4f736f38ac11a6fbb262d701889802595cdb0f53a885ac2e0/pydantic_extra_types-2.11.1-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/18/fe/23899fc8e17fb6bfa37d606f8afc755c05dd081bd690d360d3754ea7d520/pyoxigraph-0.5.11-cp38-abi3-macosx_11_0_arm64.whl
       - pypi: https://files.pythonhosted.org/packages/1a/77/48ce09fce2836856588beb84f434c1f8812d1428326efd993b619d49d949/sparqlslurper-0.5.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/1e/5e/d4e9f1a599fb8e573b7b87160658329fbf28d19eac2718f51fc3def3aa5a/idna-3.18-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/1f/fb/3068f649cc436be915f51b2f5ac0656c83dc9bcc6d4f8940633e295042c0/linkml-1.11.1-py3-none-any.whl
@@ -1451,9 +1453,9 @@ packages:
   - dump-things-service>=6.2.2 ; extra == 'tests'
   - pytest>=9.0.1 ; extra == 'tests'
   requires_python: '>=3.11'
-- pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?rev=31fc15e124329ef1598d38b4b0636882423fbe21#31fc15e124329ef1598d38b4b0636882423fbe21
+- pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?rev=4ffb9211bac92005bdc603daadf18ee5170d40e6#4ffb9211bac92005bdc603daadf18ee5170d40e6
   name: orinoco-lite
-  version: 0.3.0rc9+9.g31fc15e
+  version: 0.3.0rc9+35.g4ffb921
   requires_dist:
   - dump-things-pyclient @ git+https://github.com/ORINOCO-Lite/dump-things-pyclient.git@1e79391195ad4412286344189dc5f81a06accb90
   - dump-things-service==6.3.6
@@ -1462,6 +1464,7 @@ packages:
   - linkml-runtime==1.11.1
   - packaging==26.3
   - pydantic==2.13.4
+  - pyoxigraph==0.5.11
   - pyyaml==6.0.2
   - tomlkit>=0.13,<1
   - rdflib==7.6.0
@@ -1646,6 +1649,11 @@ packages:
   - semver>=3.0.2 ; extra == 'semver'
   - uuid-utils>=0.6.0 ; python_full_version < '3.14' and extra == 'uuid-utils'
   requires_python: '>=3.9'
+- pypi: https://files.pythonhosted.org/packages/18/fe/23899fc8e17fb6bfa37d606f8afc755c05dd081bd690d360d3754ea7d520/pyoxigraph-0.5.11-cp38-abi3-macosx_11_0_arm64.whl
+  name: pyoxigraph
+  version: 0.5.11
+  sha256: 3b67839b598fc806dbed8e99eb2d75b26b0ded6d52ca8bff1496d6a3cc002036
+  requires_python: '>=3.8'
 - pypi: https://files.pythonhosted.org/packages/1a/77/48ce09fce2836856588beb84f434c1f8812d1428326efd993b619d49d949/sparqlslurper-0.5.1-py3-none-any.whl
   name: sparqlslurper
   version: 0.5.1
@@ -2416,6 +2424,11 @@ packages:
   - packaging>=23.0
   - colorama>=0.4.6 ; sys_platform == 'win32'
   requires_python: '>=3.12'
+- pypi: https://files.pythonhosted.org/packages/76/72/58d553f050049ef2666abca85bc60ebaf1b4ca972d73e74b80e0a8b6070c/pyoxigraph-0.5.11-cp312-cp312-manylinux_2_28_x86_64.whl
+  name: pyoxigraph
+  version: 0.5.11
+  sha256: e3097d62e4fb903238ef074744ecf54c4328cf20e7787e925e670f6f7d33d345
+  requires_python: '>=3.8'
 - pypi: https://files.pythonhosted.org/packages/77/f5/21d2de20e8b8b0408f0681956ca2c69f1320a3848ac50e6e7f39c6159675/babel-2.18.0-py3-none-any.whl
   name: babel
   version: 2.18.0

@@ -4,6 +4,10 @@ This repository publishes a thin Copier scaffold for Orinoco Lite downstreams.
 It supplies repository structure, workflows, helper tools, a small Orinoco Hugo adapter, and a bounded licensed overlay for required Hugo assets.
 It does not distribute the reusable website.
 
+The template creates a working site with upstream's structure and a small, connected starter dataset that downstreams can replace without authoring pages or layouts.
+It also supports supplying upstream data and site inputs for repeatable rebuilds and comparisons.
+See the [template objective in the project design charter](https://github.com/ORINOCO-Lite/orinoco-lite-dev/blob/main/docs/project-design.md#reusable-components).
+
 The selected `orinoco-lite` package revision is the single authority for the exact German [`www-from-model`](https://hub.psychoinformatics.de/www/www-from-model) revision and official Congo dependency.
 At build time the package resolves those sources and composes them with:
 
