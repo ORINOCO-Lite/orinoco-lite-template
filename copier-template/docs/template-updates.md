@@ -10,7 +10,11 @@ Optional package revision and repository inputs apply an explicit override in a 
 The workflow opens a draft pull request containing the DataLad-recorded changes and validation results.
 Review it, resolve any conflicts, and merge when ready.
 An unchanged selection produces no pull request.
-Site inputs under `site-specific/`, submodule selections, `extensions/`, and `pyproject.toml` remain site-owned.
+Template-only updates preserve site inputs, submodule selections, `extensions/`, and `pyproject.toml`.
+For an upstream comparison site, select **Recompute retained records and import selected upstream site inputs** to reuse its saved capture with the selected package and refresh the imported site files.
+This replaces imported surfaces; it does not fetch new Pool records.
+If `site-specific` is a subdataset, the workflow opens its draft PR first and links it from the parent PR.
+Merge the child while preserving its commits before merging the parent gitlink.
 
 Install the central Orinoco Lite GitHub App on the downstream repository.
 After App installation, set `template_updates = true` under `[tool.orinoco.operations]` in root `pyproject.toml` on the default branch.
@@ -21,6 +25,7 @@ Existing site-owned operation choices remain unchanged by template updates.
 The App’s bot opens the pull request; no downstream personal token or private key is needed.
 The workflow authenticates to the service through GitHub Actions and obtains temporary access only in its separate publishing job.
 The App installation must grant contents, pull request, and workflow write permissions.
+For a changed `site-specific` subdataset, install the App on its repository too; the dispatch actor must have write access there, and its default branch must match the parent’s starting gitlink.
 The Actions run summary links to the resulting draft and reports validation.
 
 ## Resolve conflicts in GitHub
@@ -49,6 +54,7 @@ pixi run orinoco-lite verify-site build/site
 
 Use `--revision main` or `--revision COMMIT` for a different template selection.
 Add `--package-revision` and, when needed, `--package-repository` for an override.
+For the same upstream recomputation locally, run `pixi run orinoco-lite dev upstream populate --reuse-dump` after the template update and before building.
 Exit status 1 means the update was recorded with conflicts; resolve and commit those files before validation.
 Other failures leave diagnostic output and any partial changes available for inspection.
 The command never pushes, creates a pull request, or publishes the website.

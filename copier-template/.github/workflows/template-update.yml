@@ -20,6 +20,10 @@ on:
       package_repository:
         description: Optional package repository override
         type: string
+      recompute:
+        description: Recompute retained records and import selected upstream site inputs
+        type: boolean
+        default: false
       environment_revision:
         description: Optional known-good commit or branch to run the updater (for conflict recovery)
         type: string
@@ -37,8 +41,14 @@ concurrency:
 jobs:
   update:
     name: Prepare template update
+    env:
+      GIT_AUTHOR_NAME: github-actions[bot]
+      GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+      GIT_COMMITTER_NAME: github-actions[bot]
+      GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
     outputs:
       changed: ${{ steps.bundle.outputs.changed }}
+      site_changed: ${{ steps.bundle.outputs.site_changed }}
       conflicts: ${{ steps.update.outputs.conflicts }}
       validation: ${{ steps.validate.outcome }}
     runs-on: ubuntu-24.04
@@ -61,10 +71,6 @@ jobs:
         with:
           locked: true
           manifest-path: ${{ runner.temp }}/orinoco-update/pixi.toml
-      - name: Configure update commit identity
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
       - name: Record template update
         id: update
         env:
@@ -88,6 +94,9 @@ jobs:
           pixi run --manifest-path "$RUNNER_TEMP/orinoco-update/pixi.toml" orinoco-lite --root "$GITHUB_WORKSPACE" template update "${args[@]}" || status=$?
           if [[ "$status" -gt 1 ]]; then exit "$status"; fi
           echo "conflicts=$status" >> "$GITHUB_OUTPUT"
+      - name: Recompute retained upstream inputs
+        if: inputs.recompute && steps.update.outputs.conflicts == '0'
+        run: pixi exec --spec 'git-annex==10.20260601' -- pixi run orinoco-lite dev upstream populate --reuse-dump
       - name: Validate in the selected environment
         id: validate
         if: steps.update.outputs.conflicts == '0'
@@ -98,6 +107,19 @@ jobs:
       - name: Export recorded update
         id: bundle
         run: |
+          echo 'site_changed=false' >> "$GITHUB_OUTPUT"
+          site_entry=$(git ls-tree "$GITHUB_SHA" -- site-specific)
+          if [[ "$site_entry" == 160000* ]]; then
+            site_base=$(git rev-parse "$GITHUB_SHA:site-specific")
+            site_head=$(git rev-parse HEAD:site-specific)
+            if [[ "$site_head" != "$site_base" ]]; then
+              git -C site-specific merge-base --is-ancestor "$site_base" "$site_head"
+              [[ -z "$(git -C site-specific status --porcelain)" ]]
+              git -C site-specific branch orinoco-site-result "$site_head"
+              git -C site-specific bundle create "$RUNNER_TEMP/site-specific-update.bundle" orinoco-site-result "^$site_base"
+              echo 'site_changed=true' >> "$GITHUB_OUTPUT"
+            fi
+          fi
           if [[ "$(git rev-parse HEAD)" == "$GITHUB_SHA" ]]; then
             echo 'changed=false' >> "$GITHUB_OUTPUT"
             echo 'The selected template is already applied.' >> "$GITHUB_STEP_SUMMARY"
@@ -110,7 +132,9 @@ jobs:
         if: steps.bundle.outputs.changed == 'true'
         with:
           name: template-update
-          path: ${{ runner.temp }}/template-update.bundle
+          path: |
+            ${{ runner.temp }}/template-update.bundle
+            ${{ runner.temp }}/site-specific-update.bundle
           retention-days: 1
           if-no-files-found: error
 
@@ -143,13 +167,73 @@ jobs:
           path: ${{ runner.temp }}/template-update
       - name: Obtain curation App access
         id: access
-        run: pixi run --manifest-path "$RUNNER_TEMP/orinoco-publish/pixi.toml" python -m orinoco_lite.workflow_access --template
+        env:
+          SITE_CHANGED: ${{ needs.update.outputs.site_changed }}
+        run: |
+          args=(--template)
+          if [[ "$SITE_CHANGED" == true ]]; then args+=(--site-specific); fi
+          pixi run --manifest-path "$RUNNER_TEMP/orinoco-publish/pixi.toml" python -m orinoco_lite.workflow_access "${args[@]}"
       - name: Import recorded commits without executing updated code
+        env:
+          SITE_CHANGED: ${{ needs.update.outputs.site_changed }}
         run: |
           git bundle verify "$RUNNER_TEMP/template-update/template-update.bundle"
           git fetch "$RUNNER_TEMP/template-update/template-update.bundle" refs/heads/orinoco-template-result
           git merge-base --is-ancestor "$GITHUB_SHA" FETCH_HEAD
+          if [[ "$SITE_CHANGED" == true ]]; then
+            git diff --exit-code "$GITHUB_SHA" FETCH_HEAD -- .gitmodules
+          fi
           git checkout -B "$GITHUB_REF_NAME" FETCH_HEAD
+      - name: Check out the authorized site-specific base
+        if: needs.update.outputs.site_changed == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: ${{ steps.access.outputs.site_repository }}
+          ref: ${{ steps.access.outputs.site_head }}
+          token: ${{ steps.access.outputs.site_token }}
+          path: site-specific
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Import the recorded site-specific commits
+        if: needs.update.outputs.site_changed == 'true'
+        env:
+          SITE_BASE: ${{ steps.access.outputs.site_head }}
+          SITE_BRANCH: ${{ steps.access.outputs.site_branch }}
+        run: |
+          git -C site-specific bundle verify "$RUNNER_TEMP/template-update/site-specific-update.bundle"
+          git -C site-specific fetch "$RUNNER_TEMP/template-update/site-specific-update.bundle" refs/heads/orinoco-site-result
+          git -C site-specific merge-base --is-ancestor "$SITE_BASE" FETCH_HEAD
+          [[ "$(git -C site-specific rev-parse FETCH_HEAD)" == "$(git rev-parse HEAD:site-specific)" ]]
+          git -C site-specific checkout -B "$SITE_BRANCH" FETCH_HEAD
+      - name: Open site-specific draft pull request
+        id: site_pull
+        if: needs.update.outputs.site_changed == 'true'
+        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7
+        with:
+          token: ${{ steps.access.outputs.site_token }}
+          path: site-specific
+          base: ${{ steps.access.outputs.site_branch }}
+          branch: automation/template-update-${{ github.run_id }}
+          title: 'chore: recompute upstream site inputs'
+          draft: true
+          body: |
+            **AI-generated draft — not reviewed by John**
+
+            DataLad-recorded site inputs for ${{ github.repository }}.
+            [Update and validation run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+            Preserve these commits when merging, then accept the parent update.
+      - name: Require published site-specific commits
+        if: needs.update.outputs.site_changed == 'true'
+        env:
+          SITE_PULL_URL: ${{ steps.site_pull.outputs.pull-request-url }}
+          SITE_PULL_HEAD: ${{ steps.site_pull.outputs.pull-request-head-sha }}
+        run: |
+          [[ -n "$SITE_PULL_URL" ]] || { echo '::error::No site-specific pull request was created.'; exit 1; }
+          [[ "$SITE_PULL_HEAD" == "$(git rev-parse HEAD:site-specific)" ]]
+          git -C site-specific checkout --detach "$SITE_PULL_HEAD"
+          [[ -z "$(git status --porcelain)" ]]
+          echo "[Review site-specific changes]($SITE_PULL_URL)" >> "$GITHUB_STEP_SUMMARY"
       - name: Open update draft pull request
         id: pull
         uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7
@@ -160,7 +244,10 @@ jobs:
           title: 'chore: update downstream template'
           draft: true
           body: |
+            **AI-generated draft — not reviewed by John**
+
             Automated template update recorded with DataLad by the Orinoco Lite CLI.
+            Site-specific update: ${{ steps.site_pull.outputs.pull-request-url || 'unchanged' }}.
 
             Conflict status: ${{ needs.update.outputs.conflicts }} (0 = none, 1 = resolve conflicts).
             Validation: ${{ needs.update.outputs.validation }}.
@@ -189,4 +276,5 @@ jobs:
         if: always() && steps.access.outputs.token != ''
         env:
           UPDATE_TOKEN: ${{ steps.access.outputs.token }}
-        run: pixi run --manifest-path "$RUNNER_TEMP/orinoco-publish/pixi.toml" python -c 'import os; from orinoco_lite.workflow_access import revoke; revoke(os.environ["UPDATE_TOKEN"])'
+          SITE_TOKEN: ${{ steps.access.outputs.site_token }}
+        run: pixi run --manifest-path "$RUNNER_TEMP/orinoco-publish/pixi.toml" python -c 'import os; from orinoco_lite.workflow_access import revoke; [revoke(token) for token in (os.environ["UPDATE_TOKEN"], os.environ.get("SITE_TOKEN")) if token]'
