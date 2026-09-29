@@ -88,7 +88,6 @@ class DefaultRenderTests(unittest.TestCase):
                 self.assertIn(f'/{section}/{record}/', listing)
                 page = (site / section / record / "index.html").read_text()
                 self.assertIn(title, page)
-                self.assertTrue((rendered / "generated/projection/content" / section / record / "_index.md").is_file())
             self.assertIn('/persons/starter-person/', (site / 'projects/starter-project/index.html').read_text())
             self.assertIn('/projects/starter-project/', (site / 'persons/starter-person/index.html').read_text())
             self.assertIn('/publications/starter-publication/', (site / 'persons/starter-person/index.html').read_text())
