@@ -6,6 +6,10 @@
 4. Run `pixi run build`; it validates the inputs as part of building the site.
 5. Configure repository Pages and curation settings before enabling hosted editing.
 
+To test local package edits, run `pixi run dev-enable ../orinoco-lite-dev`; restore the preceding package selection with `pixi run dev-disable`.
+Both tasks record the package selection, lockfile, and development link with DataLad, leaving unrelated site edits uncommitted.
+The recorded editable connection still depends on that local checkout.
+
 Use [template updates](template-updates.md) to update the scaffold and package through a GitHub draft pull request or the local CLI.
 
 Orinoco Lite supplies the default projection and resolves the www-from-model checkout selected by its packaged resources.
