@@ -47,8 +47,7 @@ jobs:
         with:
           cache: true
           locked: true
-      - name: Test a complete downstream build without Annex
-        shell: bash
+      - name: Test a complete downstream build
         run: |
           unset GITHUB_REPOSITORY
           pixi run pytest -m integration
