@@ -51,4 +51,4 @@ jobs:
         shell: bash
         run: |
           unset GITHUB_REPOSITORY
-          pixi run pytest -m integration --no-annex
+          pixi run pytest -m integration

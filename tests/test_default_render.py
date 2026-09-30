@@ -4,6 +4,7 @@ from html.parser import HTMLParser
 import json
 import os
 import re
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -32,10 +33,25 @@ class Page(HTMLParser):
 
 @pytest.mark.integration
 class DefaultRenderTests(unittest.TestCase):
-    def test_default_render_builds_and_serves_every_navigation_route(self) -> None:
-        """A default Copier render is a deployable starter site."""
+    def test_default_render_builds_without_annex_and_serves_every_navigation_route(self) -> None:
+        """An ordinary starter site builds without invoking Git Annex."""
 
         with tempfile.TemporaryDirectory(prefix="orinoco-template-default-") as temp:
+            trap_dir = Path(temp) / "no-annex"
+            trap_dir.mkdir()
+            self.annex_invoked = trap_dir / "invoked"
+            executable = trap_dir / "git-annex"
+            executable.write_text(
+                "#!/bin/sh\n"
+                f"touch {shlex.quote(str(self.annex_invoked))}\n"
+                'echo "Unexpected git-annex invocation in an ordinary downstream" >&2\n'
+                "exit 99\n"
+            )
+            executable.chmod(0o755)
+            self.command_env = {
+                **os.environ,
+                "PATH": f"{trap_dir}{os.pathsep}{os.environ.get('PATH', '')}",
+            }
             rendered = Path(temp) / "consumer"
             self.run_command(
                 [
@@ -114,10 +130,13 @@ class DefaultRenderTests(unittest.TestCase):
         result = subprocess.run(
             command,
             cwd=cwd,
+            env=self.command_env,
             text=True,
             capture_output=True,
             check=False,
         )
+        # Detect calls even when application code ignores the trap's exit status.
+        self.assertFalse(self.annex_invoked.exists(), "Ordinary downstream invoked git-annex")
         if result.returncode:
             self.fail(
                 f"{' '.join(command)} failed with status {result.returncode}\n"
