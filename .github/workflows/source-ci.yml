@@ -51,16 +51,4 @@ jobs:
         shell: bash
         run: |
           unset GITHUB_REPOSITORY
-          export ORINOCO_ANNEX_INVOKED="$RUNNER_TEMP/annex-invoked"
-          mkdir -p "$RUNNER_TEMP/no-annex"
-          cat > "$RUNNER_TEMP/no-annex/git-annex" <<'SH'
-          #!/bin/sh
-          touch "$ORINOCO_ANNEX_INVOKED"
-          echo "Unexpected git-annex invocation in an ordinary downstream build" >&2
-          exit 99
-          SH
-          chmod +x "$RUNNER_TEMP/no-annex/git-annex"
-          export PATH="$RUNNER_TEMP/no-annex:$PATH"
-          # Fail even if a caller catches or ignores the executable's failure.
-          trap 'if [[ -e "$ORINOCO_ANNEX_INVOKED" ]]; then exit 1; fi' EXIT
-          pixi run pytest -m integration
+          pixi run pytest -m integration --no-annex
