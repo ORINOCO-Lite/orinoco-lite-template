@@ -1,5 +1,6 @@
-colorScheme = {{ site.appearance.color_scheme | default('fire') | json_string }}
-defaultAppearance = {{ site.appearance.default_appearance | default('light') | json_string }}
+{% set appearance = site.appearance | default({}) %}
+colorScheme = {{ appearance.color_scheme | default('fire') | json_string }}
+defaultAppearance = {{ appearance.default_appearance | default('light') | json_string }}
 autoSwitchAppearance = true
 enableSearch = true
 enableCodeCopy = true
@@ -9,7 +10,7 @@ enableQuicklink = true
 fingerprintAlgorithm = "sha256"
 
 [header]
-  layout = {{ site.appearance.header_layout | default('hybrid') | json_string }}
+  layout = {{ appearance.header_layout | default('hybrid') | json_string }}
   logo = ""
   logoDark = ""
   showTitle = true

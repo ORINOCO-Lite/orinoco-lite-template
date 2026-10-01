@@ -17,6 +17,23 @@ import tomllib
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_navigation_defaults_and_explicit_empty_list():
+    path = ROOT / "copier-template/.orinoco-lite/hugo-adapter/config-templates/menus.en.toml.j2"
+    environment = Environment(undefined=StrictUndefined)
+    environment.filters["json_string"] = json.dumps
+    template = environment.from_string(path.read_text())
+    menus = tomllib.loads(template.render(site={}))
+    assert [item.get("pageRef") for item in menus["main"]] == [
+        "/persons/", "/projects/", "/publications/", None,
+        "/datasets/", "/instruments/", "/explore/", None,
+    ]
+    assert menus["main"][3]["identifier"] == "outputs"
+    assert all(item["parent"] == "outputs" for item in menus["main"][4:6])
+    empty = tomllib.loads(template.render(site={"navigation": []}))
+    assert empty["main"] == [menus["main"][-1]]
+    assert empty["main"][0]["params"]["action"] == "search"
+
+
 def test_navigation_preserves_external_urls_and_targets():
     path = ROOT / "copier-template/.orinoco-lite/hugo-adapter/config-templates/menus.en.toml.j2"
     environment = Environment(undefined=StrictUndefined)
@@ -451,3 +468,16 @@ def test_appearance_settings_reach_hugo():
     assert params["colorScheme"] == "ocean"
     assert params["defaultAppearance"] == "dark"
     assert params["header"]["layout"] == "basic"
+
+
+def test_omitted_appearance_uses_template_defaults():
+    path = ROOT / "copier-template/.orinoco-lite/hugo-adapter/config-templates/params.toml.j2"
+    environment = Environment(undefined=StrictUndefined)
+    environment.filters["json_string"] = json.dumps
+    template = environment.from_string(path.read_text())
+    params = tomllib.loads(template.render(site={}))
+    assert params["colorScheme"] == "fire"
+    assert params["defaultAppearance"] == "light"
+    assert params["header"]["layout"] == "hybrid"
+    custom = tomllib.loads(template.render(site={"appearance": {"color_scheme": "con"}}))
+    assert custom == dict(params, colorScheme="con")

@@ -1,8 +1,55 @@
+{% set default_navigation = [
+  {
+    "name": "People",
+    "page_ref": "/persons/",
+    "icon": "account-group",
+    "weight": 10
+  },
+  {
+    "name": "Projects",
+    "page_ref": "/projects/",
+    "icon": "human-dolly",
+    "weight": 25
+  },
+  {
+    "name": "Publications",
+    "page_ref": "/publications/",
+    "icon": "cast-education",
+    "weight": 30
+  },
+  {
+    "name": "Outputs",
+    "identifier": "outputs",
+    "icon": "export",
+    "weight": 32
+  },
+  {
+    "name": "Datasets",
+    "page_ref": "/datasets/",
+    "parent": "outputs",
+    "icon": "mdi-database-outline",
+    "weight": 34
+  },
+  {
+    "name": "Instruments",
+    "page_ref": "/instruments/",
+    "parent": "outputs",
+    "icon": "mdi-microscope",
+    "weight": 36
+  },
+  {
+    "name": "Explore",
+    "page_ref": "/explore/",
+    "icon": "circle-info",
+    "weight": 40
+  }
+] %}
+
 {% if not site.footer_navigation | default([]) %}
 footer = []
 {% endif %}
 
-{% for item in site.navigation | default([]) -%}
+{% for item in site.navigation | default(default_navigation) -%}
 [[main]]
   name = {{ item.name | json_string }}
   title = {{ item.name | json_string }}
