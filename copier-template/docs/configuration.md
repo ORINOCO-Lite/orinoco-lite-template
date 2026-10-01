@@ -2,6 +2,9 @@
 
 Edit root `pyproject.toml` for runtime settings under `[tool.orinoco]`.
 `site.identity`, `site.navigation`, and `site.appearance` control the public website.
+Omit `site.navigation` to use the template menu.
+An explicit list replaces the standard links; `navigation = []` leaves only Search.
+Omitted appearance settings use the template defaults.
 Keep environment dependencies, package selections, and tasks in `pixi.toml`.
 Copier answers record generation choices; the root manifest is authoritative afterward and template updates preserve it.
 
