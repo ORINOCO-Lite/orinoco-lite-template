@@ -176,6 +176,7 @@ jobs:
       - name: Install the trusted locked Pixi environment
         uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
+          activate-environment: true
           cache: true
           locked: true
           manifest-path: trusted/pixi.toml

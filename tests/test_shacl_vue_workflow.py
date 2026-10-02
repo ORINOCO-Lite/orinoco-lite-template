@@ -51,6 +51,9 @@ class ShaclVueWorkflowTests(unittest.TestCase):
         self.assertEqual(
             "${{ steps.coordinates.outputs.head_sha }}", proposal["with"]["ref"]
         )
+        environment = self.steps["Install the trusted locked Pixi environment"]["with"]
+        self.assertEqual("trusted/pixi.toml", environment["manifest-path"])
+        self.assertEqual("true", environment["activate-environment"])
         for checkout in (trusted, proposal):
             self.assertEqual("false", checkout["with"]["persist-credentials"])
 
