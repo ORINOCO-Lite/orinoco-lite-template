@@ -59,6 +59,7 @@ jobs:
           echo "ORINOCO_UPDATE_ENVIRONMENT=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY@$revision" >> "$GITHUB_ENV"
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
+          activate-environment: true
           locked: true
           manifest-path: ${{ runner.temp }}/orinoco-update/pixi.toml
       - name: Configure update commit identity
@@ -93,8 +94,8 @@ jobs:
         if: steps.update.outputs.conflicts == '0'
         continue-on-error: true
         run: |
-          pixi run build
-          pixi run orinoco-lite verify-site build/site
+          pixi run --manifest-path "$GITHUB_WORKSPACE/pixi.toml" build
+          pixi run --manifest-path "$GITHUB_WORKSPACE/pixi.toml" orinoco-lite verify-site build/site
       - name: Export recorded update
         id: bundle
         run: |
@@ -135,6 +136,7 @@ jobs:
           git archive "$GITHUB_SHA" pixi.toml pixi.lock | tar -x -C "$RUNNER_TEMP/orinoco-publish"
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
+          activate-environment: true
           locked: true
           manifest-path: ${{ runner.temp }}/orinoco-publish/pixi.toml
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
