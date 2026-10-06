@@ -10,7 +10,7 @@ The site record's `associated_with` selects people; a project's `part_of` places
 Projects name contributors through `associated_with`, and publications name authors through `attributed_to`.
 When changing a record's `pid`, update references to it in other records too.
 
-To develop the package, run `pixi run dev-enable` and edit `submodule/orinoco-lite-dev` or its nested dependencies.
+To develop the package, run `pixi run dev-enable` and edit `.orinoco-lite/orinoco-lite-dev` or its nested dependencies.
 The checkout is local and ignored; the switch is not recorded with DataLad.
 Return to a fixed package with `pixi run orinoco-lite package update --revision FULL_SHA`, then start a fresh Pixi command.
 
