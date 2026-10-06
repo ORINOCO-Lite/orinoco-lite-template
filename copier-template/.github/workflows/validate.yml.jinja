@@ -36,6 +36,12 @@ jobs:
           activate-environment: true
           cache: true
           locked: true
+      - name: Cache upstream Git and Annex objects
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: .orinoco-lite/www-from-model
+          key: upstream-${{ runner.os }}-${{ runner.arch }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: upstream-${{ runner.os }}-${{ runner.arch }}-
       - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: |

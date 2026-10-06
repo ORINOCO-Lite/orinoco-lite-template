@@ -4,7 +4,10 @@
 It maps downstream settings, supplies an unbranded homepage and editorial layout, and adds record editing and people-group rendering.
 Shared configuration defaults, theme components, and graph rendering come from upstream.
 
-`www-from-model/` holds the ignored runtime source checkouts and their downloaded Annex content.
+`www-from-model/` is one ignored Git checkout with its Annex object store.
+Package changes switch its selected commit and nested dependencies while retaining downloaded objects.
+Pages and validation workflows cache this directory between runs; a cache miss downloads the required content again.
+Concurrent builds selecting different revisions require separate downstream working directories.
 `hugo-adapter/` and these notices remain tracked template files.
 
 The package retrieves required Hugo assets with Git Annex from the same selected checkout and copies ordinary files into the build assembly.
@@ -17,7 +20,7 @@ The package supplies reusable rendering functionality, its pinned upstream depen
 The template supplies the Orinoco adaptation and scaffold; site records, pages, and media remain downstream-owned.
 Package updates do not import the upstream organisation's content.
 
-This template requires the upstream-source and asset handling introduced in package commit `46b5c789fa59dae39cd4cb31c85851f95a81cd26`.
+This template requires the reusable upstream checkout and asset handling introduced in package commit `6b98af8c16ade43551f4713db21affd268a11a91`.
 These changes are not yet released; this commit is the compatibility baseline until a containing release supplies the minimum version.
 Select this commit or a descendant retaining that functionality for candidate testing.
 A fork must also include that functionality; a higher version number alone does not establish compatibility.

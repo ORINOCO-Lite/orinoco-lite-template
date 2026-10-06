@@ -90,9 +90,7 @@ class DefaultRenderTests(unittest.TestCase):
                 ["pixi", "run", "--locked", "orinoco-lite", "verify-site", "build/site"], rendered
             )
             # Installed builds need the selected upstream, not another package checkout.
-            sources = list((rendered / ".orinoco-lite/www-from-model").iterdir())
-            self.assertEqual(len(sources), 1)
-            source = sources[0]
+            source = rendered / ".orinoco-lite/www-from-model"
             self.assertFalse((rendered / ".orinoco").exists())
             self.run_command(["git", "check-ignore", str(source)], rendered)
             self.assertTrue((source / "themes/congo/theme.toml").is_file())
