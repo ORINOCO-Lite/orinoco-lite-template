@@ -60,12 +60,12 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.7.22-hbd8a1cb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python_abi-3.14-9_cp314.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/tzdata-2026c-h151e31d_0.conda
-      - pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?rev=494d9d45d4a707934c7f68d65227e282b117671c#494d9d45d4a707934c7f68d65227e282b117671c
-      - pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?subdirectory=submodules%2Fdump-things-pyclient&rev=494d9d45d4a707934c7f68d65227e282b117671c#494d9d45d4a707934c7f68d65227e282b117671c
-      - pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?subdirectory=submodules%2Fdump-things-service&rev=494d9d45d4a707934c7f68d65227e282b117671c#494d9d45d4a707934c7f68d65227e282b117671c
-      - pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?subdirectory=submodules%2Fquery-things&rev=494d9d45d4a707934c7f68d65227e282b117671c#494d9d45d4a707934c7f68d65227e282b117671c
-      - pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?subdirectory=submodules%2Fthings-enrichment-tools&rev=494d9d45d4a707934c7f68d65227e282b117671c#494d9d45d4a707934c7f68d65227e282b117671c
-      - pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?subdirectory=submodules%2Fthings-schemas&rev=494d9d45d4a707934c7f68d65227e282b117671c#494d9d45d4a707934c7f68d65227e282b117671c
+      - pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?rev=8f92262faeae36beaa667c2ae775fec5f7dea0d7#8f92262faeae36beaa667c2ae775fec5f7dea0d7
+      - pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?subdirectory=submodules%2Fdump-things-pyclient&rev=8f92262faeae36beaa667c2ae775fec5f7dea0d7#8f92262faeae36beaa667c2ae775fec5f7dea0d7
+      - pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?subdirectory=submodules%2Fdump-things-service&rev=8f92262faeae36beaa667c2ae775fec5f7dea0d7#8f92262faeae36beaa667c2ae775fec5f7dea0d7
+      - pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?subdirectory=submodules%2Fquery-things&rev=8f92262faeae36beaa667c2ae775fec5f7dea0d7#8f92262faeae36beaa667c2ae775fec5f7dea0d7
+      - pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?subdirectory=submodules%2Fthings-enrichment-tools&rev=8f92262faeae36beaa667c2ae775fec5f7dea0d7#8f92262faeae36beaa667c2ae775fec5f7dea0d7
+      - pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?subdirectory=submodules%2Fthings-schemas&rev=8f92262faeae36beaa667c2ae775fec5f7dea0d7#8f92262faeae36beaa667c2ae775fec5f7dea0d7
       - pypi: https://files.pythonhosted.org/packages/00/cc/7fbd75d3362e939eb98bcf9bd22f3f7df8c237a85148899ed3d38e5614e5/json_flattener-0.1.9-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/01/f9/575c8d760eae1fc99651b7cc5efd96ad5379ca4d6b53750b0fb4fe983f34/imagesize-2.0.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/02/10/5da547df7a391dcde17f59520a231527b8571e6f46fc8efb02ccb370ab12/docutils-0.22.4-py3-none-any.whl
@@ -276,12 +276,12 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/readline-8.3-h46df422_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/tk-8.6.13-hd3d0363_3.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.7-hf451053_7.conda
-      - pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?rev=494d9d45d4a707934c7f68d65227e282b117671c#494d9d45d4a707934c7f68d65227e282b117671c
-      - pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?subdirectory=submodules%2Fdump-things-pyclient&rev=494d9d45d4a707934c7f68d65227e282b117671c#494d9d45d4a707934c7f68d65227e282b117671c
-      - pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?subdirectory=submodules%2Fdump-things-service&rev=494d9d45d4a707934c7f68d65227e282b117671c#494d9d45d4a707934c7f68d65227e282b117671c
-      - pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?subdirectory=submodules%2Fquery-things&rev=494d9d45d4a707934c7f68d65227e282b117671c#494d9d45d4a707934c7f68d65227e282b117671c
-      - pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?subdirectory=submodules%2Fthings-enrichment-tools&rev=494d9d45d4a707934c7f68d65227e282b117671c#494d9d45d4a707934c7f68d65227e282b117671c
-      - pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?subdirectory=submodules%2Fthings-schemas&rev=494d9d45d4a707934c7f68d65227e282b117671c#494d9d45d4a707934c7f68d65227e282b117671c
+      - pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?rev=8f92262faeae36beaa667c2ae775fec5f7dea0d7#8f92262faeae36beaa667c2ae775fec5f7dea0d7
+      - pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?subdirectory=submodules%2Fdump-things-pyclient&rev=8f92262faeae36beaa667c2ae775fec5f7dea0d7#8f92262faeae36beaa667c2ae775fec5f7dea0d7
+      - pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?subdirectory=submodules%2Fdump-things-service&rev=8f92262faeae36beaa667c2ae775fec5f7dea0d7#8f92262faeae36beaa667c2ae775fec5f7dea0d7
+      - pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?subdirectory=submodules%2Fquery-things&rev=8f92262faeae36beaa667c2ae775fec5f7dea0d7#8f92262faeae36beaa667c2ae775fec5f7dea0d7
+      - pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?subdirectory=submodules%2Fthings-enrichment-tools&rev=8f92262faeae36beaa667c2ae775fec5f7dea0d7#8f92262faeae36beaa667c2ae775fec5f7dea0d7
+      - pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?subdirectory=submodules%2Fthings-schemas&rev=8f92262faeae36beaa667c2ae775fec5f7dea0d7#8f92262faeae36beaa667c2ae775fec5f7dea0d7
       - pypi: https://files.pythonhosted.org/packages/00/cc/7fbd75d3362e939eb98bcf9bd22f3f7df8c237a85148899ed3d38e5614e5/json_flattener-0.1.9-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/02/10/5da547df7a391dcde17f59520a231527b8571e6f46fc8efb02ccb370ab12/docutils-0.22.4-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/02/36/ecc85bc96c273dc8a11273ed4782272975e6338d4a3e9228621175edf0e3/jaraco_functools-4.6.0-py3-none-any.whl
@@ -1453,19 +1453,19 @@ packages:
     - zstd >=1.5.7,<1.6.0a0
   size: 433687
   timestamp: 1786599629846
-- pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?rev=494d9d45d4a707934c7f68d65227e282b117671c#494d9d45d4a707934c7f68d65227e282b117671c
+- pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?rev=8f92262faeae36beaa667c2ae775fec5f7dea0d7#8f92262faeae36beaa667c2ae775fec5f7dea0d7
   name: orinoco-lite
-  version: 0.3.0rc9+89.g494d9d4
+  version: 0.3.0rc9+90.g8f92262
   requires_dist:
   - datalad
   - git-annex
   - copier
   - click-option-group
-  - dump-things-pyclient @ git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git@494d9d45d4a707934c7f68d65227e282b117671c#subdirectory=submodules/dump-things-pyclient
-  - dump-things-service @ git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git@494d9d45d4a707934c7f68d65227e282b117671c#subdirectory=submodules/dump-things-service
-  - things-enrichment-tools @ git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git@494d9d45d4a707934c7f68d65227e282b117671c#subdirectory=submodules/things-enrichment-tools
-  - query-things @ git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git@494d9d45d4a707934c7f68d65227e282b117671c#subdirectory=submodules/query-things
-  - datalad-concepts @ git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git@494d9d45d4a707934c7f68d65227e282b117671c#subdirectory=submodules/things-schemas
+  - dump-things-pyclient @ git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git@8f92262faeae36beaa667c2ae775fec5f7dea0d7#subdirectory=submodules/dump-things-pyclient
+  - dump-things-service @ git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git@8f92262faeae36beaa667c2ae775fec5f7dea0d7#subdirectory=submodules/dump-things-service
+  - things-enrichment-tools @ git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git@8f92262faeae36beaa667c2ae775fec5f7dea0d7#subdirectory=submodules/things-enrichment-tools
+  - query-things @ git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git@8f92262faeae36beaa667c2ae775fec5f7dea0d7#subdirectory=submodules/query-things
+  - datalad-concepts @ git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git@8f92262faeae36beaa667c2ae775fec5f7dea0d7#subdirectory=submodules/things-schemas
   - jinja2
   - linkml
   - linkml-runtime
@@ -1476,7 +1476,7 @@ packages:
   - tomlkit
   - rdflib
   requires_python: '>=3.12'
-- pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?subdirectory=submodules%2Fdump-things-pyclient&rev=494d9d45d4a707934c7f68d65227e282b117671c#494d9d45d4a707934c7f68d65227e282b117671c
+- pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?subdirectory=submodules%2Fdump-things-pyclient&rev=8f92262faeae36beaa667c2ae775fec5f7dea0d7#8f92262faeae36beaa667c2ae775fec5f7dea0d7
   name: dump-things-pyclient
   version: 0.3.0
   requires_dist:
@@ -1489,7 +1489,7 @@ packages:
   - dump-things-service>=6.2.2 ; extra == 'tests'
   - pytest>=9.0.1 ; extra == 'tests'
   requires_python: '>=3.11'
-- pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?subdirectory=submodules%2Fdump-things-service&rev=494d9d45d4a707934c7f68d65227e282b117671c#494d9d45d4a707934c7f68d65227e282b117671c
+- pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?subdirectory=submodules%2Fdump-things-service&rev=8f92262faeae36beaa667c2ae775fec5f7dea0d7#8f92262faeae36beaa667c2ae775fec5f7dea0d7
   name: dump-things-service
   version: 6.3.6
   requires_dist:
@@ -1512,7 +1512,7 @@ packages:
   - sphinx-autodoc-typehints ; extra == 'docs'
   - sphinx-rtd-theme ; extra == 'docs'
   requires_python: '>=3.11'
-- pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?subdirectory=submodules%2Fquery-things&rev=494d9d45d4a707934c7f68d65227e282b117671c#494d9d45d4a707934c7f68d65227e282b117671c
+- pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?subdirectory=submodules%2Fquery-things&rev=8f92262faeae36beaa667c2ae775fec5f7dea0d7#8f92262faeae36beaa667c2ae775fec5f7dea0d7
   name: query-things
   version: 0.1.dev137+g8efe2c03e
   requires_dist:
@@ -1522,11 +1522,11 @@ packages:
   - jinja2
   - pyyaml
   requires_python: '>=3.11'
-- pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?subdirectory=submodules%2Fthings-enrichment-tools&rev=494d9d45d4a707934c7f68d65227e282b117671c#494d9d45d4a707934c7f68d65227e282b117671c
+- pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?subdirectory=submodules%2Fthings-enrichment-tools&rev=8f92262faeae36beaa667c2ae775fec5f7dea0d7#8f92262faeae36beaa667c2ae775fec5f7dea0d7
   name: things-enrichment-tools
   version: 0.1.dev72+g9f036a4cd
   requires_python: '>=3.12'
-- pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?subdirectory=submodules%2Fthings-schemas&rev=494d9d45d4a707934c7f68d65227e282b117671c#494d9d45d4a707934c7f68d65227e282b117671c
+- pypi: git+https://github.com/ORINOCO-Lite/orinoco-lite-dev.git?subdirectory=submodules%2Fthings-schemas&rev=8f92262faeae36beaa667c2ae775fec5f7dea0d7#8f92262faeae36beaa667c2ae775fec5f7dea0d7
   name: datalad-concepts
   version: 0.0.1
   requires_dist:
