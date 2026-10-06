@@ -180,6 +180,7 @@ jobs:
           cache: true
           locked: true
           manifest-path: trusted/pixi.toml
+          activate-environment: true
 
       - name: Classify the fixed handoff or canonical metadata head
         id: inspect

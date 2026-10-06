@@ -177,15 +177,6 @@ class TemplateArchitectureTests(unittest.TestCase):
             any(path.name == "themes" for path in private_root.rglob("*"))
         )
 
-    def test_materialized_hugo_assets_is_a_bounded_licensed_overlay(self) -> None:
-        private_root = self.rendered / ".orinoco-lite"
-        overlay = private_root / "materialized-hugo-assets"
-        upstream = overlay / "upstream"
-
-        self.assertTrue(upstream.is_dir())
-        self.assertTrue((overlay / "LICENSE").read_text(encoding="utf-8").strip())
-        self.assertFalse(any(path.is_symlink() for path in overlay.rglob("*")))
-
     def test_downstream_jobs_run_pixi_tasks_directly(self) -> None:
         for name in ("pages.yml", "validate.yml"):
             workflow = yaml.load(
@@ -219,7 +210,9 @@ class TemplateArchitectureTests(unittest.TestCase):
             "pixi.toml",
             ".copier-answers.yml",
         ):
-            text = (self.rendered / configuration).read_text(encoding="utf-8")
+            source = (self.rendered / configuration).read_text(encoding="utf-8")
+            value = tomllib.loads(source) if configuration.endswith(".toml") else yaml.safe_load(source)
+            text = repr(value)
             self.assertNotIn("www-from-model", text)
             self.assertNotIn("congo", text.lower())
 

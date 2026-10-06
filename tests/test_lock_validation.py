@@ -1,6 +1,7 @@
 from pathlib import Path
 import shutil
 import tempfile
+import re
 import unittest
 
 import importlib.util
@@ -28,7 +29,7 @@ class LockValidationTests(unittest.TestCase):
             self.assertEqual(lock.read_bytes(), before)
             self.assertFalse((destination / ".pixi/envs").exists())
             manifest = destination / "pixi.toml"
-            manifest.write_text(manifest.read_text().replace('python = ">=3.12,<3.13"', 'python = "==3.11.0"'))
+            manifest.write_text(re.sub(r'(?m)^python = .*$', 'python = "==3.11.0"', manifest.read_text()))
             self.assertIn('python = "==3.11.0"', manifest.read_text())
             with self.assertRaises(RuntimeError):
                 verify_frozen_lock(destination)

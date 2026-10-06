@@ -1,5 +1,11 @@
 # Update the template
 
+Use the current template and its selected package together.
+For the transition away from the materialized asset overlay, recreate the scaffold in a separate checkout and retain `site-specific/` (including its submodule history), `extensions/`, and site settings from `pyproject.toml`.
+Review the new scaffold, restore those site-owned inputs, then validate and build before replacing the existing checkout.
+Do not carry forward old `.orinoco-lite/` files, workflows, Pixi files, or Copier answers.
+There is no compatibility or automatic migration path for the retired layout.
+
 In GitHub, open **Actions → Update downstream template → Run workflow**.
 Select the branch to update.
 **Latest release** is selected by default and uses Copier’s latest version tag, including release candidates.
