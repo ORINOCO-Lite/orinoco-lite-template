@@ -46,6 +46,10 @@ jobs:
           fetch-depth: 0
           submodules: recursive
           persist-credentials: false
+      - name: Install Pixi for environment selection
+        uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          run-install: false
       - name: Prepare the updater environment
         env:
           ENVIRONMENT_REVISION: ${{ inputs.environment_revision || github.sha }}
@@ -53,6 +57,13 @@ jobs:
           revision=$(git rev-parse --verify --end-of-options "$ENVIRONMENT_REVISION^{commit}" || git rev-parse --verify --end-of-options "origin/$ENVIRONMENT_REVISION^{commit}")
           mkdir -p "$RUNNER_TEMP/orinoco-update"
           git archive "$revision" pixi.toml | tar -x -C "$RUNNER_TEMP/orinoco-update"
+          development=.orinoco-lite/orinoco-lite-dev
+          if git cat-file -e "$revision:$development" 2>/dev/null; then
+            package_commit=$(git rev-parse "$revision:$development")
+            package_repository=$(git config --blob "$revision:.gitmodules" --get "submodule.$development.url")
+            pixi add --manifest-path "$RUNNER_TEMP/orinoco-update/pixi.toml" --no-install \
+              --pypi orinoco-lite --git "$package_repository" --rev "$package_commit"
+          fi
           echo "ORINOCO_UPDATE_ENVIRONMENT=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY@$revision" >> "$GITHUB_ENV"
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
@@ -127,10 +138,21 @@ jobs:
           ref: ${{ github.sha }}
           fetch-depth: 0
           persist-credentials: false
+      - name: Install Pixi for environment selection
+        uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          run-install: false
       - name: Preserve the trusted publishing environment
         run: |
           mkdir -p "$RUNNER_TEMP/orinoco-publish"
           git archive "$GITHUB_SHA" pixi.toml | tar -x -C "$RUNNER_TEMP/orinoco-publish"
+          development=.orinoco-lite/orinoco-lite-dev
+          if git cat-file -e "$GITHUB_SHA:$development" 2>/dev/null; then
+            package_commit=$(git rev-parse "$GITHUB_SHA:$development")
+            package_repository=$(git config --blob "$GITHUB_SHA:.gitmodules" --get "submodule.$development.url")
+            pixi add --manifest-path "$RUNNER_TEMP/orinoco-publish/pixi.toml" --no-install \
+              --pypi orinoco-lite --git "$package_repository" --rev "$package_commit"
+          fi
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
           activate-environment: true

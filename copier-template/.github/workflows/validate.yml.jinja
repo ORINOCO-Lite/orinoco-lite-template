@@ -33,6 +33,9 @@ jobs:
           activate-environment: true
           cache: true
           locked: false
+      - name: Prepare editable package resources
+        if: ${{ hashFiles('.orinoco-lite/orinoco-lite-dev/pixi.toml') != '' }}
+        run: pixi run --manifest-path .orinoco-lite/orinoco-lite-dev/pixi.toml orinoco-lite dev prepare-resources
       - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: |

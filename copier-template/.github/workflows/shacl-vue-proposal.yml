@@ -161,6 +161,7 @@ jobs:
           path: trusted
           persist-credentials: false
           ref: ${{ steps.coordinates.outputs.base_sha }}
+          submodules: recursive
 
       - name: Check out exact proposal head as data
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -177,7 +178,11 @@ jobs:
           cache: true
           locked: false
           manifest-path: trusted/pixi.toml
-          activate-environment: true
+
+      - name: Prepare trusted editable package resources
+        if: ${{ hashFiles('trusted/.orinoco-lite/orinoco-lite-dev/pixi.toml') != '' }}
+        working-directory: trusted
+        run: pixi run --manifest-path .orinoco-lite/orinoco-lite-dev/pixi.toml orinoco-lite dev prepare-resources
 
       - name: Classify the fixed handoff or canonical metadata head
         id: inspect
