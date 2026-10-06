@@ -31,7 +31,7 @@ Keep generated output, tool state, and migration evidence out of content commits
 - Treat `site-specific/` and `extensions/` as user-facing source.
 - Keep a site-specific layout, configuration, or static override under the matching `site-specific/overrides/` directory.
   Propose reusable Hugo behavior to the template or pinned upstream.
-- Treat `.orinoco-lite/hugo-adapter/` and `.orinoco-lite/materialized-hugo-assets/` as template-owned Hugo inputs.
+- Treat `.orinoco-lite/hugo-adapter/` as template-owned Hugo input.
   Change them only for an explicit template-development or maintainer repinning task.
 - Keep executable metadata acquisition and curation code under `extensions/source-adapters/`; it is never website rendering code.
 - Never commit `generated/`, `.orinoco-lite/state/`, caches, build output, or a second digest inventory of the same commit.

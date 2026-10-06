@@ -1,8 +1,5 @@
 # Hugo asset notices
 
-Maintainers copy the Hugo assets required by downstream builds into `materialized-hugo-assets/upstream/` at their original upstream-relative paths.
-The adjacent `materialized-hugo-assets/LICENSE` applies to that bounded ordinary-file overlay.
-Applicable notices are preserved in the overlay when it is populated.
-
-The complete reusable website, its projection templates, and its theme are not copied into this scaffold.
-The selected Orinoco Lite package resolves them at build time and preserves notices supplied by their dependency closure, including Congo's MIT notice.
+The selected Orinoco Lite package resolves `www-from-model`, its required Hugo assets, projection templates, and theme at build time.
+The build assembly retains the Hugo asset license and applicable dependency notices, including Congo’s MIT notice.
+These components are not copied into this scaffold.
