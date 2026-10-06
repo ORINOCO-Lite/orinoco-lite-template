@@ -4,6 +4,8 @@ This is an Orinoco Lite metadata-driven website.
 Set its public identity in `pyproject.toml` under `[tool.orinoco.site]`.
 The starter records build immediately; replace them with your own metadata to populate the site.
 Custom pages and layouts are optional.
+The package supplies reusable rendering functionality and required upstream assets; the template supplies the scaffold and Orinoco adaptations.
+Your records, pages, and media remain site-owned.
 
 ```console
 pixi run build
@@ -22,4 +24,5 @@ The source boundary is:
 See [getting started](docs/getting-started.md), [ownership](docs/ownership.md), and [custom-domain setup](docs/custom-domain.md). <%- if pr_previews == 'netlify' %> Pull requests also get a disposable Netlify rendering; see [pull-request previews](docs/pr-previews.md). <%- endif %>
 
 Package versions are selected through Pixi and template versions through `.copier-answers.yml`.
+The template’s [minimum package requirement](.orinoco-lite/README.md#package-compatibility) is separate from that exact selection.
 See [template updates](docs/template-updates.md) for the supported update commands.
