@@ -32,7 +32,7 @@ jobs:
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
           activate-environment: true
-          cache: true
+          cache: false
           locked: false
       - name: Prepare editable package resources
         if: ${{ hashFiles('.orinoco-lite/orinoco-lite-dev/pixi.toml') != '' }}
@@ -88,7 +88,7 @@ jobs:
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
           activate-environment: true
-          cache: true
+          cache: false
           locked: false
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:

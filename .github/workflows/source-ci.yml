@@ -28,7 +28,7 @@ jobs:
       - name: Install the source environment
         uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
-          cache: true
+          cache: false
           locked: false
       - name: Check source
         run: pixi run pytest
@@ -42,7 +42,7 @@ jobs:
       - name: Install the source environment
         uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
-          cache: true
+          cache: false
           locked: false
       - name: Test a complete downstream build
         run: |

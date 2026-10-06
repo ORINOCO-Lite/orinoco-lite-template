@@ -50,6 +50,7 @@ jobs:
         uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
           run-install: false
+          cache: false
       - name: Prepare the updater environment
         env:
           ENVIRONMENT_REVISION: ${{ inputs.environment_revision || github.sha }}
@@ -69,6 +70,7 @@ jobs:
         with:
           activate-environment: true
           locked: false
+          cache: false
           manifest-path: ${{ runner.temp }}/orinoco-update/pixi.toml
       - name: Configure update commit identity
         run: |
@@ -142,6 +144,7 @@ jobs:
         uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
           run-install: false
+          cache: false
       - name: Preserve the trusted publishing environment
         run: |
           mkdir -p "$RUNNER_TEMP/orinoco-publish"
@@ -157,6 +160,7 @@ jobs:
         with:
           activate-environment: true
           locked: false
+          cache: false
           manifest-path: ${{ runner.temp }}/orinoco-publish/pixi.toml
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:

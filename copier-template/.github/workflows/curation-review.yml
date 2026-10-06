@@ -43,7 +43,7 @@ jobs:
         with:
           activate-environment: true
           locked: false
-          cache: true
+          cache: false
 
       - name: Prepare editable package resources
         if: ${{ hashFiles('.orinoco-lite/orinoco-lite-dev/pixi.toml') != '' }}
