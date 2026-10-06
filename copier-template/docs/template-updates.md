@@ -1,6 +1,8 @@
 # Update the template
 
-Use the current template and its selected package together.
+Select a package meeting the template’s [minimum package requirement](../.orinoco-lite/README.md#package-compatibility).
+Package updates can advance rendering software and required assets without a template update or changes to site-owned content.
+Update the template when you need changes to its scaffold, workflows, or Orinoco adaptations.
 For the transition away from the materialized asset overlay, recreate the scaffold in a separate checkout and retain `site-specific/` (including its submodule history), `extensions/`, and site settings from `pyproject.toml`.
 Review the new scaffold, restore those site-owned inputs, then validate and build before replacing the existing checkout.
 Do not carry forward old `.orinoco-lite/` files, workflows, Pixi files, or Copier answers.

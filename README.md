@@ -5,7 +5,6 @@ It supplies repository structure, workflows, helper tools, and a small Orinoco H
 It does not distribute the reusable website.
 
 The template creates a working site with upstream's structure and a small, connected starter dataset that downstreams can replace without authoring pages or layouts.
-It also supports supplying upstream data and site inputs for repeatable rebuilds and comparisons.
 See the [template objective in the project design charter](https://github.com/ORINOCO-Lite/orinoco-lite-dev/blob/main/docs/project-design.md#reusable-components).
 
 The selected `orinoco-lite` package revision is the single authority for the exact German [`www-from-model`](https://hub.psychoinformatics.de/www/www-from-model) revision and official Congo dependency.
@@ -25,7 +24,8 @@ pixi run render
 pixi run pytest
 ```
 
-Use the current package and template together.
+Use a package meeting the template’s [minimum package requirement](copier-template/.orinoco-lite/README.md#package-compatibility).
+The package supplies reusable rendering functionality and required framework assets; ordinary package updates do not require template updates.
 When replacing a retired layout, recreate the scaffold with Copier and restore site-owned inputs; do not retain old framework files or add compatibility code.
 Copier is the creation and update mechanism.
 For updates, the package wraps Copier and DataLad in `orinoco-lite template update`.
@@ -51,7 +51,8 @@ cd my-site
 ```
 
 DataLad is optional and is used here only to record instantiation provenance; `git init my-site` is equivalent.
-The build never requires Git Annex, so `--no-annex` is the correct mode and no Git Annex installation is needed.
+The parent repository stores ordinary Git files, so use `--no-annex`.
+The package includes Git Annex to retrieve required upstream framework assets during builds.
 
 ### 2. Instantiate the scaffold
 
