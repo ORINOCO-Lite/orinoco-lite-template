@@ -33,8 +33,8 @@ class Page(HTMLParser):
 
 @pytest.mark.integration
 class DefaultRenderTests(unittest.TestCase):
-    def test_default_render_builds_without_annex_and_serves_every_navigation_route(self) -> None:
-        """An ordinary starter site builds without invoking Git Annex."""
+    def test_default_render_builds_and_serves_every_navigation_route(self) -> None:
+        """An ordinary starter site uses the bundled tools and selected upstream directly."""
 
         with tempfile.TemporaryDirectory(prefix="orinoco-template-default-") as temp:
             trap_dir = Path(temp) / "no-annex"
@@ -89,6 +89,13 @@ class DefaultRenderTests(unittest.TestCase):
             self.run_command(
                 ["pixi", "run", "--locked", "orinoco-lite", "verify-site", "build/site"], rendered
             )
+            # Installed builds need the selected upstream, not another package checkout.
+            sources = list((rendered / ".orinoco/www-from-model").iterdir())
+            self.assertEqual(len(sources), 1)
+            source = sources[0]
+            self.assertTrue((source / "themes/congo/theme.toml").is_file())
+            self.assertFalse((source / "src/orinoco_lite").exists())
+            self.assertFalse((source / "submodules/www-from-model").exists())
             site = rendered / "build/site"
             home = (site / "index.html").read_text()
             main = re.search(r"<main\b[^>]*>(.*?)</main>", home, re.S).group(1)
