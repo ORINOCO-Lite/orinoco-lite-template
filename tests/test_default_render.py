@@ -96,6 +96,9 @@ class DefaultRenderTests(unittest.TestCase):
             self.assertTrue((source / "themes/congo/theme.toml").is_file())
             self.assertFalse((source / "src/orinoco_lite").exists())
             self.assertFalse((source / "submodules/www-from-model").exists())
+            self.assertFalse((rendered / "generated").exists())
+            self.assertTrue((rendered / "build/hugo-projection/records.jsonl").is_file())
+            self.assertTrue((rendered / "build/hugo-assembly/config").is_dir())
             site = rendered / "build/site"
             home = (site / "index.html").read_text()
             main = re.search(r"<main\b[^>]*>(.*?)</main>", home, re.S).group(1)

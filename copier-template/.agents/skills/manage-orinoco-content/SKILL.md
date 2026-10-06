@@ -12,7 +12,7 @@ Keep generated output, tool state, and migration evidence out of content commits
 
 1. Read `site-specific/site.yaml` and the existing files under `site-specific/content/` to understand the site's identity, navigation, and editorial conventions.
 2. Edit Markdown under `site-specific/content/`; preserve existing front matter and navigation intent.
-3. Do not edit `generated/`.
+3. Do not edit `build/` output.
    Run `pixi run orinoco-lite validate` to regenerate it locally.
 4. Run `pixi run build` and inspect the affected page before committing.
 5. Keep the commit focused on source files; ignored projection output is not review evidence.
@@ -34,7 +34,7 @@ Keep generated output, tool state, and migration evidence out of content commits
 - Treat `.orinoco-lite/hugo-adapter/` as template-owned Hugo input.
   Change them only for an explicit template-development or maintainer repinning task.
 - Keep executable metadata acquisition and curation code under `extensions/source-adapters/`; it is never website rendering code.
-- Never commit `generated/`, `.orinoco-lite/state/`, caches, build output, or a second digest inventory of the same commit.
+- Never commit `.orinoco-lite/state/`, caches, build output, or a second digest inventory of the same commit.
 - Prefer a small source diff plus rendered review over provenance narration in the downstream tree.
 
 ## Metadata-adapter handoff

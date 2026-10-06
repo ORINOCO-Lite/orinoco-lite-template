@@ -20,7 +20,7 @@ The package supplies reusable rendering functionality, its pinned upstream depen
 The template supplies the Orinoco adaptation and scaffold; site records, pages, and media remain downstream-owned.
 Package updates do not import the upstream organisation's content.
 
-This template requires the reusable upstream checkout and asset handling introduced in package commit `6b98af8c16ade43551f4713db21affd268a11a91`.
+This template requires the build output paths introduced in package commit `1a92c3a129d12100ab9be86e748ed2bdcd2ff426`, including its reusable upstream checkout and asset handling.
 These changes are not yet released; this commit is the compatibility baseline until a containing release supplies the minimum version.
 Select this commit or a descendant retaining that functionality for candidate testing.
 A fork must also include that functionality; a higher version number alone does not establish compatibility.

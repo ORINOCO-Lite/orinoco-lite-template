@@ -45,8 +45,8 @@ jobs:
       - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: |
-            generated/projection
-            generated/.projection-cache.json
+            build/hugo-projection
+            build/.projection-cache.json
           key: projection-${{ runner.os }}-${{ github.workflow }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: projection-${{ runner.os }}-
       - name: Validate and build

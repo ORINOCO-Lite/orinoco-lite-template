@@ -15,6 +15,6 @@ orinoco-lite = { git = "[[ package_repository ]]", rev = "[[ package_revision ]]
 
 [tasks]
 build = "orinoco-lite build --destination build/site --base-url /"
-build-pages = "orinoco-lite build --destination build/pages --publication-bundle build/pages-publication.bundle"
+build-pages = "orinoco-lite build --destination build/site --publication-bundle build/pages-publication.bundle"
 serve = "orinoco-lite serve --directory build/site --port 8765"
 dev-enable = "orinoco-lite dev enable"
