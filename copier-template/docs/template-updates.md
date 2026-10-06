@@ -65,7 +65,8 @@ The command never pushes, creates a pull request, or publishes the website.
 
 DataLad records `orinoco-lite template apply` with immutable selections.
 For historical replay, use another clone and restore the recorded execution environment and submodule selections before `datalad rerun`.
-GitHub runs record the repository and commit supplying the updater's `pixi.toml` and `pixi.lock`; local runs normally use the recorded parent commit's environment.
+GitHub runs record the repository and commit supplying the updater's `pixi.toml`.
+Locks are resolved locally and remain untracked; exact third-party resolutions are not retained for historical replay.
 The package performing an update can differ from the package it selects; validation starts with a fresh Pixi invocation.
 Replaying the generated update does not reproduce later human conflict resolutions.
 

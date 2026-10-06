@@ -10,9 +10,6 @@ on:
 permissions:
   contents: read
 
-env:
-  PIXI_LOCKED: "true"
-
 jobs:
   source-check:
     name: Source check (${{ matrix.label }})
@@ -28,11 +25,11 @@ jobs:
     steps:
       - name: Check out the Copier source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Install the locked source environment
+      - name: Install the source environment
         uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
           cache: true
-          locked: true
+          locked: false
       - name: Check source
         run: pixi run pytest
 
@@ -42,11 +39,11 @@ jobs:
     steps:
       - name: Check out the Copier source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Install the locked source environment
+      - name: Install the source environment
         uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
           cache: true
-          locked: true
+          locked: false
       - name: Test a complete downstream build
         run: |
           unset GITHUB_REPOSITORY

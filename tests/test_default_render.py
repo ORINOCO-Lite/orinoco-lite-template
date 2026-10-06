@@ -84,7 +84,7 @@ class DefaultRenderTests(unittest.TestCase):
                 self.run_command(["pixi", "add", "--pypi", f"orinoco-lite @ {Path(wheel).resolve().as_uri()}"], rendered)
             if revision := os.environ.get("ORINOCO_TEST_PACKAGE_REVISION"):
                 self.run_command(["pixi", "run", "orinoco-lite", "package", "update", "--revision", revision], rendered)
-                self.run_command(["git", "add", "pixi.toml", "pixi.lock"], rendered)
+                self.run_command(["git", "add", "pixi.toml"], rendered)
                 self.run_command(["git", "commit", "-m", "test: select package candidate"], rendered)
             self.run_command(["pixi", "run", "--locked", "orinoco-lite", "validate"], rendered)
             self.run_command(["pixi", "run", "--locked", "build"], rendered)

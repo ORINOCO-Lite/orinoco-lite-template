@@ -22,7 +22,7 @@ Run the website-build integration test explicitly:
 pixi run pytest -m integration
 ```
 
-It creates a disposable default downstream, installs its locked environment, validates and builds the starter site, then runs `orinoco-lite verify-site build/site`.
+It creates a disposable default downstream, resolves and installs its environment, validates and builds the starter site, then runs `orinoco-lite verify-site build/site`.
 That verification checks the homepage and its direct references, not every route or browser interaction.
 The starter test also checks its linked pages and optional authored replacements.
 Replacement-metadata testing belongs in the engineering repository's [downstream test](https://github.com/ORINOCO-Lite/orinoco-lite-dev/blob/main/tests/engineering/test_template_downstream.py), which exercises a selected template through the ordinary build CLI.

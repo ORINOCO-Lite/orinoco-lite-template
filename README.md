@@ -38,9 +38,9 @@ See [testing](docs/testing.md) and [releasing](docs/releasing.md).
 
 A downstream is an ordinary Git repository.
 Only [Pixi](https://pixi.sh) 0.76 or newer and a Copier runner are required; the scaffold pins everything else.
-CI always installs the latest Pixi and sets `PIXI_LOCKED=true` to reject stale locks without rewriting them.
+CI installs the latest Pixi and resolves dependencies from the manifest.
 Development shells should leave `PIXI_LOCKED` unset so package switches can resolve dependencies.
-For deliberate dependency updates, run `env -u PIXI_LOCKED pixi lock`, then review and commit the changes.
+Keep `pixi.lock` local and untracked; commit dependency selections in `pixi.toml`.
 The commands below use [`uv`](https://docs.astral.sh/uv/) to run Copier and DataLad without installing them.
 
 ### 1. Create the repository
@@ -143,7 +143,7 @@ Provide `extensions/source-adapters/<adapter>/review.py` in the trusted website 
 The adapter reads captured source and mapping policy from the immutable base checkout at `root`; executable adapter code comes from `trusted_root`.
 Dispatch the workflow with that adapter name, follow its downstream review link, and submit one explicit decision for every candidate.
 The package owns repository coordination, DataLad recording, composed validation, and temporary App access through `orinoco-lite curation validate`, `publish`, and `complete`.
-The workflow supplies the event, permissions, locked environment, and GitHub artifact upload.
+The workflow supplies the event, permissions, environment, and GitHub artifact upload.
 A stale head or lost access stops the write; a failure after the metadata push reports the partial result for inspection.
 Neither draft is merged automatically.
 
@@ -170,7 +170,7 @@ pixi run build && pixi run orinoco-lite verify-site build/site
 `orinoco-lite verify-site` checks the locally built site before it is published.
 
 Pixi installs the downstream-selected package dependency declared in `pixi.toml`.
-A downstream may retain the generated `pixi.lock` for the complete resolved environment; no Orinoco-specific release lock is required.
+Downstream `pixi.lock` files stay local and untracked.
 Copier records the template selection in `.copier-answers.yml`; workflows contain their pinned action references.
 Resources and specifications required to build or operate Orinoco Lite are internal to that package and share its version and integrity boundary.
 

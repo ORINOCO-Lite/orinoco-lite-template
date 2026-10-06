@@ -27,9 +27,6 @@ on:
 permissions:
   contents: read
 
-env:
-  PIXI_LOCKED: "true"
-
 concurrency:
   group: template-update-${{ github.ref }}
   cancel-in-progress: false
@@ -55,12 +52,12 @@ jobs:
         run: |
           revision=$(git rev-parse --verify --end-of-options "$ENVIRONMENT_REVISION^{commit}" || git rev-parse --verify --end-of-options "origin/$ENVIRONMENT_REVISION^{commit}")
           mkdir -p "$RUNNER_TEMP/orinoco-update"
-          git archive "$revision" pixi.toml pixi.lock | tar -x -C "$RUNNER_TEMP/orinoco-update"
+          git archive "$revision" pixi.toml | tar -x -C "$RUNNER_TEMP/orinoco-update"
           echo "ORINOCO_UPDATE_ENVIRONMENT=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY@$revision" >> "$GITHUB_ENV"
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
           activate-environment: true
-          locked: true
+          locked: false
           manifest-path: ${{ runner.temp }}/orinoco-update/pixi.toml
       - name: Configure update commit identity
         run: |
@@ -133,11 +130,11 @@ jobs:
       - name: Preserve the trusted publishing environment
         run: |
           mkdir -p "$RUNNER_TEMP/orinoco-publish"
-          git archive "$GITHUB_SHA" pixi.toml pixi.lock | tar -x -C "$RUNNER_TEMP/orinoco-publish"
+          git archive "$GITHUB_SHA" pixi.toml | tar -x -C "$RUNNER_TEMP/orinoco-publish"
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
           activate-environment: true
-          locked: true
+          locked: false
           manifest-path: ${{ runner.temp }}/orinoco-publish/pixi.toml
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
