@@ -158,7 +158,7 @@ pixi run build
 pixi run serve
 ```
 
-The first build resolves and caches the exact www-from-model checkout, so it needs network access to GitHub and takes longer than later builds.
+The installed package includes the required upstream rendering files and assets; website builds need no upstream checkout or upstream asset downloads.
 `pixi run serve` publishes the built site on <http://127.0.0.1:8765/>, including the static `/edit/` metadata editor.
 
 Before proposing a change, run what CI runs:

@@ -80,6 +80,8 @@ class DefaultRenderTests(unittest.TestCase):
             )
             self.run_command(["git", "add", "."], rendered)
             self.run_command(["git", "commit", "-m", "initial render"], rendered)
+            if wheel := os.environ.get("ORINOCO_TEST_PACKAGE_WHEEL"):
+                self.run_command(["pixi", "add", "--pypi", f"orinoco-lite @ {Path(wheel).resolve().as_uri()}"], rendered)
             if revision := os.environ.get("ORINOCO_TEST_PACKAGE_REVISION"):
                 self.run_command(["pixi", "run", "orinoco-lite", "package", "update", "--revision", revision], rendered)
                 self.run_command(["git", "add", "pixi.toml", "pixi.lock"], rendered)
@@ -89,13 +91,8 @@ class DefaultRenderTests(unittest.TestCase):
             self.run_command(
                 ["pixi", "run", "--locked", "orinoco-lite", "verify-site", "build/site"], rendered
             )
-            # Installed builds need the selected upstream, not another package checkout.
-            source = rendered / ".orinoco-lite/www-from-model"
             self.assertFalse((rendered / ".orinoco").exists())
-            self.run_command(["git", "check-ignore", str(source)], rendered)
-            self.assertTrue((source / "themes/congo/theme.toml").is_file())
-            self.assertFalse((source / "src/orinoco_lite").exists())
-            self.assertFalse((source / "submodules/www-from-model").exists())
+            self.assertFalse((rendered / ".orinoco-lite/www-from-model").exists())
             self.assertFalse((rendered / "generated").exists())
             self.assertTrue((rendered / "build/hugo-projection/records.jsonl").is_file())
             self.assertTrue((rendered / "build/hugo-assembly/config").is_dir())

@@ -1,16 +1,12 @@
 # Orinoco Lite template internals
 
-`.orinoco-lite/hugo-adapter/` is a small adapter applied to the www-from-model checkout resolved by the selected Orinoco Lite package.
+`.orinoco-lite/hugo-adapter/` is a small adapter applied to the www-from-model rendering resources supplied by the selected Orinoco Lite package.
 It maps downstream settings, supplies an unbranded homepage and editorial layout, and adds record editing and people-group rendering.
 Shared configuration defaults, theme components, and graph rendering come from upstream.
 
-`www-from-model/` is one ignored Git checkout with its Annex object store.
-Package changes switch its selected commit and nested dependencies while retaining downloaded objects.
-Pages and validation workflows cache this directory between runs; a cache miss downloads the required content again.
-Concurrent builds selecting different revisions require separate downstream working directories.
-`hugo-adapter/` and these notices remain tracked template files.
-
-The package retrieves required Hugo assets with Git Annex from the same selected checkout and copies ordinary files into the build assembly.
+Fixed installations bundle the required upstream rendering files, Congo, assets, and notices.
+Website builds need no upstream Git/Annex checkout or asset downloads.
+Editable installations use the package's nested working checkout, including local changes.
 
 Executable commands are supplied by the installed `orinoco-lite` package and invoked through Pixi tasks.
 
@@ -20,7 +16,7 @@ The package supplies reusable rendering functionality, its pinned upstream depen
 The template supplies the Orinoco adaptation and scaffold; site records, pages, and media remain downstream-owned.
 Package updates do not import the upstream organisation's content.
 
-This template requires the build output paths introduced in package commit `1a92c3a129d12100ab9be86e748ed2bdcd2ff426`, including its reusable upstream checkout and asset handling.
+This template requires the packaged rendering resources and build output paths supplied by package commit `d573ae1107ae947002ae33b64027b14f1aa83f81`.
 These changes are not yet released; this commit is the compatibility baseline until a containing release supplies the minimum version.
 Select this commit or a descendant retaining that functionality for candidate testing.
 A fork must also include that functionality; a higher version number alone does not establish compatibility.
