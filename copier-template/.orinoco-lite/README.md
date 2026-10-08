@@ -16,7 +16,7 @@ The package supplies reusable rendering functionality, its pinned upstream depen
 The template supplies the Orinoco adaptation and scaffold; site records, pages, and media remain downstream-owned.
 Package updates do not import the upstream organisation's content.
 
-This template requires Orinoco Lite `0.3.0rc10` or a later version retaining its packaged rendering resources and build output paths.
+This template requires Orinoco Lite `0.3.0` or a later version retaining its packaged rendering resources and build output paths.
 A fork must also include that functionality; a higher version number alone does not establish compatibility.
 
 The exact package selection lives in `pixi.toml` and may advance independently of the template.
