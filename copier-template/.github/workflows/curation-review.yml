@@ -12,9 +12,6 @@ on:
 
 permissions: {}
 
-env:
-  PIXI_LOCKED: "true"
-
 jobs:
   curate:
     if: >-
@@ -37,6 +34,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.sha }}
+          submodules: recursive
           fetch-depth: 0
           persist-credentials: false
 
@@ -44,8 +42,12 @@ jobs:
         uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
           activate-environment: true
-          locked: true
-          cache: true
+          locked: false
+          cache: false
+
+      - name: Prepare editable package resources
+        if: ${{ hashFiles('.orinoco-lite/orinoco-lite-dev/pixi.toml') != '' }}
+        run: pixi run --manifest-path .orinoco-lite/orinoco-lite-dev/pixi.toml orinoco-lite dev prepare-resources
 
       # The App grants repository write access only after this step succeeds.
       - name: Validate and record the composed adapter result

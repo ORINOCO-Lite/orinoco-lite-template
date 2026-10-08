@@ -2,21 +2,19 @@
 requires-pixi = ">=0.76"
 name = "[[ project_slug ]]"
 channels = ["conda-forge"]
-platforms = [{ platform = "osx-arm64", macos = "14.0" }, "linux-64"]
+platforms = [{ platform = "osx-arm64", macos = "14.0" }, { platform = "linux-64", glibc = "2.34" }]
 
 [dependencies]
-python = ">=3.12,<3.13"
-copier = "==9.10.3"
-hugo = "==0.154.5"
-pyyaml = "==6.0.2"
+python = "*"
+git = "*"
+# The selected Congo theme uses .Site.Author, removed in Hugo 0.156.
+hugo = "<0.156"
 
 [pypi-dependencies]
 orinoco-lite = { git = "[[ package_repository ]]", rev = "[[ package_revision ]]" }
-datalad = ">=1.6.2,<2"
 
 [tasks]
 build = "orinoco-lite build --destination build/site --base-url /"
-build-pages = "orinoco-lite build --destination build/pages --publication-bundle build/pages-publication.bundle"
+build-pages = "orinoco-lite build --destination build/site --publication-bundle build/pages-publication.bundle"
 serve = "orinoco-lite serve --directory build/site --port 8765"
-dev-enable = 'datalad run --explicit --output pixi.toml --output pixi.lock --output .orinoco-lite/dev -m "chore: enable editable Orinoco Lite" -- orinoco-lite dev enable'
-dev-disable = 'datalad run --explicit --output pixi.toml --output pixi.lock --output .orinoco-lite/dev -m "chore: disable editable Orinoco Lite" -- orinoco-lite dev disable'
+dev-enable = "orinoco-lite dev enable"

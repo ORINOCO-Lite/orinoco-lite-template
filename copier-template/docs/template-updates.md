@@ -1,5 +1,13 @@
 # Update the template
 
+Select a package meeting the template’s [minimum package requirement](../.orinoco-lite/README.md#package-compatibility).
+Package updates can advance rendering software and required assets without a template update or changes to site-owned content.
+Update the template when you need changes to its scaffold, workflows, or Orinoco adaptations.
+For the transition away from the materialized asset overlay, recreate the scaffold in a separate checkout and retain `site-specific/` (including its submodule history), `extensions/`, and site settings from `pyproject.toml`.
+Review the new scaffold, restore those site-owned inputs, then validate and build before replacing the existing checkout.
+Do not carry forward old `.orinoco-lite/` files, workflows, Pixi files, or Copier answers.
+There is no compatibility or automatic migration path for the retired layout.
+
 In GitHub, open **Actions → Update downstream template → Run workflow**.
 Select the branch to update.
 **Latest release** is selected by default and uses Copier’s latest version tag, including release candidates.
@@ -57,7 +65,8 @@ The command never pushes, creates a pull request, or publishes the website.
 
 DataLad records `orinoco-lite template apply` with immutable selections.
 For historical replay, use another clone and restore the recorded execution environment and submodule selections before `datalad rerun`.
-GitHub runs record the repository and commit supplying the updater's `pixi.toml` and `pixi.lock`; local runs normally use the recorded parent commit's environment.
+GitHub runs record the repository and commit supplying the updater's `pixi.toml`.
+Locks are resolved locally and remain untracked; exact third-party resolutions are not retained for historical replay.
 The package performing an update can differ from the package it selects; validation starts with a fresh Pixi invocation.
 Replaying the generated update does not reproduce later human conflict resolutions.
 

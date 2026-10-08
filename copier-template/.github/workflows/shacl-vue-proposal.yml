@@ -20,9 +20,6 @@ on:
 
 permissions: {}
 
-env:
-  PIXI_LOCKED: "true"
-
 jobs:
   validate:
     name: Materialize or validate one explicit human edit
@@ -164,6 +161,7 @@ jobs:
           path: trusted
           persist-credentials: false
           ref: ${{ steps.coordinates.outputs.base_sha }}
+          submodules: recursive
 
       - name: Check out exact proposal head as data
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -177,9 +175,14 @@ jobs:
         uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
           activate-environment: true
-          cache: true
-          locked: true
+          cache: false
+          locked: false
           manifest-path: trusted/pixi.toml
+
+      - name: Prepare trusted editable package resources
+        if: ${{ hashFiles('trusted/.orinoco-lite/orinoco-lite-dev/pixi.toml') != '' }}
+        working-directory: trusted
+        run: pixi run --manifest-path .orinoco-lite/orinoco-lite-dev/pixi.toml orinoco-lite dev prepare-resources
 
       - name: Classify the fixed handoff or canonical metadata head
         id: inspect

@@ -1,11 +1,10 @@
 # Orinoco Lite downstream template
 
 This repository publishes a thin Copier scaffold for Orinoco Lite downstreams.
-It supplies repository structure, workflows, helper tools, a small Orinoco Hugo adapter, and a bounded licensed overlay for required Hugo assets.
+It supplies repository structure, workflows, helper tools, and a small Orinoco Hugo adapter.
 It does not distribute the reusable website.
 
 The template creates a working site with upstream's structure and a small, connected starter dataset that downstreams can replace without authoring pages or layouts.
-It also supports supplying upstream data and site inputs for repeatable rebuilds and comparisons.
 See the [template objective in the project design charter](https://github.com/ORINOCO-Lite/orinoco-lite-dev/blob/main/docs/project-design.md#reusable-components).
 
 The selected `orinoco-lite` package revision is the single authority for the exact German [`www-from-model`](https://hub.psychoinformatics.de/www/www-from-model) revision and official Congo dependency.
@@ -13,8 +12,6 @@ At build time the package resolves those sources and composes them with:
 
 ```text
 .orinoco-lite/hugo-adapter/  small template-owned adaptation
-.orinoco-lite/materialized-hugo-assets/upstream/
-                             required ordinary-file asset overlay
 site-specific/               declarative downstream inputs and overrides
 extensions/                  optional metadata acquisition and curation code
 ```
@@ -27,7 +24,10 @@ pixi run render
 pixi run pytest
 ```
 
-Copier is the only supported creation and update path.
+Use a package meeting the template’s [minimum package requirement](copier-template/.orinoco-lite/README.md#package-compatibility).
+The package supplies reusable rendering functionality and required framework assets; ordinary package updates do not require template updates.
+When replacing a retired layout, recreate the scaffold with Copier and restore site-owned inputs; do not retain old framework files or add compatibility code.
+Copier is the creation and update mechanism.
 For updates, the package wraps Copier and DataLad in `orinoco-lite template update`.
 The downstream's **Update downstream template** workflow invokes that command and opens a draft pull request.
 See [template updates](copier-template/docs/template-updates.md) for selection, conflicts, and rollback.
@@ -38,9 +38,9 @@ See [testing](docs/testing.md) and [releasing](docs/releasing.md).
 
 A downstream is an ordinary Git repository.
 Only [Pixi](https://pixi.sh) 0.76 or newer and a Copier runner are required; the scaffold pins everything else.
-CI always installs the latest Pixi and sets `PIXI_LOCKED=true` to reject stale locks without rewriting them.
-For the same local default, run `export PIXI_LOCKED=true` in your shell.
-For deliberate dependency updates, run `env -u PIXI_LOCKED pixi lock`, then review and commit the changes.
+CI installs the latest Pixi and resolves dependencies from the manifest.
+Development shells should leave `PIXI_LOCKED` unset so package switches can resolve dependencies.
+Keep `pixi.lock` local and untracked; commit dependency selections in `pixi.toml`.
 The commands below use [`uv`](https://docs.astral.sh/uv/) to run Copier and DataLad without installing them.
 
 ### 1. Create the repository
@@ -51,7 +51,8 @@ cd my-site
 ```
 
 DataLad is optional and is used here only to record instantiation provenance; `git init my-site` is equivalent.
-The build never requires Git Annex, so `--no-annex` is the correct mode and no Git Annex installation is needed.
+The parent repository stores ordinary Git files, so use `--no-annex`.
+The package includes Git Annex to retrieve required upstream framework assets during builds.
 
 ### 2. Instantiate the scaffold
 
@@ -142,7 +143,7 @@ Provide `extensions/source-adapters/<adapter>/review.py` in the trusted website 
 The adapter reads captured source and mapping policy from the immutable base checkout at `root`; executable adapter code comes from `trusted_root`.
 Dispatch the workflow with that adapter name, follow its downstream review link, and submit one explicit decision for every candidate.
 The package owns repository coordination, DataLad recording, composed validation, and temporary App access through `orinoco-lite curation validate`, `publish`, and `complete`.
-The workflow supplies the event, permissions, locked environment, and GitHub artifact upload.
+The workflow supplies the event, permissions, environment, and GitHub artifact upload.
 A stale head or lost access stops the write; a failure after the metadata push reports the partial result for inspection.
 Neither draft is merged automatically.
 
@@ -157,7 +158,7 @@ pixi run build
 pixi run serve
 ```
 
-The first build resolves and caches the exact www-from-model checkout, so it needs network access to GitHub and takes longer than later builds.
+The installed package includes the required upstream rendering files and assets; website builds need no upstream checkout or upstream asset downloads.
 `pixi run serve` publishes the built site on <http://127.0.0.1:8765/>, including the static `/edit/` metadata editor.
 
 Before proposing a change, run what CI runs:
@@ -169,7 +170,7 @@ pixi run build && pixi run orinoco-lite verify-site build/site
 `orinoco-lite verify-site` checks the locally built site before it is published.
 
 Pixi installs the downstream-selected package dependency declared in `pixi.toml`.
-A downstream may retain the generated `pixi.lock` for the complete resolved environment; no Orinoco-specific release lock is required.
+Downstream `pixi.lock` files stay local and untracked.
 Copier records the template selection in `.copier-answers.yml`; workflows contain their pinned action references.
 Resources and specifications required to build or operate Orinoco Lite are internal to that package and share its version and integrity boundary.
 
@@ -181,6 +182,6 @@ See [`docs/custom-domain.md`](copier-template/docs/custom-domain.md) in a render
 
 ## License
 
-Original scaffold software and the bounded materialized Hugo asset overlay are MIT licensed; original documentation is CC BY 4.0.
+Original scaffold software is MIT licensed; original documentation is CC BY 4.0.
 Applicable dependency notices are preserved.
 See [LICENSES.md](LICENSES.md).

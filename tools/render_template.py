@@ -87,24 +87,12 @@ def source_commit(repository: Path, source_ref: str | None) -> str:
     return commit
 
 
-def verify_frozen_lock(destination: Path) -> None:
-    """Require the source lock to already match the rendered manifest."""
+def resolve_lock(destination: Path) -> None:
+    """Resolve a local downstream lock from the rendered manifest."""
 
-    lock = destination / "pixi.lock"
-    if not lock.is_file():
-        raise RenderError("copier-template/pixi.lock was not rendered")
     run(
-        [
-            executable("pixi"),
-            "run",
-            "--locked",
-            "--no-config",
-            "--no-install",
-            "--manifest-path",
-            (destination / "pixi.toml").as_posix(),
-            "--",
-            "true",
-        ],
+        [executable("pixi"), "lock", "--manifest-path",
+         (destination / "pixi.toml").as_posix()],
         cwd=destination,
     )
 
@@ -147,7 +135,7 @@ def render(
     run(command, cwd=repository)
     answers = normalize_answers(destination, source_commit(repository, source_ref))
     if verify_lock:
-        verify_frozen_lock(destination)
+        resolve_lock(destination)
     return answers
 
 

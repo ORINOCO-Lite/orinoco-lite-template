@@ -33,8 +33,8 @@ class Page(HTMLParser):
 
 @pytest.mark.integration
 class DefaultRenderTests(unittest.TestCase):
-    def test_default_render_builds_without_annex_and_serves_every_navigation_route(self) -> None:
-        """An ordinary starter site builds without invoking Git Annex."""
+    def test_default_render_builds_and_serves_every_navigation_route(self) -> None:
+        """An ordinary starter site uses the bundled tools and selected upstream directly."""
 
         with tempfile.TemporaryDirectory(prefix="orinoco-template-default-") as temp:
             trap_dir = Path(temp) / "no-annex"
@@ -80,15 +80,22 @@ class DefaultRenderTests(unittest.TestCase):
             )
             self.run_command(["git", "add", "."], rendered)
             self.run_command(["git", "commit", "-m", "initial render"], rendered)
+            if wheel := os.environ.get("ORINOCO_TEST_PACKAGE_WHEEL"):
+                self.run_command(["pixi", "add", "--pypi", f"orinoco-lite @ {Path(wheel).resolve().as_uri()}"], rendered)
             if revision := os.environ.get("ORINOCO_TEST_PACKAGE_REVISION"):
                 self.run_command(["pixi", "run", "orinoco-lite", "package", "update", "--revision", revision], rendered)
-                self.run_command(["git", "add", "pixi.toml", "pixi.lock"], rendered)
+                self.run_command(["git", "add", "pixi.toml"], rendered)
                 self.run_command(["git", "commit", "-m", "test: select package candidate"], rendered)
             self.run_command(["pixi", "run", "--locked", "orinoco-lite", "validate"], rendered)
             self.run_command(["pixi", "run", "--locked", "build"], rendered)
             self.run_command(
                 ["pixi", "run", "--locked", "orinoco-lite", "verify-site", "build/site"], rendered
             )
+            self.assertFalse((rendered / ".orinoco").exists())
+            self.assertFalse((rendered / ".orinoco-lite/www-from-model").exists())
+            self.assertFalse((rendered / "generated").exists())
+            self.assertTrue((rendered / "build/hugo-projection/records.jsonl").is_file())
+            self.assertTrue((rendered / "build/hugo-assembly/config").is_dir())
             site = rendered / "build/site"
             home = (site / "index.html").read_text()
             main = re.search(r"<main\b[^>]*>(.*?)</main>", home, re.S).group(1)
