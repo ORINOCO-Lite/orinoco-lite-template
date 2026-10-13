@@ -148,6 +148,30 @@ class ShaclVueWorkflowTests(unittest.TestCase):
         self.assertIn("gh workflow run validate.yml", retrigger)
         self.assertIn('--ref "$HEAD_REF"', retrigger)
 
+    def test_metadata_access_requires_an_editor_handoff(self) -> None:
+        condition = self.steps[
+            "Obtain bounded metadata read access from the curation App"
+        ]["if"]
+        cases = [
+            ("example/metadata", "canonical", "", False),
+            ("example/metadata", "handoff", "", True),
+            ("example/metadata", "canonical", "a" * 40, True),
+            ("", "handoff", "", False),
+        ]
+        for repository, phase, handoff, expected in cases:
+            with self.subTest(phase=phase, repository=repository, handoff=handoff):
+                expression = condition.replace(
+                    "steps.inspect.outputs.metadata_repository", repr(repository)
+                ).replace("steps.inspect.outputs.phase", repr(phase)).replace(
+                    "inputs.handoff", repr(handoff)
+                ).replace("&&", "and").replace("||", "or")
+                self.assertEqual(expected, eval(expression, {"__builtins__": {}}))
+        checkout = self.steps["Check out exact canonical site-specific metadata"]
+        self.assertEqual(
+            "${{ steps.metadata-token.outputs.token || github.token }}",
+            checkout["with"]["token"],
+        )
+
     def test_canonical_validation_is_exact_and_does_not_rehost_the_editor(
         self,
     ) -> None:

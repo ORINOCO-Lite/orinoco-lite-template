@@ -225,7 +225,9 @@ jobs:
 
       - name: Obtain bounded metadata read access from the curation App
         id: metadata-token
-        if: steps.inspect.outputs.metadata_repository != ''
+        if: >-
+          steps.inspect.outputs.metadata_repository != '' &&
+          (steps.inspect.outputs.phase == 'handoff' || inputs.handoff != '')
         env:
           PROPOSAL_HANDOFF: ${{ inputs.handoff }}
           PROPOSAL_NUMBER: ${{ steps.coordinates.outputs.number }}
@@ -625,7 +627,7 @@ jobs:
         with:
           repository: ${{ steps.inspect.outputs.metadata_repository }}
           ref: ${{ steps.inspect.outputs.metadata_source_commit }}
-          token: ${{ steps.metadata-token.outputs.token }}
+          token: ${{ steps.metadata-token.outputs.token || github.token }}
           path: proposal/site-specific
           persist-credentials: false
 
