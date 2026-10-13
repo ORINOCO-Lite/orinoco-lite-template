@@ -17,7 +17,8 @@ class ShaclVueWorkflowTests(unittest.TestCase):
         cls.text = WORKFLOW.read_text(encoding="utf-8")
         cls.contract = yaml.load(cls.text, Loader=yaml.BaseLoader)
         cls.job = cls.contract["jobs"]["validate"]
-        cls.steps = {step["name"]: step for step in cls.job["steps"]}
+        cls.publish = cls.contract["jobs"]["publish"]
+        cls.steps = {step["name"]: step for job in (cls.job, cls.publish) for step in job["steps"]}
 
     def test_triggers_and_permissions_keep_execution_on_trusted_code(self) -> None:
         self.assertEqual(
@@ -31,10 +32,10 @@ class ShaclVueWorkflowTests(unittest.TestCase):
         self.assertEqual({}, self.contract["permissions"])
         self.assertEqual(
             {
-                "actions": "write",
+                "actions": "read",
                 "id-token": "write",
-                "contents": "write",
-                "pull-requests": "write",
+                "contents": "read",
+                "pull-requests": "read",
             },
             self.job["permissions"],
         )
@@ -56,6 +57,23 @@ class ShaclVueWorkflowTests(unittest.TestCase):
         self.assertEqual("true", environment["activate-environment"])
         for checkout in (trusted, proposal):
             self.assertEqual("false", checkout["with"]["persist-credentials"])
+
+    def test_publishing_requires_successful_isolated_validation(self) -> None:
+        self.assertEqual("validate", self.publish["needs"])
+        self.assertEqual("needs.validate.outputs.phase == 'handoff'", self.publish["if"])
+        self.assertEqual("Publish validated SHACL Vue proposal", self.publish["name"])
+        self.assertEqual("Validate SHACL Vue proposal", self.job["name"])
+        for name in (
+            "Validate the materialized joined graph",
+            "Create the equivalent attributed human metadata commit",
+        ):
+            first = next(s for s in self.job["steps"] if s["name"] == name)
+            second = next(s for s in self.publish["steps"] if s["name"] == name)
+            self.assertEqual(first, second)
+        self.assertNotIn(
+            "Obtain validated metadata write access from the curation App",
+            {s["name"] for s in self.job["steps"]},
+        )
 
     def test_handoff_requires_exact_actor_authority_history_and_fixed_path(self) -> None:
         resolve = self.steps["Resolve exact pull request and attributed head"]["run"]
@@ -183,7 +201,7 @@ class ShaclVueWorkflowTests(unittest.TestCase):
         )
         self.assertIn('--root "$GITHUB_WORKSPACE/proposal" projection update', validate)
         self.assertIn('--root "$GITHUB_WORKSPACE/proposal" validate', validate)
-        self.assertEqual({"validate"}, set(self.contract["jobs"]))
+        self.assertEqual({"validate", "publish"}, set(self.contract["jobs"]))
         for obsolete in (
             "actions/upload-artifact@",
             "shacl-vue-editor-input",
