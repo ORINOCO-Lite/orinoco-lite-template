@@ -22,7 +22,7 @@ permissions: {}
 
 jobs:
   validate:
-    name: Materialize or validate one explicit human edit
+    name: Validate SHACL Vue proposal
     if: >-
       github.repository != 'ORINOCO-Lite/orinoco-lite-template' &&
       ((github.event_name == 'pull_request_target' &&
@@ -37,15 +37,18 @@ jobs:
         github.ref_name == github.event.repository.default_branch))
     runs-on: ubuntu-24.04
     permissions:
-      actions: write
+      actions: read
       id-token: write
-      contents: write
-      pull-requests: write
+      contents: read
+      pull-requests: read
     concurrency:
       group: shacl-vue-proposal-${{ github.event.pull_request.number || inputs.pull_request }}
       cancel-in-progress: false
+    outputs:
+      phase: ${{ steps.inspect.outputs.phase }}
     steps:
-      - name: Resolve exact pull request and attributed head
+      - &resolve_exact_pull_request_and_attributed_head
+        name: Resolve exact pull request and attributed head
         id: coordinates
         env:
           DISPATCH_HEAD: ${{ inputs.expected_head }}
@@ -154,7 +157,8 @@ jobs:
                   out.write(f"{name}={value}\n")
           PY
 
-      - name: Check out exact trusted default-branch code
+      - &check_out_exact_trusted_default_branch_code
+        name: Check out exact trusted default-branch code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
@@ -163,7 +167,8 @@ jobs:
           ref: ${{ steps.coordinates.outputs.base_sha }}
           submodules: recursive
 
-      - name: Check out exact proposal head as data
+      - &check_out_exact_proposal_head_as_data
+        name: Check out exact proposal head as data
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
@@ -171,7 +176,8 @@ jobs:
           persist-credentials: false
           ref: ${{ steps.coordinates.outputs.head_sha }}
 
-      - name: Install the trusted locked Pixi environment
+      - &install_the_trusted_locked_pixi_environment
+        name: Install the trusted locked Pixi environment
         uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
           activate-environment: true
@@ -179,12 +185,14 @@ jobs:
           locked: false
           manifest-path: trusted/pixi.toml
 
-      - name: Prepare trusted editable package resources
+      - &prepare_trusted_editable_package_resources
+        name: Prepare trusted editable package resources
         if: ${{ hashFiles('trusted/.orinoco-lite/orinoco-lite-dev/pixi.toml') != '' }}
         working-directory: trusted
         run: pixi run --manifest-path .orinoco-lite/orinoco-lite-dev/pixi.toml orinoco-lite dev prepare-resources
 
-      - name: Classify the fixed handoff or canonical metadata head
+      - &classify_the_fixed_handoff_or_canonical_metadata_head
+        name: Classify the fixed handoff or canonical metadata head
         id: inspect
         env:
           BASE_SHA: ${{ steps.coordinates.outputs.base_sha }}
@@ -223,7 +231,8 @@ jobs:
               out.write(f"metadata_name={metadata.get('repository', '/').split('/')[1]}\n")
           PY
 
-      - name: Obtain bounded metadata read access from the curation App
+      - &obtain_bounded_metadata_read_access_from_the_curation_app
+        name: Obtain bounded metadata read access from the curation App
         id: metadata-token
         if: >-
           steps.inspect.outputs.metadata_repository != '' &&
@@ -235,7 +244,8 @@ jobs:
         working-directory: trusted
         run: pixi run python -m orinoco_lite.workflow_access
 
-      - name: Verify the attributed curator remains authorized
+      - &verify_the_attributed_curator_remains_authorized
+        name: Verify the attributed curator remains authorized
         id: authority
         if: steps.inspect.outputs.phase == 'handoff'
         env:
@@ -269,7 +279,8 @@ jobs:
               out.write(f"authorized={str(authorized).lower()}\n")
           PY
 
-      - name: Enforce the authenticated exact-head handoff boundary
+      - &enforce_the_authenticated_exact_head_handoff_boundary
+        name: Enforce the authenticated exact-head handoff boundary
         if: steps.inspect.outputs.phase == 'handoff'
         env:
           AUTHORIZED: ${{ steps.authority.outputs.authorized }}
@@ -284,38 +295,8 @@ jobs:
           [[ "$EVENT_NAME" == "pull_request_target" ]]
           [[ "$EVENT_AUTHOR_MATCH" == "true" ]]
 
-      - name: Announce metadata materialization
-        if: steps.inspect.outputs.phase == 'handoff'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          NUMBER: ${{ steps.coordinates.outputs.number }}
-          REPOSITORY: ${{ github.repository }}
-        run: |
-          set -euo pipefail
-          export COMMENT_BODY=$'Metadata update from SHACL Vue.\n\nPlease wait for the workflow to create the corresponding edit to the metadata records.'
-          gh api "repos/${REPOSITORY}/issues/${NUMBER}/comments?per_page=100" \
-            > "$RUNNER_TEMP/shacl-vue-comments.json"
-          if python - "$RUNNER_TEMP/shacl-vue-comments.json" <<'PY'
-          import json
-          import os
-          from pathlib import Path
-          import sys
-
-          comments = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
-          found = any(
-              comment.get("body") == os.environ["COMMENT_BODY"]
-              and comment.get("user", {}).get("login") == "github-actions[bot]"
-              for comment in comments
-          )
-          raise SystemExit(0 if found else 1)
-          PY
-          then
-            exit 0
-          fi
-          gh api "repos/${REPOSITORY}/issues/${NUMBER}/comments" \
-            --field body="$COMMENT_BODY" > /dev/null
-
-      - name: Create an isolated exact-parent metadata checkout
+      - &create_an_isolated_exact_parent_metadata_checkout
+        name: Create an isolated exact-parent metadata checkout
         if: steps.inspect.outputs.phase == 'handoff'
         env:
           SOURCE_COMMIT: ${{ steps.inspect.outputs.parent_sha }}
@@ -326,7 +307,8 @@ jobs:
           test "$(git -C source rev-parse HEAD)" = "$SOURCE_COMMIT"
           test -z "$(git -C source status --porcelain --untracked-files=all)"
 
-      - name: Check out the exact metadata handoff as data
+      - &check_out_the_exact_metadata_handoff_as_data
+        name: Check out the exact metadata handoff as data
         if: steps.inspect.outputs.phase == 'handoff' && steps.inspect.outputs.metadata_repository != ''
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -337,7 +319,8 @@ jobs:
           path: source/site-specific
           persist-credentials: false
 
-      - name: Verify both handoffs and prepare exact metadata source
+      - &verify_both_handoffs_and_prepare_exact_metadata_source
+        name: Verify both handoffs and prepare exact metadata source
         if: steps.inspect.outputs.phase == 'handoff' && steps.inspect.outputs.metadata_repository != ''
         env:
           GH_TOKEN: ${{ steps.metadata-token.outputs.token }}
@@ -364,7 +347,8 @@ jobs:
             --curator "$CURATOR" --curator-id "$CURATOR_ID"
           git -C "$GITHUB_WORKSPACE/source/site-specific" checkout --detach "$METADATA_SOURCE"
 
-      - name: Extract and apply the unchanged version 2 bundle
+      - &extract_and_apply_the_unchanged_version_2_bundle
+        name: Extract and apply the unchanged version 2 bundle
         if: steps.inspect.outputs.phase == 'handoff'
         env:
           HEAD_SHA: ${{ steps.coordinates.outputs.head_sha }}
@@ -403,7 +387,8 @@ jobs:
             --source-commit "$SOURCE_COMMIT" \
             > "$RUNNER_TEMP/shacl-vue-materialized.json"
 
-      - name: Validate the materialized joined graph
+      - &validate_the_materialized_joined_graph
+        name: Validate the materialized joined graph
         if: steps.inspect.outputs.phase == 'handoff'
         env:
           SOURCE_COMMIT: ${{ steps.inspect.outputs.parent_sha }}
@@ -422,7 +407,8 @@ jobs:
             --source-commit "$SOURCE_COMMIT" \
             > "$RUNNER_TEMP/shacl-vue-validated.json"
 
-      - name: Create the equivalent attributed human metadata commit
+      - &create_the_equivalent_attributed_human_metadata_commit
+        name: Create the equivalent attributed human metadata commit
         if: steps.inspect.outputs.phase == 'handoff'
         id: materialized
         env:
@@ -481,6 +467,120 @@ jobs:
           test "$(git -C "$GITHUB_WORKSPACE/source" show -s --format=%ce HEAD)" = \
             "41898282+github-actions[bot]@users.noreply.github.com"
           printf 'sha=%s\n' "$replacement" >> "$GITHUB_OUTPUT"
+
+      - name: Check out exact canonical site-specific metadata
+        if: steps.inspect.outputs.phase == 'canonical' && steps.inspect.outputs.metadata_repository != ''
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ steps.inspect.outputs.metadata_repository }}
+          ref: ${{ steps.inspect.outputs.metadata_source_commit }}
+          token: ${{ steps.metadata-token.outputs.token || github.token }}
+          path: proposal/site-specific
+          persist-credentials: false
+
+      - name: Validate the exact canonical joined metadata graph
+        if: steps.inspect.outputs.phase == 'canonical'
+        env:
+          HEAD_SHA: ${{ steps.coordinates.outputs.head_sha }}
+        working-directory: trusted
+        run: |
+          set -euo pipefail
+          unset GH_TOKEN GITHUB_TOKEN ACTIONS_ID_TOKEN_REQUEST_TOKEN ACTIONS_ID_TOKEN_REQUEST_URL
+          test "$(git -C "$GITHUB_WORKSPACE/proposal" rev-parse HEAD)" = "$HEAD_SHA"
+          test -z "$(git -C "$GITHUB_WORKSPACE/proposal" status --porcelain --untracked-files=no)"
+          pixi run orinoco-lite \
+            --root "$GITHUB_WORKSPACE/proposal" projection update
+          pixi run orinoco-lite \
+            --root "$GITHUB_WORKSPACE/proposal" validate
+          test -z "$(git -C "$GITHUB_WORKSPACE/proposal" status --porcelain --untracked-files=no)"
+
+      - name: Revoke metadata installation tokens
+        if: always()
+        env:
+          READ_TOKEN: ${{ steps.metadata-token.outputs.token }}
+          WRITE_TOKEN: ${{ steps.metadata-write-token.outputs.token }}
+        run: |
+          set -euo pipefail
+          for token in "$READ_TOKEN" "$WRITE_TOKEN"; do
+            if [[ -n "$token" ]]; then
+              GH_TOKEN="$token" gh api --method DELETE installation/token
+            fi
+          done
+
+  publish:
+    name: Publish validated SHACL Vue proposal
+    needs: validate
+    if: needs.validate.outputs.phase == 'handoff'
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: write
+      id-token: write
+      contents: write
+      pull-requests: write
+    concurrency:
+      group: shacl-vue-proposal-${{ github.event.pull_request.number || inputs.pull_request }}
+      cancel-in-progress: false
+    steps:
+      - *resolve_exact_pull_request_and_attributed_head
+
+      - *check_out_exact_trusted_default_branch_code
+
+      - *check_out_exact_proposal_head_as_data
+
+      - *install_the_trusted_locked_pixi_environment
+
+      - *prepare_trusted_editable_package_resources
+
+      - *classify_the_fixed_handoff_or_canonical_metadata_head
+
+      - *obtain_bounded_metadata_read_access_from_the_curation_app
+
+      - *verify_the_attributed_curator_remains_authorized
+
+      - *enforce_the_authenticated_exact_head_handoff_boundary
+
+      - *create_an_isolated_exact_parent_metadata_checkout
+
+      - *check_out_the_exact_metadata_handoff_as_data
+
+      - *verify_both_handoffs_and_prepare_exact_metadata_source
+
+      - *extract_and_apply_the_unchanged_version_2_bundle
+
+      - *validate_the_materialized_joined_graph
+
+      - *create_the_equivalent_attributed_human_metadata_commit
+
+      - name: Announce metadata materialization
+        if: steps.inspect.outputs.phase == 'handoff'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ steps.coordinates.outputs.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          export COMMENT_BODY=$'Metadata update from SHACL Vue.\n\nPlease wait for the workflow to create the corresponding edit to the metadata records.'
+          gh api "repos/${REPOSITORY}/issues/${NUMBER}/comments?per_page=100" \
+            > "$RUNNER_TEMP/shacl-vue-comments.json"
+          if python - "$RUNNER_TEMP/shacl-vue-comments.json" <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import sys
+
+          comments = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          found = any(
+              comment.get("body") == os.environ["COMMENT_BODY"]
+              and comment.get("user", {}).get("login") == "github-actions[bot]"
+              for comment in comments
+          )
+          raise SystemExit(0 if found else 1)
+          PY
+          then
+            exit 0
+          fi
+          gh api "repos/${REPOSITORY}/issues/${NUMBER}/comments" \
+            --field body="$COMMENT_BODY" > /dev/null
 
       - name: Obtain validated metadata write access from the curation App
         id: metadata-write-token
@@ -620,32 +720,6 @@ jobs:
           gh workflow run validate.yml \
             --repo "$REPOSITORY" \
             --ref "$HEAD_REF"
-
-      - name: Check out exact canonical site-specific metadata
-        if: steps.inspect.outputs.phase == 'canonical' && steps.inspect.outputs.metadata_repository != ''
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          repository: ${{ steps.inspect.outputs.metadata_repository }}
-          ref: ${{ steps.inspect.outputs.metadata_source_commit }}
-          token: ${{ steps.metadata-token.outputs.token || github.token }}
-          path: proposal/site-specific
-          persist-credentials: false
-
-      - name: Validate the exact canonical joined metadata graph
-        if: steps.inspect.outputs.phase == 'canonical'
-        env:
-          HEAD_SHA: ${{ steps.coordinates.outputs.head_sha }}
-        working-directory: trusted
-        run: |
-          set -euo pipefail
-          unset GH_TOKEN GITHUB_TOKEN ACTIONS_ID_TOKEN_REQUEST_TOKEN ACTIONS_ID_TOKEN_REQUEST_URL
-          test "$(git -C "$GITHUB_WORKSPACE/proposal" rev-parse HEAD)" = "$HEAD_SHA"
-          test -z "$(git -C "$GITHUB_WORKSPACE/proposal" status --porcelain --untracked-files=no)"
-          pixi run orinoco-lite \
-            --root "$GITHUB_WORKSPACE/proposal" projection update
-          pixi run orinoco-lite \
-            --root "$GITHUB_WORKSPACE/proposal" validate
-          test -z "$(git -C "$GITHUB_WORKSPACE/proposal" status --porcelain --untracked-files=no)"
 
       - name: Revoke metadata installation tokens
         if: always()
