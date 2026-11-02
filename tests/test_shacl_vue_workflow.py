@@ -58,6 +58,13 @@ class ShaclVueWorkflowTests(unittest.TestCase):
         for checkout in (trusted, proposal):
             self.assertEqual("false", checkout["with"]["persist-credentials"])
 
+    def test_trusted_checkout_does_not_clone_private_metadata(self) -> None:
+        trusted = self.steps["Check out exact trusted default-branch code"]
+        self.assertNotIn("submodules", trusted["with"])
+        initialize = self.steps["Initialize trusted development package when present"]["run"]
+        self.assertIn("git submodule update --init --recursive .orinoco-lite/orinoco-lite-dev", initialize)
+        self.assertNotIn("site-specific", initialize)
+
     def test_publishing_requires_successful_isolated_validation(self) -> None:
         self.assertEqual("validate", self.publish["needs"])
         self.assertEqual("needs.validate.outputs.phase == 'handoff'", self.publish["if"])
