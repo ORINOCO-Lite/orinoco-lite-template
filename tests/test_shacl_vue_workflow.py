@@ -58,6 +58,13 @@ class ShaclVueWorkflowTests(unittest.TestCase):
         for checkout in (trusted, proposal):
             self.assertEqual("false", checkout["with"]["persist-credentials"])
 
+    def test_trusted_checkout_does_not_clone_private_metadata(self) -> None:
+        trusted = self.steps["Check out exact trusted default-branch code"]
+        self.assertNotIn("submodules", trusted["with"])
+        initialize = self.steps["Initialize trusted development package when present"]["run"]
+        self.assertIn("git submodule update --init --recursive .orinoco-lite/orinoco-lite-dev", initialize)
+        self.assertNotIn("site-specific", initialize)
+
     def test_publishing_requires_successful_isolated_validation(self) -> None:
         self.assertEqual("validate", self.publish["needs"])
         self.assertEqual("needs.validate.outputs.phase == 'handoff'", self.publish["if"])
@@ -171,18 +178,19 @@ class ShaclVueWorkflowTests(unittest.TestCase):
             "Obtain bounded metadata read access from the curation App"
         ]["if"]
         cases = [
-            ("example/metadata", "canonical", "", False),
-            ("example/metadata", "handoff", "", True),
-            ("example/metadata", "canonical", "a" * 40, True),
-            ("", "handoff", "", False),
+            ("example/metadata", "canonical", "", "false", False),
+            ("example/metadata", "canonical", "", "true", True),
+            ("example/metadata", "handoff", "", "false", True),
+            ("example/metadata", "canonical", "a" * 40, "false", True),
+            ("", "handoff", "", "false", False),
         ]
-        for repository, phase, handoff, expected in cases:
+        for repository, phase, handoff, auto, expected in cases:
             with self.subTest(phase=phase, repository=repository, handoff=handoff):
                 expression = condition.replace(
                     "steps.inspect.outputs.metadata_repository", repr(repository)
                 ).replace("steps.inspect.outputs.phase", repr(phase)).replace(
                     "inputs.handoff", repr(handoff)
-                ).replace("&&", "and").replace("||", "or")
+                ).replace("steps.coordinates.outputs.auto_gitlink", repr(auto)).replace("&&", "and").replace("||", "or")
                 self.assertEqual(expected, eval(expression, {"__builtins__": {}}))
         checkout = self.steps["Check out exact canonical site-specific metadata"]
         self.assertEqual(
