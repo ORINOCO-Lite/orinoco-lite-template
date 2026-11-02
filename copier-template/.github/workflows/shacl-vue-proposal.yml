@@ -162,7 +162,14 @@ jobs:
           path: trusted
           persist-credentials: false
           ref: ${{ steps.coordinates.outputs.base_sha }}
-          submodules: recursive
+
+      - &initialize_trusted_development_package
+        name: Initialize trusted development package when present
+        working-directory: trusted
+        run: |
+          if [ "$(git ls-tree HEAD .orinoco-lite/orinoco-lite-dev | cut -f 1 | cut -d " " -f 2)" = commit ]; then
+            git submodule update --init --recursive .orinoco-lite/orinoco-lite-dev
+          fi
 
       - &check_out_exact_proposal_head_as_data
         name: Check out exact proposal head as data
@@ -529,6 +536,8 @@ jobs:
       - *resolve_exact_pull_request_and_attributed_head
 
       - *check_out_exact_trusted_default_branch_code
+
+      - *initialize_trusted_development_package
 
       - *check_out_exact_proposal_head_as_data
 
