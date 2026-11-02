@@ -137,6 +137,7 @@ jobs:
               )
           values = {
               "author_date": author_date if eligible else "",
+              "auto_gitlink": str(commit.get("commit", {}).get("message", "").split("\n")[0] == "chore: update merged site-specific metadata").lower(),
               "base_sha": trusted_sha,
               "curator": author["login"] if eligible else "",
               "curator_id": str(author["id"]) if eligible else "",
@@ -232,13 +233,21 @@ jobs:
         id: metadata-token
         if: >-
           steps.inspect.outputs.metadata_repository != '' &&
-          (steps.inspect.outputs.phase == 'handoff' || inputs.handoff != '')
+          (steps.inspect.outputs.phase == 'handoff' || inputs.handoff != '' ||
+           (steps.inspect.outputs.phase == 'canonical' && steps.coordinates.outputs.auto_gitlink == 'true'))
         env:
           PROPOSAL_HANDOFF: ${{ inputs.handoff }}
           PROPOSAL_NUMBER: ${{ steps.coordinates.outputs.number }}
           PROPOSAL_HEAD: ${{ steps.coordinates.outputs.head_sha }}
+          AUTO_GITLINK: ${{ steps.coordinates.outputs.auto_gitlink }}
+          PHASE: ${{ steps.inspect.outputs.phase }}
         working-directory: trusted
-        run: pixi run python -m orinoco_lite.workflow_access
+        run: |
+          if [[ "$PHASE" == "canonical" && "$AUTO_GITLINK" == "true" && -z "$PROPOSAL_HANDOFF" ]]; then
+            pixi run python -m orinoco_lite.workflow_access --metadata-read
+          else
+            pixi run python -m orinoco_lite.workflow_access
+          fi
 
       - &verify_the_attributed_curator_remains_authorized
         name: Verify the attributed curator remains authorized

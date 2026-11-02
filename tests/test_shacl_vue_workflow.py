@@ -171,18 +171,19 @@ class ShaclVueWorkflowTests(unittest.TestCase):
             "Obtain bounded metadata read access from the curation App"
         ]["if"]
         cases = [
-            ("example/metadata", "canonical", "", False),
-            ("example/metadata", "handoff", "", True),
-            ("example/metadata", "canonical", "a" * 40, True),
-            ("", "handoff", "", False),
+            ("example/metadata", "canonical", "", "false", False),
+            ("example/metadata", "canonical", "", "true", True),
+            ("example/metadata", "handoff", "", "false", True),
+            ("example/metadata", "canonical", "a" * 40, "false", True),
+            ("", "handoff", "", "false", False),
         ]
-        for repository, phase, handoff, expected in cases:
+        for repository, phase, handoff, auto, expected in cases:
             with self.subTest(phase=phase, repository=repository, handoff=handoff):
                 expression = condition.replace(
                     "steps.inspect.outputs.metadata_repository", repr(repository)
                 ).replace("steps.inspect.outputs.phase", repr(phase)).replace(
                     "inputs.handoff", repr(handoff)
-                ).replace("&&", "and").replace("||", "or")
+                ).replace("steps.coordinates.outputs.auto_gitlink", repr(auto)).replace("&&", "and").replace("||", "or")
                 self.assertEqual(expected, eval(expression, {"__builtins__": {}}))
         checkout = self.steps["Check out exact canonical site-specific metadata"]
         self.assertEqual(
