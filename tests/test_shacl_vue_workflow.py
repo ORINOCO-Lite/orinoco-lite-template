@@ -1,245 +1,81 @@
-from __future__ import annotations
-
+"""Exercise the downstream event router without calling GitHub."""
 from pathlib import Path
-import re
+import io
+import json
+import os
+import tempfile
 import unittest
+from unittest.mock import patch
 
+from jinja2 import Environment
 import yaml
 
-
 ROOT = Path(__file__).resolve().parents[1]
-WORKFLOW = ROOT / "copier-template/.github/workflows/shacl-vue-proposal.yml"
 
 
-class ShaclVueWorkflowTests(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls) -> None:
-        cls.text = WORKFLOW.read_text(encoding="utf-8")
-        cls.contract = yaml.load(cls.text, Loader=yaml.BaseLoader)
-        cls.job = cls.contract["jobs"]["validate"]
-        cls.publish = cls.contract["jobs"]["publish"]
-        cls.steps = {step["name"]: step for job in (cls.job, cls.publish) for step in job["steps"]}
-
-    def test_triggers_and_permissions_keep_execution_on_trusted_code(self) -> None:
-        self.assertEqual(
-            {"pull_request_target", "workflow_dispatch"},
-            set(self.contract["on"]),
-        )
-        self.assertEqual(
-            ["opened", "reopened", "synchronize"],
-            self.contract["on"]["pull_request_target"]["types"],
-        )
-        self.assertEqual({}, self.contract["permissions"])
-        self.assertEqual(
-            {
-                "actions": "read",
-                "id-token": "write",
-                "contents": "read",
-                "pull-requests": "read",
-            },
-            self.job["permissions"],
-        )
-        self.assertEqual("false", self.job["concurrency"]["cancel-in-progress"])
-        condition = self.job["if"]
-        self.assertIn("pull_request.draft", condition)
-        self.assertIn("repository.default_branch", condition)
-        self.assertIn("head.repo.full_name == github.repository", condition)
-        trusted = self.steps["Check out exact trusted default-branch code"]
-        proposal = self.steps["Check out exact proposal head as data"]
-        self.assertEqual(
-            "${{ steps.coordinates.outputs.base_sha }}", trusted["with"]["ref"]
-        )
-        self.assertEqual(
-            "${{ steps.coordinates.outputs.head_sha }}", proposal["with"]["ref"]
-        )
-        environment = self.steps["Install the trusted locked Pixi environment"]["with"]
-        self.assertEqual("trusted/pixi.toml", environment["manifest-path"])
-        self.assertEqual("true", environment["activate-environment"])
-        for checkout in (trusted, proposal):
-            self.assertEqual("false", checkout["with"]["persist-credentials"])
-
-    def test_publishing_requires_successful_isolated_validation(self) -> None:
-        self.assertEqual("validate", self.publish["needs"])
-        self.assertEqual("needs.validate.outputs.phase == 'handoff'", self.publish["if"])
-        self.assertEqual("Publish validated SHACL Vue proposal", self.publish["name"])
-        self.assertEqual("Validate SHACL Vue proposal", self.job["name"])
-        for name in (
-            "Validate the materialized joined graph",
-            "Create the equivalent attributed human metadata commit",
-        ):
-            first = next(s for s in self.job["steps"] if s["name"] == name)
-            second = next(s for s in self.publish["steps"] if s["name"] == name)
-            self.assertEqual(first, second)
-        self.assertNotIn(
-            "Obtain validated metadata write access from the curation App",
-            {s["name"] for s in self.job["steps"]},
-        )
-
-    def test_handoff_requires_exact_actor_authority_history_and_fixed_path(self) -> None:
-        resolve = self.steps["Resolve exact pull request and attributed head"]["run"]
-        enforce = self.steps["Enforce the authenticated exact-head handoff boundary"][
-            "run"
-        ]
-        classify = self.steps["Classify the fixed handoff or canonical metadata head"][
-            "run"
-        ]
-        self.assertIn('author.get("type") == "User"', resolve)
-        self.assertIn('os.environ["EVENT_SENDER"] == author["login"]', resolve)
-        self.assertIn('[[ "$EVENT_AUTHOR_MATCH" == "true" ]]', enforce)
-        self.assertNotIn("IS_CURATION", enforce)
-        self.assertNotIn('[[ "$PARENT_SHA" == "$BASE_SHA" ]]', enforce)
-        self.assertEqual("trusted", self.steps[
-            "Classify the fixed handoff or canonical metadata head"
-        ]["working-directory"])
-        self.assertIn("pixi run orinoco-lite shacl-handoff", classify)
-        self.assertNotIn("--manifest-path", classify)
-        self.assertIn('--head-sha "$HEAD_SHA"', classify)
-        self.assertIn('--base-sha "$BASE_SHA"', classify)
-        authority = self.steps["Verify the attributed curator remains authorized"]
-        boundary = self.steps["Enforce the authenticated exact-head handoff boundary"]
-        self.assertEqual("steps.inspect.outputs.phase == 'handoff'", authority["if"])
-        self.assertEqual("steps.inspect.outputs.phase == 'handoff'", boundary["if"])
-
-    def test_trusted_workflow_posts_one_concise_bot_status(self) -> None:
-        announce = self.steps["Announce metadata materialization"]
-        self.assertEqual("steps.inspect.outputs.phase == 'handoff'", announce["if"])
-        script = announce["run"]
-        self.assertIn(
-            "Metadata update from SHACL Vue.\\n\\nPlease wait for the workflow "
-            "to create the corresponding edit to the metadata records.",
-            script,
-        )
-        self.assertIn('"github-actions[bot]"', script)
-        self.assertIn('comment.get("body") == os.environ["COMMENT_BODY"]', script)
-        self.assertIn('--field body="$COMMENT_BODY"', script)
-
-    def test_trusted_python_applies_validates_and_materializes_same_parent(
-        self,
-    ) -> None:
-        apply = self.steps["Extract and apply the unchanged version 2 bundle"]["run"]
-        validate = self.steps["Validate the materialized joined graph"]["run"]
-        commit = self.steps["Create the equivalent attributed human metadata commit"][
-            "run"
-        ]
-        for name in (
-            "Extract and apply the unchanged version 2 bundle",
-            "Validate the materialized joined graph",
-            "Create the equivalent attributed human metadata commit",
-            "Validate the exact canonical joined metadata graph",
-        ):
-            self.assertEqual("trusted", self.steps[name]["working-directory"])
-            self.assertNotIn("--manifest-path", self.steps[name]["run"])
-        self.assertIn("pixi run orinoco-lite", apply)
-        self.assertIn("editor apply", apply)
-        self.assertIn('"$RUNNER_TEMP/shacl-vue-review-bundle.json" --write', apply)
-        self.assertIn("unset GH_TOKEN GITHUB_TOKEN", apply)
-        self.assertIn('--root "$GITHUB_WORKSPACE/source" projection update', validate)
-        self.assertIn('--root "$GITHUB_WORKSPACE/source" validate', validate)
-        self.assertIn('GIT_AUTHOR_NAME="$CURATOR"', commit)
-        self.assertIn('GIT_COMMITTER_NAME="github-actions[bot]"', commit)
-        self.assertIn('--source-commit "$SOURCE_COMMIT"', commit)
-        self.assertIn("verify-commit", commit)
-        self.assertIn(
-            'git -C "$metadata_root" add -A -- "$metadata_path"',
-            commit,
-        )
-        self.assertNotIn(
-            "site-specific/metadata/records site-specific/metadata/overlays/machine-provenance-annotations",
-            commit,
-        )
-
-    def test_replacement_is_one_exact_lease_then_retriggers_validation(self) -> None:
-        push = self.steps["Replace only the exact handoff head with a lease"]["run"]
-        retrigger = self.steps[
-            "Retrigger trusted and downstream validation at the replacement head"
-        ]["run"]
-        self.assertIn('pull.get("head", {}).get("sha")', push)
-        self.assertIn('permission.get("permission") not in {"write", "admin"}', push)
-        self.assertIn(
-            '--force-with-lease="refs/heads/${HEAD_REF}:${HANDOFF_SHA}"', push
-        )
-        self.assertIn('"${REPLACEMENT_SHA}:refs/heads/${HEAD_REF}"', push)
-        self.assertIn("for _attempt in 1 2 3 4 5", retrigger)
-        self.assertIn('test "$observed" = "$REPLACEMENT_SHA"', retrigger)
-        self.assertIn("gh workflow run shacl-vue-proposal.yml", retrigger)
-        self.assertIn('-f "expected_head=${REPLACEMENT_SHA}"', retrigger)
-        self.assertIn("gh workflow run validate.yml", retrigger)
-        self.assertIn('--ref "$HEAD_REF"', retrigger)
-
-    def test_metadata_access_requires_an_editor_handoff(self) -> None:
-        condition = self.steps[
-            "Obtain bounded metadata read access from the curation App"
-        ]["if"]
-        cases = [
-            ("example/metadata", "canonical", "", False),
-            ("example/metadata", "handoff", "", True),
-            ("example/metadata", "canonical", "a" * 40, True),
-            ("", "handoff", "", False),
-        ]
-        for repository, phase, handoff, expected in cases:
-            with self.subTest(phase=phase, repository=repository, handoff=handoff):
-                expression = condition.replace(
-                    "steps.inspect.outputs.metadata_repository", repr(repository)
-                ).replace("steps.inspect.outputs.phase", repr(phase)).replace(
-                    "inputs.handoff", repr(handoff)
-                ).replace("&&", "and").replace("||", "or")
-                self.assertEqual(expected, eval(expression, {"__builtins__": {}}))
-        checkout = self.steps["Check out exact canonical site-specific metadata"]
-        self.assertEqual(
-            "${{ steps.metadata-token.outputs.token || github.token }}",
-            checkout["with"]["token"],
-        )
-
-    def test_canonical_validation_is_exact_and_does_not_rehost_the_editor(
-        self,
-    ) -> None:
-        validate = self.steps["Validate the exact canonical joined metadata graph"][
-            "run"
-        ]
-        self.assertIn(
-            'git -C "$GITHUB_WORKSPACE/proposal" rev-parse HEAD)', validate
-        )
-        self.assertIn('--root "$GITHUB_WORKSPACE/proposal" projection update', validate)
-        self.assertIn('--root "$GITHUB_WORKSPACE/proposal" validate', validate)
-        self.assertEqual({"validate", "publish"}, set(self.contract["jobs"]))
-        for obsolete in (
-            "actions/upload-artifact@",
-            "shacl-vue-editor-input",
-            "CURATION_REVIEW_APP_ORIGIN",
-            "orinoco-shacl-vue-input-",
-            "review-url",
-        ):
-            self.assertNotIn(obsolete, self.text)
-        helper = self.text
-        self.assertNotIn("review-url", helper)
-        self.assertNotIn("/edit/?", helper)
-
-    def test_profile_and_helper_are_adapter_neutral(self) -> None:
-        combined = self.text
-        self.assertNotIn("dump-research-info", combined)
-        self.assertNotIn("source-adapters/zotero", combined)
-        self.assertIn("site-specific", combined)
-
-    def test_profile_never_executes_head_or_adds_adapter_decision_behavior(
-        self,
-    ) -> None:
-        references = re.findall(r"^\s*uses:\s*([^\s#]+)", self.text, re.MULTILINE)
-        for reference in references:
-            self.assertRegex(reference, r"@[0-9a-f]{40}$")
-        self.assertNotIn("proposal/pixi.toml", self.text)
-        self.assertNotIn("proposal/source-adapters", self.text)
-        for forbidden in (
-            "datalad",
-            "decision-cache",
-            "disposition",
-            "gh pr approve",
-            "gh pr merge",
-            "gh pr ready",
-            "wrangler",
-            "source_revision",
-        ):
-            self.assertNotIn(forbidden, self.text.lower())
+def workflow(repository='git@github.com:example/package.git'):
+    environment = Environment(variable_start_string='[[', variable_end_string=']]',
+                              block_start_string='<%', block_end_string='%>')
+    source = (ROOT / 'copier-template/.github/workflows/orinoco.yml.jinja').read_text()
+    rendered = environment.from_string(source).render(
+        package_repository=repository, package_revision='a' * 40)
+    return yaml.load(rendered, Loader=yaml.BaseLoader)
 
 
-if __name__ == "__main__":
+class SubmissionRoutingTests(unittest.TestCase):
+    def run_route(self, event_name, event, responses=None):
+        sent = []
+        responses = responses or {}
+
+        def respond(request, **kwargs):
+            if request.data:
+                sent.append(json.loads(request.data))
+                return io.BytesIO(b'')
+            for path, value in responses.items():
+                if path in request.full_url:
+                    return io.BytesIO(json.dumps(value).encode())
+            raise AssertionError(request.full_url)
+
+        with tempfile.TemporaryDirectory() as directory:
+            event_path = Path(directory) / 'event.json'
+            event_path.write_text(json.dumps(event))
+            with patch.dict(os.environ, {'GITHUB_REPOSITORY': 'example/metadata',
+                                         'GITHUB_EVENT_NAME': event_name,
+                                         'GITHUB_EVENT_PATH': str(event_path),
+                                         'GH_TOKEN': 'fixture-token'}):
+                with patch('urllib.request.urlopen', side_effect=respond):
+                    exec(workflow()['jobs']['route']['steps'][0]['run'], {})
+        return sent
+
+    def test_dispatch_runs_at_the_retained_submission_branch(self):
+        branch = 'orinoco/submissions/' + 'b' * 64
+        self.assertEqual(self.run_route('repository_dispatch', {'client_payload': {'submission': branch}}),
+                         [{'ref': branch, 'inputs': {'phase': 'process', 'pull_request': '0'}}])
+
+    def test_merge_of_an_existing_proposal_routes_its_authorized_submissions(self):
+        event = {'pull_request': {'number': 17, 'head': {'ref': 'existing-proposal'}}}
+        sent = self.run_route('pull_request_target', event, {
+            '/issues/17/comments': [{'body': '<!-- orinoco-submission:' + 'c' * 64 + ' -->'}],
+            '/contents/': {'input_repository': 'example/metadata'},
+        })
+        self.assertEqual(sent, [{'ref': 'orinoco/submissions/' + 'c' * 64,
+                                 'inputs': {'phase': 'complete', 'pull_request': '17'}}])
+
+    def test_website_merge_does_not_process_private_metadata(self):
+        event = {'pull_request': {'number': 18, 'head': {'ref': 'orinoco/proposals/' + 'd' * 64}}}
+        self.assertEqual(self.run_route('pull_request_target', event, {
+            '/issues/18/comments': [], '/contents/': {'input_repository': 'example/private-input'},
+        }), [])
+
+    def test_invalid_dispatch_branch_is_not_run(self):
+        with self.assertRaisesRegex(SystemExit, 'Invalid submission'):
+            self.run_route('repository_dispatch', {'client_payload': {'submission': 'main'}})
+
+    def test_ssh_and_https_package_selections_call_the_same_worker(self):
+        expected = 'example/package/.github/workflows/repository-submission.yml@' + 'a' * 40
+        for repository in ['git@github.com:example/package.git', 'https://github.com/example/package.git']:
+            self.assertEqual(workflow(repository)['jobs']['process']['uses'], expected)
+
+
+if __name__ == '__main__':
     unittest.main()

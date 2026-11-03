@@ -17,6 +17,7 @@ The template supplies the Orinoco adaptation and scaffold; site records, pages, 
 Package updates do not import the upstream organisation's content.
 
 This template requires Orinoco Lite `0.3.0` or a later version retaining its packaged rendering resources and build output paths.
+The editor workflow also requires private metadata read authorization and automatic gitlink update support.
 A fork must also include that functionality; a higher version number alone does not establish compatibility.
 
 The exact package selection lives in `pixi.toml` and may advance independently of the template.
