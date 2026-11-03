@@ -79,7 +79,7 @@ package_repository:
 package_revision:
   type: str
   help: Release tag or exact Git commit to install
-  default: "964e9db6957151203a011dced2cbc8db0c9d28e3"
+  default: "fbaa784c7ddcb5a343b73ef09d966279f12887d5"
   when: false
   validator: >-
     <% if not package_revision %>

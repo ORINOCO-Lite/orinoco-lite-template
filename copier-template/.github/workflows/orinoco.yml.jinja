@@ -1,0 +1,98 @@
+name: Process submitted edits
+
+on:
+  repository_dispatch:
+    types: [orinoco-submission]
+  pull_request_target:
+    types: [closed]
+  workflow_dispatch:
+    inputs:
+      phase:
+        type: choice
+        options: [process, complete]
+        default: process
+      pull_request:
+        type: string
+        default: "0"
+
+permissions: {}
+
+jobs:
+  route:
+    if: >-
+      github.event_name == 'repository_dispatch' ||
+      (github.event_name == 'pull_request_target' &&
+       github.event.pull_request.merged &&
+       github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: write
+      contents: read
+      pull-requests: read
+    steps:
+      # Dispatch at the retained submission ref. Its selected reusable worker
+      # remains available after the default branch installs a newer version.
+      - name: Run the submission's selected workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: python
+        run: |
+          import json, os, re, urllib.error, urllib.parse, urllib.request
+          repository = os.environ['GITHUB_REPOSITORY']
+          base = 'https://api.github.com/repos/' + repository
+          headers = {'Authorization': 'Bearer ' + os.environ['GH_TOKEN'],
+                     'Content-Type': 'application/json', 'User-Agent': 'orinoco-repository-workflow'}
+          def request(path, body=None, raw=False):
+              req = urllib.request.Request(base + path,
+                  data=None if body is None else json.dumps(body).encode(),
+                  headers={**headers, 'Accept': 'application/vnd.github.raw+json' if raw else 'application/vnd.github+json'})
+              with urllib.request.urlopen(req, timeout=30) as response:
+                  data = response.read()
+              return json.loads(data) if data else None
+          with open(os.environ['GITHUB_EVENT_PATH']) as stream:
+              event = json.load(stream)
+          number = 0
+          if os.environ['GITHUB_EVENT_NAME'] == 'repository_dispatch':
+              branches = {event['client_payload']['submission']}
+              phase = 'process'
+          else:
+              number = event['pull_request']['number']
+              branches = set()
+              head = event['pull_request']['head']['ref']
+              if re.fullmatch(r'orinoco/proposals/[0-9a-f]{64}', head):
+                  branches.add(head.replace('orinoco/proposals/', 'orinoco/submissions/', 1))
+              page = 1
+              while True:
+                  comments = request(f'/issues/{number}/comments?per_page=100&page={page}')
+                  for comment in comments:
+                      for identifier in re.findall(r'<!-- orinoco-submission:([0-9a-f]{64}) -->', comment['body']):
+                          branches.add('orinoco/submissions/' + identifier)
+                  if len(comments) < 100:
+                      break
+                  page += 1
+              phase = 'complete'
+          for branch in sorted(branches):
+              if re.fullmatch(r'orinoco/submissions/[0-9a-f]{64}', branch) is None:
+                  raise SystemExit('Invalid submission branch')
+              if phase == 'complete':
+                  try:
+                      receipt = request('/contents/.orinoco-lite/submission-authorization.json?ref=' + urllib.parse.quote(branch, safe=''), raw=True)
+                  except urllib.error.HTTPError as error:
+                      if error.code == 404:
+                          continue
+                      raise
+                  if receipt['input_repository'] != repository:
+                      continue
+              request('/actions/workflows/orinoco.yml/dispatches',
+                      {'ref': branch, 'inputs': {'phase': phase, 'pull_request': str(number)}})
+
+  process:
+    if: github.event_name == 'workflow_dispatch' && startsWith(github.ref_name, 'orinoco/submissions/')
+    permissions:
+      contents: read
+      id-token: write
+    uses: [[ package_repository.removeprefix('https://github.com/').removeprefix('git@github.com:').removesuffix('.git') ]]/.github/workflows/repository-submission.yml@[[ package_revision ]]
+    with:
+      submission: ${{ github.ref_name }}
+      phase: ${{ inputs.phase }}
+      pull_request: ${{ inputs.pull_request }}
